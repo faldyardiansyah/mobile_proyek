@@ -32,8 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const SizedBox(height: 40),
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
@@ -41,14 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Icon(
                       Icons.home_rounded,
                       color: Colors.white,
-                      size: 40,
+                      size: 35,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   const Text(
                     "Selamat Datang di Apkonkos",
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     "Masuk untuk mecari hunian impianmu",
                     style: TextStyle(fontSize: 16, color: Colors.white70),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 35),
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
