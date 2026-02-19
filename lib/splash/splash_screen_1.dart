@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:appkonkos_mobile/splash/splash_screen_2.dart';
-import 'package:appkonkos_mobile/splash/splash_screen_3.dart';
+import '../auth/login_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class SplashScreen1 extends StatelessWidget {
@@ -45,7 +45,7 @@ class SplashScreen1 extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const SplashScreen3()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
