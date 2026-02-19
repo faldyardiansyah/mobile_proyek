@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'onboarding_screen.dart';
 import 'splash_screen_3.dart';
@@ -24,7 +25,7 @@ class SplashScreen2 extends StatelessWidget {
       onSkip: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const SplashScreen3()),
+          MaterialPageRoute(builder: (_) =>  const LoginScreen()),
         );
       },
     );
