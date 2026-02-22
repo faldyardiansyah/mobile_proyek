@@ -1,5 +1,7 @@
-import 'package:appkonkos_mobile/splash/splash_screen_1.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:appkonkos_mobile/splash/splash_screen_1.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -8,44 +10,19 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
-
-    startAnimation();
+    _startTransition();
   }
 
-  Future<void> startAnimation() async {
-    await _controller.forward();
-    await Future.delayed(const Duration(seconds: 1));
-    await _controller.reverse();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const SplashScreen1()),
-    );
+  void _startTransition() async {
+    await Future.delayed(const Duration(seconds: 3));
+    Get.off(() => const SplashScreen1());
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -53,8 +30,15 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/image/konten.png", height: 300),
+            Image.asset("assets/image/konten.png", height: 300)
+                .animate()
+                .fadeIn(duration: const Duration(seconds: 1))
+                .scale()
+                .then(delay: const Duration(seconds: 1))
+                .fadeOut(duration: const Duration(seconds: 1)),
+            
             const SizedBox(height: 10),
+            
             const Text(
               "Apkonkos",
               style: TextStyle(
@@ -62,15 +46,17 @@ class _SplashScreenState extends State<SplashScreen>
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E2A5E),
               ),
-            ),
+            ).animate().fadeIn(delay: 500.ms),
+            
             const Text(
               "Aplikasi Pencarian Kontrakan\n dan Kosan",
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF64748B),
               ),
-            ),
+            ).animate().fadeIn(delay: 800.ms),
           ],
         ),
       ),

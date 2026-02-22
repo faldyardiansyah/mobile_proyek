@@ -1,7 +1,7 @@
-import 'package:appkonkos_mobile/auth/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'onboarding_screen.dart';
+import 'widget/onboarding_screen.dart';
 import 'splash_screen_3.dart';
+import 'package:get/get.dart';
 
 class SplashScreen2 extends StatelessWidget {
   const SplashScreen2({super.key});
@@ -16,17 +16,10 @@ class SplashScreen2 extends StatelessWidget {
       buttonText: "Lanjut",
       currentIndex: 1,
       onNext: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SplashScreen3()),
-        );
-        
+        Get.to(() => const SplashScreen3());
       },
       onSkip: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) =>  const LoginScreen()),
-        );
+        Get.to(() => const SplashScreen3());
       },
     );
   }

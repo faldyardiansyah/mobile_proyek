@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:get/get.dart'; 
 import 'package:appkonkos_mobile/splash/splash_screen.dart';
 
 void main() {
@@ -10,11 +11,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp( 
       title: "Apkonkos",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue), 
         useMaterial3: true,
       ),
       home: const SplashScreen(),
