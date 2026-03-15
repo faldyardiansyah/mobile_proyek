@@ -3,6 +3,7 @@ import 'splash_screen_3.dart';
 import 'splash_screen_2.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../utils/app_color.dart';
 
 class SplashScreen1 extends StatelessWidget {
   const SplashScreen1({super.key});
@@ -10,7 +11,7 @@ class SplashScreen1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColor.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -29,7 +30,7 @@ class SplashScreen1 extends StatelessWidget {
                         ),
                         child: const Icon(
                           Icons.home_rounded,
-                          color: Colors.white,
+                          color: AppColor.white,
                           size: 24,
                         ),
                       ),
@@ -56,7 +57,7 @@ class SplashScreen1 extends StatelessWidget {
                       "Lewati",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: AppColor.grey,
                       ),
                     ),
                   ),
@@ -138,13 +139,13 @@ class SplashScreen1 extends StatelessWidget {
                       Text(
                         "Lanjut",
                         style: TextStyle(
-                          color: Colors.white, 
+                          color: AppColor.white, 
                           fontSize: 16, 
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, color: Colors.white),
+                      Icon(Icons.arrow_forward, color: AppColor.white),
                     ],
                   ),
                 ),
@@ -185,7 +186,7 @@ Widget _buildImage() {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: AppColor.white.withOpacity(0.9),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -213,7 +214,7 @@ Widget _buildImage() {
                         style: TextStyle(
                           fontSize: 8,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                          color: AppColor.grey,
                         ),
                       ),
                       Text(

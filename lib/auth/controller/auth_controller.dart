@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:appkonkos_mobile/modules/home/home_screen.dart';
 
 class AuthController extends GetxController {
   var isHidden = true.obs;
@@ -26,6 +27,9 @@ class AuthController extends GetxController {
       margin: const EdgeInsets.all(15),
       duration: const Duration(seconds: 2),
     );
+    Future.delayed(const Duration(seconds: 2), () {
+      Get.offAll(() => HomeScreen());
+    });
   }
 
   var isRegisterPasswordHidden = true.obs;

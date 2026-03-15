@@ -1,7 +1,9 @@
 import 'package:appkonkos_mobile/auth/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'controller/auth_controller.dart';
+import '../utils/app_color.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -15,17 +17,11 @@ class LoginScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF1E88E5), Color(0xFF1565C0)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppColor.primaryLinear),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 40, 20, 40),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               child: Column(
                 children: [
                   const SizedBox(height: 40),
@@ -33,7 +29,11 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const Text(
                     "Selamat Datang di Apkonkos",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -50,7 +50,10 @@ class LoginScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Email", style: TextStyle(fontSize: 16, color: Colors.black)),
+                        const Text(
+                          "Email",
+                          style: TextStyle(fontSize: 16, color: Colors.black),
+                        ),
                         const SizedBox(height: 8),
                         _buildTextField(
                           hint: "Masukkan email",
@@ -60,24 +63,33 @@ class LoginScreen extends StatelessWidget {
                         _buildForgotPasswordRow(),
                         const SizedBox(height: 8),
 
-                        Obx(() => _buildTextField(
-                          hint: "Masukkan password",
-                          icon: Icons.lock_outline,
-                          isPassword: true,
-                          obscureText: authController.isHidden.value,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              authController.isHidden.value ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.grey,
+                        Obx(
+                          () => _buildTextField(
+                            hint: "Masukkan password",
+                            icon: Icons.lock_outline,
+                            isPassword: true,
+                            obscureText: authController.isHidden.value,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                authController.isHidden.value
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () => authController.togglePassword(),
                             ),
-                            onPressed: () => authController.togglePassword(),
                           ),
-                        )),
+                        ),
 
                         const SizedBox(height: 30),
                         _buildLoginButton(authController),
                         const SizedBox(height: 20),
-                        const Center(child: Text("Atau masuk dengan", style: TextStyle(fontSize: 14, color: Colors.grey))),
+                        const Center(
+                          child: Text(
+                            "Atau masuk dengan",
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         _buildSocialRow(),
                         const SizedBox(height: 24),
@@ -94,21 +106,24 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildLogo() {
     return Container(
-      width: 60, height: 60,
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
-      child: const Icon(Icons.home_rounded, color: Colors.white, size: 35),
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Icon(Icons.home_filled, color: Colors.white, size: 30)
     );
   }
 
   Widget _buildTextField({
-    required String hint, 
-    required IconData icon, 
-    bool isPassword = false, 
-    bool obscureText = false, 
-    Widget? suffixIcon
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    bool obscureText = false,
+    Widget? suffixIcon,
   }) {
     return TextField(
       obscureText: obscureText,
@@ -118,7 +133,10 @@ class LoginScreen extends StatelessWidget {
         suffixIcon: suffixIcon,
         filled: true,
         fillColor: Colors.grey[200],
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }
@@ -127,24 +145,61 @@ class LoginScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text("Password", style: TextStyle(fontSize: 16, color: Colors.black)),
-        TextButton(onPressed: () {}, child: const Text("Lupa Password?", style: TextStyle(color: Color(0xFF1E88E5)))),
+        const Text(
+          "Password",
+          style: TextStyle(fontSize: 16, color: Colors.black),
+        ),
+        TextButton(
+          onPressed: () {},
+          child: const Text(
+            "Lupa Password?",
+            style: TextStyle(color: Color(0xFF1E88E5)),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildLoginButton(AuthController controller) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
       height: 50,
-      child: ElevatedButton(
-        onPressed: () => controller.login(),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1E88E5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        child: const Text("Masuk", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.primaryLinear.colors[0].withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      child:
+          ElevatedButton(
+                onPressed: () => controller.login(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E88E5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Masuk",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Icon(Icons.login, size: 16, color: Colors.white),
+                  ],
+                ),
+              )
+              .animate(onPlay: (controller) => controller.repeat())
+              .shimmer(duration: 3500.ms, color: Colors.white.withOpacity(0.4)),
     );
   }
 
@@ -166,8 +221,11 @@ class LoginScreen extends StatelessWidget {
         TextButton(
           onPressed: () {
             Get.to(() => const RegisterScreen());
-          }, 
-          child: const Text("Daftar", style: TextStyle(color: Color(0xFF1E88E5)))
+          },
+          child: const Text(
+            "Daftar",
+            style: TextStyle(color: Color(0xFF1E88E5)),
+          ),
         ),
       ],
     );
@@ -185,11 +243,15 @@ class SocialButton extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            icon, const SizedBox(width: 6),
+            icon,
+            const SizedBox(width: 6),
             Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
           ],
         ),
