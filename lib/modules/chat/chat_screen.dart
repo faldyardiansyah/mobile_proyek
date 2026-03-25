@@ -35,7 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ChatMessage(
         user: _botUser,
         createdAt: DateTime.now(),
-        text: "Halo! Saya Asisten Appkonkos Dekat. Ada yang bisa dibantu?",
+        text: "Halo! Saya Asisten Appkonkos. Ada yang bisa dibantu?",
       ),
     );
   }

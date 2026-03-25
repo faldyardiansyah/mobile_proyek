@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'widget/onboarding_screen.dart';
 import '../auth/login_screen.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen3 extends StatelessWidget {
   const SplashScreen3({super.key});
@@ -9,7 +10,12 @@ class SplashScreen3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OnboardingScreen(
-      image: "assets/image/splash3.png",
+      image: Lottie.asset(
+        'assets/lottie/security_payment.json',
+        width: 300,
+        height: 300,
+        repeat: true,
+      ),
       title: "Pembayaran",
       highlight: "Aman & Terpercaya",
       description:

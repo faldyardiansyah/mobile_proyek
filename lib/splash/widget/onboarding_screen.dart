@@ -2,7 +2,7 @@ import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 
 class OnboardingScreen extends StatelessWidget {
-  final String image;
+  final Widget image;
   final String title;
   final String highlight;
   final String description;
@@ -51,12 +51,7 @@ class OnboardingScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      image,
-                      height: MediaQuery.of(context).size.height * 0.35,
-                      fit: BoxFit.contain,
-                    ),
-
+                    image,
                     const SizedBox(height: 24),
 
                     Text(

@@ -117,7 +117,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // --- KONTEN UTAMA HOME ---
   Widget _buildHomeContent() {
     return SafeArea(
       child: SingleChildScrollView(
@@ -129,7 +128,6 @@ class HomeScreen extends StatelessWidget {
             _buildCategoryScroll(),
             _buildSectionTitle("Properti Terdekat"),
 
-            // Memperbaiki Improper Use of GetX dengan mengecek list
             Obx(() {
               if (controller.properties.isEmpty) {
                 return const Center(
@@ -153,8 +151,6 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-
-  // --- REFACTORED NAV ITEM ---
   Widget _buildNavItem(
     IconData icon,
     String label,
@@ -194,7 +190,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-            // Titik notifikasi biru
             if (hasNotification)
               Positioned(
                 top: 4,
@@ -215,7 +210,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // --- UI LAINNYA (TETAP SAMA TAPI DIRAPIKAN) ---
   Widget _buildHeaderFancy() {
     return Padding(
       padding: const EdgeInsets.all(20),

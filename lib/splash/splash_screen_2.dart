@@ -9,7 +9,11 @@ class SplashScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OnboardingScreen(
-      image: "assets/image/splash2.png",
+      image: Image.asset(
+        'assets/image/splash2.png',
+        height: MediaQuery.of(context).size.height * 0.35,
+        fit: BoxFit.contain,
+      ),
       title: "Booking Cepat &",
       highlight: "Mudah",
       description: "Temukan kamar impianmu dan amankan\n" "segera hanya dengan beberapa ketukan jari.\n" "Tanpa ribet, langsung huni.",

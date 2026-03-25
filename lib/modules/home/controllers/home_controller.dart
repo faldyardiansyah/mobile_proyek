@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import '../models/property_model.dart';
 
 class HomeController extends GetxController {
-  // Gunakan RxList agar reaktif dan hindari error JSArray
   final RxList<Property> properties = <Property>[].obs;
   final RxList<String> categories = <String>[
     "Semua",
@@ -25,7 +24,6 @@ class HomeController extends GetxController {
   }
 
   void loadDummyData() {
-    // Data dummy sesuai mockup
     var data = [
       Property(
         name: "Kost Exclusive Melati",
@@ -46,7 +44,7 @@ class HomeController extends GetxController {
     ];
     properties.assignAll(
       data,
-    ); // .assignAll wajib supaya Obx sadar ada data baru
+    ); 
   }
 
   void changeCategory(int index) {
