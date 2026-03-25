@@ -50,4 +50,18 @@ class HomeController extends GetxController {
   void changeCategory(int index) {
     selectedCategoryIndex.value = index;
   }
+
+  var wishlist = <dynamic>[].obs;
+
+bool isFavorite(dynamic item) {
+  return wishlist.contains(item);
+}
+
+void toggleFavorite(dynamic item) {
+  if (wishlist.contains(item)) {
+    wishlist.remove(item);
+  } else {
+    wishlist.add(item);
+  }
+}
 }

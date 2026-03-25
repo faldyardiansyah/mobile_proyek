@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import './controllers/home_controller.dart';
 import '../chat/chat_screen.dart';
+import '../wishlist/wishlist_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final controller = Get.put(HomeController());
@@ -18,7 +19,7 @@ class HomeScreen extends StatelessWidget {
           index: controller.tabIndex.value,
           children: [
             _buildHomeContent(),
-            const Center(child: Text("Halaman Favorit")),
+            const WishlistScreen(),
             const SizedBox(),
             const Center(child: Text("Halaman Riwayat")),
             const Center(child: Text("Halaman Profil")),
@@ -40,75 +41,57 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: FloatingActionButton(
-          elevation: 0,
-          backgroundColor: AppColor.primary,
-          onPressed: () => Get.to(() => const ChatScreen()),
-          child: const Icon(
-            Icons.smart_toy_rounded,
-            size: 30,
-            color: Colors.white,
+        child: SizedBox(
+          height: 64,
+          width: 64,
+          child: FloatingActionButton(
+            backgroundColor: AppColor.primary,
+            elevation: 4,
+            shape: const CircleBorder(),
+            onPressed: () => Get.to(() => const ChatScreen()),
+            child: const Icon(
+              Icons.smart_toy_rounded,
+              color: Colors.white,
+              size: 30,
+            ),
           ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        margin: const EdgeInsets.fromLTRB(24, 0, 24, 30),
+        height: 70,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
+          borderRadius: BorderRadius.circular(35),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 20,
-              offset: const Offset(0, -4),
+              spreadRadius: 0,
+              offset: const Offset(0, 4), 
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
-          child: BottomAppBar(
-            color: Colors.white,
-            elevation: 0,
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 10,
-            child: SizedBox(
-              height: 78,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          _buildNavItem(Icons.search, "Cari", 0),
-                          const SizedBox(width: 20),
-                          _buildNavItem(Icons.favorite_border, "Simpan", 1),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          _buildNavItem(
-                            Icons.assignment_outlined,
-                            "Riwayat",
-                            3,
-                            hasNotification: true,
-                          ),
-                          const SizedBox(width: 20),
-                          _buildNavItem(Icons.person_outline, "Profil", 4),
-                        ],
-                      ),
-                    ],
+          borderRadius: BorderRadius.circular(35),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Obx(
+              () => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(Icons.search, "Cari", 0),
+                  _buildNavItem(Icons.favorite_border, "Simpan", 1),
+                  const SizedBox(width: 40),
+                  _buildNavItem(
+                    Icons.assignment_outlined,
+                    "Riwayat",
+                    3,
+                    hasNotification: true,
                   ),
-                ),
+                  _buildNavItem(Icons.person_outline, "Profil", 4),
+                ],
               ),
             ),
           ),
@@ -151,6 +134,7 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildNavItem(
     IconData icon,
     String label,
@@ -373,6 +357,37 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Obx(() {
+                  bool isFav = controller.isFavorite(data);
+
+                  return GestureDetector(
+                    onTap: () {
+                      controller.toggleFavorite(data);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                        color: isFav ? AppColor.primary : Colors.grey,
+                        size: 20,
+                      ),
+                    ),
+                  );
+                }),
+              ),
             ],
           ),
           Padding(
@@ -383,24 +398,49 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      data.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        data.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 18),
-                        Text(
-                          " ${data.rating}",
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4EAD7),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            color: Color(0xFFFFC107),
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${data.rating}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: Color(0xFFB45309),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 5),
                 Row(
                   children: [
