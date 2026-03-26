@@ -204,11 +204,17 @@ class LoginScreen extends StatelessWidget {
   }
 
   Widget _buildSocialRow() {
-    return const Row(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SocialButton(Icon(Icons.g_mobiledata, color: Colors.red), "Google"),
-        SocialButton(Icon(Icons.facebook, color: Colors.blue), "Facebook"),
-        SocialButton(Icon(Icons.apple, color: Colors.black), "Apple"),
+        SocialButton(
+        Image(image: AssetImage("assets/image/google.png"), height: 20), 
+        "Google",
+      ),
+      SocialButton(
+        Image(image: AssetImage("assets/image/facebook.png"), height: 20), 
+        "Facebook",
+      ),
       ],
     );
   }
@@ -223,7 +229,7 @@ class LoginScreen extends StatelessWidget {
             Get.to(() => const RegisterScreen());
           },
           child: const Text(
-            "Daftar",
+            "Daftar sekarang",
             style: TextStyle(color: Color(0xFF1E88E5)),
           ),
         ),
@@ -233,7 +239,7 @@ class LoginScreen extends StatelessWidget {
 }
 
 class SocialButton extends StatelessWidget {
-  final Icon icon;
+  final Widget icon;
   final String label;
   const SocialButton(this.icon, this.label, {super.key});
 

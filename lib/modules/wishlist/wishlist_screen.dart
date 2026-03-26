@@ -41,9 +41,16 @@ class WishlistScreen extends StatelessWidget {
         child: Obx(() {
           if (controller.wishlist.isEmpty) {
             return const Center(
-              child: Text(
-                "Belum ada wishlist",
-                style: TextStyle(fontSize: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(padding: 
+                    EdgeInsets.all(20),
+                    child: Image(image: AssetImage("assets/image/no_data.png"), height: 250),
+                  ),
+                  // const SizedBox(height: 10),
+                  Text("Wislisht kamu masih kosong")
+                ],
               ),
             );
           }
@@ -230,7 +237,7 @@ class WishlistScreen extends StatelessWidget {
                         elevation: 0,
                       ),
                       child: const Text(
-                        "Pesan",
+                        "Lihat Detail",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

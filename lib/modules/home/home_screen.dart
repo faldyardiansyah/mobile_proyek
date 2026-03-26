@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
@@ -22,7 +23,7 @@ class HomeScreen extends StatelessWidget {
             const WishlistScreen(),
             const SizedBox(),
             const Center(child: Text("Halaman Riwayat")),
-            const Center(child: Text("Halaman Profil")),
+            const ProfileScreen(),
           ],
         ),
       ),
@@ -49,11 +50,7 @@ class HomeScreen extends StatelessWidget {
             elevation: 4,
             shape: const CircleBorder(),
             onPressed: () => Get.to(() => const ChatScreen()),
-            child: const Icon(
-              Icons.smart_toy_rounded,
-              color: Colors.white,
-              size: 30,
-            ),
+            child: Image.asset("assets/image/chatbot.png",width: 40, height: 40, color: AppColor.white)
           ),
         ),
       ),
@@ -81,16 +78,16 @@ class HomeScreen extends StatelessWidget {
               () => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildNavItem(Icons.search, "Cari", 0),
-                  _buildNavItem(Icons.favorite_border, "Simpan", 1),
+                  _buildNavItem("assets/image/search.png", "Cari", 0),
+                  _buildNavItem("assets/image/wishlist.png", "Simpan", 1),
                   const SizedBox(width: 40),
                   _buildNavItem(
-                    Icons.assignment_outlined,
+                    "assets/image/riwayat.png",
                     "Riwayat",
                     3,
                     hasNotification: true,
                   ),
-                  _buildNavItem(Icons.person_outline, "Profil", 4),
+                  _buildNavItem("assets/image/profile.png", "Profil", 4),
                 ],
               ),
             ),
@@ -136,7 +133,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildNavItem(
-    IconData icon,
+    String imagePath,
     String label,
     int index, {
     bool hasNotification = false,
@@ -153,13 +150,10 @@ class HomeScreen extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  icon,
-                  size: 24,
-                  color: isSelected
-                      ? AppColor.primary
-                      : const Color(0xFF94A3B8),
+                Image.asset(
+                  imagePath, width: 24, height: 24, color: isSelected ? AppColor.primary : const Color(0xFF94A3B8),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   label,
                   style: TextStyle(

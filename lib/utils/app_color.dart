@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppColor {
   static const LinearGradient primaryLinear = LinearGradient(
     colors: [
-      Color(0xFF1E88E5),
+      Color(0xFF0EA5E9),
       Color(0xFF1565C0),
     ],
     begin: Alignment.topCenter,

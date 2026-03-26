@@ -36,8 +36,8 @@ class HomeController extends GetxController {
       Property(
         name: "Kontrakan Pak Budi",
         type: "Campur",
-        location: "Margonda, Depok",
-        price: "1.200.000",
+        location: "Lobener, Indramayu",
+        price: "600.000",
         rating: 4.5,
         isYearly: false,
       ),

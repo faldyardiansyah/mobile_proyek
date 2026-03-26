@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'widget/onboarding_screen.dart';
 import 'splash_screen_3.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen2 extends StatelessWidget {
   const SplashScreen2({super.key});
@@ -9,11 +10,7 @@ class SplashScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OnboardingScreen(
-      image: Image.asset(
-        'assets/image/splash2.png',
-        height: MediaQuery.of(context).size.height * 0.35,
-        fit: BoxFit.contain,
-      ),
+      image: Lottie.asset('assets/lottie/calendar_booking.json', width: 800, height: 300, repeat: true),
       title: "Booking Cepat &",
       highlight: "Mudah",
       description: "Temukan kamar impianmu dan amankan\n" "segera hanya dengan beberapa ketukan jari.\n" "Tanpa ribet, langsung huni.",
