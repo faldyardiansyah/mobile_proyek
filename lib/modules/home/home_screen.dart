@@ -1,5 +1,6 @@
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import './controllers/home_controller.dart';
@@ -14,6 +15,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: const Color(0xFFF8FAFC),
       body: Obx(
         () => IndexedStack(
@@ -50,7 +52,12 @@ class HomeScreen extends StatelessWidget {
             elevation: 4,
             shape: const CircleBorder(),
             onPressed: () => Get.to(() => const ChatScreen()),
-            child: Image.asset("assets/image/chatbot.png",width: 40, height: 40, color: AppColor.white)
+            child: Image.asset(
+              "assets/image/chatbot.png",
+              width: 40,
+              height: 40,
+              color: AppColor.white,
+            ),
           ),
         ),
       ),
@@ -66,7 +73,7 @@ class HomeScreen extends StatelessWidget {
               color: Colors.black.withOpacity(0.06),
               blurRadius: 20,
               spreadRadius: 0,
-              offset: const Offset(0, 4), 
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -139,51 +146,70 @@ class HomeScreen extends StatelessWidget {
     bool hasNotification = false,
   }) {
     bool isSelected = controller.tabIndex.value == index;
+
     return InkWell(
-      onTap: () => controller.tabIndex.value = index,
+      onTap: () {
+        controller.tabIndex.value = index;
+        HapticFeedback.lightImpact();
+      },
       borderRadius: BorderRadius.circular(15),
-      child: SizedBox(
-        width: 60,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  imagePath, width: 24, height: 24, color: isSelected ? AppColor.primary : const Color(0xFF94A3B8),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isSelected
-                        ? AppColor.primary
-                        : const Color(0xFF94A3B8),
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 1.0, end: isSelected ? 1.15 : 1.0),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutBack,
+        builder: (context, scale, child) {
+          return Transform.scale(
+            scale: scale,
+            child: SizedBox(
+              width: 60,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        imagePath,
+                        width: 24,
+                        height: 24,
+                        color: isSelected
+                            ? AppColor.primary
+                            : const Color(0xFF94A3B8),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: isSelected
+                              ? AppColor.primary
+                              : const Color(0xFF94A3B8),
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            if (hasNotification)
-              Positioned(
-                top: 4,
-                right: 14,
-                child: Container(
-                  height: 8,
-                  width: 8,
-                  decoration: BoxDecoration(
-                    color: AppColor.primary,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1.5),
-                  ),
-                ),
+                  if (hasNotification)
+                    Positioned(
+                      top: 4,
+                      right: 14,
+                      child: Container(
+                        height: 8,
+                        width: 8,
+                        decoration: BoxDecoration(
+                          color: AppColor.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-          ],
-        ),
+            ),
+          );
+        },
       ),
     );
   }
