@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/modules/Riwayat/riwayat_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +25,7 @@ class HomeScreen extends StatelessWidget {
             _buildHomeContent(),
             const WishlistScreen(),
             const SizedBox(),
-            const Center(child: Text("Halaman Riwayat")),
+            RiwayatScreen(),
             const ProfileScreen(),
           ],
         ),
@@ -105,7 +106,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHomeContent() {
-    return SafeArea(
+    return SafeArea(    
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,26 +225,19 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "LOKASI SEKARANG",
+                "APPKONKOS",
                 style: TextStyle(
-                  color: AppColor.primary,
-                  fontSize: 10,
+                  color: Color(0xFF0077B6),
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
                 ),
               ),
               const SizedBox(height: 5),
-              Row(
-                children: [
-                  const Icon(Icons.stars, size: 18, color: AppColor.primary),
-                  const SizedBox(width: 5),
-                  const Text(
-                    "Jakarta Selatan, DKI",
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                const Text(
+                    "Halo, Selamat datang, Faldy Ardiansyah",
+                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
                   ),
-                  Icon(Icons.keyboard_arrow_down, color: Colors.grey[400]),
-                ],
-              ),
             ],
           ),
           _buildCircleIconButton(Icons.notifications_none_rounded),

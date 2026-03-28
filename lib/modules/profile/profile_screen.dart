@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/auth/login_screen.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -99,7 +100,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   _menu(icon: Icons.help_outline, title: "Pusat Bantuan", onTap: (){}),
                   const SizedBox(height: 20),
-                  ElevatedButton.icon(onPressed: (){}, label: const Text("Keluar Sesi"), icon: const Icon(Icons.logout, size: 18,), style: ElevatedButton.styleFrom(
+                  ElevatedButton.icon(onPressed: (){Get.offAll(() => const LoginScreen());}, label: const Text("Keluar Sesi"), icon: const Icon(Icons.logout, size: 18,), style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColor.primary,
                     elevation: 0,
