@@ -1,4 +1,4 @@
-import 'package:appkonkos_mobile/modules/Riwayat/riwayat_screen.dart';
+import 'package:appkonkos_mobile/modules/riwayat/riwayat_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

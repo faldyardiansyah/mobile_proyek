@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../Riwayat/controllers/riwayat_controller.dart';
-import 'package:appkonkos_mobile/modules/Riwayat/models/model_riwayat.dart';
+import 'controllers/riwayat_controller.dart';
+import 'package:appkonkos_mobile/modules/riwayat/models/model_riwayat.dart';
 
 class RiwayatScreen extends StatelessWidget {
   final RiwayatController controller = Get.put(RiwayatController());

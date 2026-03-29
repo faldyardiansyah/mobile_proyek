@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:appkonkos_mobile/modules/Riwayat/models/model_riwayat.dart';
+import 'package:appkonkos_mobile/modules/riwayat/models/model_riwayat.dart';
 
 class RiwayatController extends GetxController {
   var selectedTab = 0.obs;

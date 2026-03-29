@@ -30,15 +30,17 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/image/konten.png", height: 300)
+            Image.asset("assets/image/logo.png", height: 200)
+                .animate()
+                .fadeIn(duration: const Duration(seconds: 1))
                 .animate()
                 .fadeIn(duration: const Duration(seconds: 1))
                 .scale()
                 .then(delay: const Duration(seconds: 1))
                 .fadeOut(duration: const Duration(seconds: 1)),
-            
+
             const SizedBox(height: 10),
-            
+
             const Text(
               "Apkonkos",
               style: TextStyle(
@@ -47,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Color(0xFF1E2A5E),
               ),
             ).animate().fadeIn(delay: 500.ms),
-            
+
             const Text(
               "Aplikasi Pencarian Kontrakan\n dan Kosan",
               textAlign: TextAlign.center,
@@ -57,9 +59,49 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Color(0xFF64748B),
               ),
             ).animate().fadeIn(delay: 800.ms),
+             SizedBox(height: 45),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(3, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  child: _AnimatedDot(index: index),
+                );
+              }),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AnimatedDot extends StatelessWidget {
+  final int index;
+  const _AnimatedDot({required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: const BoxDecoration(
+        color: Color(0xFF4A89F3),
+        shape: BoxShape.circle,
+      ),
+    )
+    .animate(onPlay: (controller) => controller.repeat())
+    .fadeIn(
+      delay: Duration(milliseconds: index * 200),
+      duration: const Duration(milliseconds: 400),
+    )
+    .then()
+    .fadeOut(duration: const Duration(milliseconds: 400))
+    .then()
+    .scaleXY(
+      begin: 0.6,
+      end: 1.0,
+      duration: const Duration(milliseconds: 300),
     );
   }
 }
