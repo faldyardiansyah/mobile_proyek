@@ -1,17 +1,26 @@
-class Riwayat {
-  final String title;
-  final String location;
-  final String status;
-  final String image;
-  final int price;
-  final String date;
+enum BookingStatus {
+  menunggu,
+  dibayar,
+  refund,
+}
 
-  Riwayat({
+class ModelRiwayat {
+  final String id;
+  final String title;
+  final String price;
+  final String location;
+  final BookingStatus status;
+  final String? counttime;
+  final String? canceldate;
+  final String imageAsset;
+  ModelRiwayat({
+    required this.id,
     required this.title,
+    required this.price,
     required this.location,
     required this.status,
-    required this.image,
-    required this.price,
-    required this.date,
+    this.counttime,
+    this.canceldate,
+    required this.imageAsset,
   });
 }

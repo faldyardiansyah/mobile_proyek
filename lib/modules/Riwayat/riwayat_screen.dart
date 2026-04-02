@@ -1,189 +1,211 @@
+import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'controllers/riwayat_controller.dart';
-import 'package:appkonkos_mobile/modules/riwayat/models/model_riwayat.dart';
+import 'models/model_riwayat.dart';
 
 class RiwayatScreen extends StatelessWidget {
-  final RiwayatController controller = Get.put(RiwayatController());
-
-  RiwayatScreen({super.key});
+  const RiwayatScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEAF3FB),
-      appBar: AppBar(
-        title: Row(
-          children: const [
-            const Text(
-            "Riwayat Booking",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-            const Spacer(),
-            const Icon(
-              Icons.notifications_none,
-              color: Colors.black,
-            ),
-          ]
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Column(
+    final controller = Get.put(RiwayatController());
+    return ColoredBox(
+      color: AppColor.background,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                _tab("Semua", 0),
-                _tab("Menunggu", 1),
-                _tab("Dibayar", 2),
-                _tab("Refund", 3),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // 3. Daftar Riwayat menggunakan Obx
+          _buildHeader(),
+          _buildTabBar(controller),
           Expanded(
             child: Obx(() {
-              final listData = controller.filteredriwayats; // Perbaikan Case-Sensitive
-
-              if (listData.isEmpty) {
-                return const Center(child: Text("Tidak ada riwayat"));
+              final list = controller.filteredList;
+              if (list.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Tidak ada riwayat booking',
+                    style: TextStyle(color: AppColor.grey),
+                  ),
+                );
               }
-
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: listData.length,
-                itemBuilder: (context, index) {
-                  final item = listData[index];
-                  return _bookingCard(item);
-                },
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                itemCount: list.length,
+                itemBuilder: (context, index) =>
+                    _BookingCard(item: list[index], controller: controller),
               );
             }),
-          )
+          ),
         ],
       ),
     );
   }
+}
 
-  // Widget Tab Filter
-  Widget _tab(String title, int index) {
-    return GestureDetector(
-      onTap: () => controller.selectedTab.value = index,
-      child: Obx(() {
-        bool active = controller.selectedTab.value == index;
-        return Container(
-          margin: const EdgeInsets.only(right: 10),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+Widget _buildHeader() {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12), 
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          "Riwayat Booking",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A1A2E),
+          ),
+        ),
+        Container(
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: active ? Colors.blue : Colors.white,
-            borderRadius: BorderRadius.circular(25),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              if (active)
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: active ? Colors.white : Colors.grey[600],
-              fontWeight: FontWeight.bold,
-            ),
+          child: const Icon(
+            Icons.notifications_none_rounded,
+            color: Colors.black,
+            size: 21,
           ),
-        );
-      }),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
-  // Widget Card untuk List
-  Widget _bookingCard(Riwayat item) {
+Widget _buildTabBar(RiwayatController controller) {
+  return Obx(
+    () => SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        children: List.generate(controller.tabs.length, (i) {
+          final isSelected = controller.selectedTab.value == i; 
+
+          return GestureDetector(
+            onTap: () => controller.selectTab(i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color:
+                    isSelected ? const Color(0xFF1565C0) : Colors.white,
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: [
+                  BoxShadow(
+                    color: isSelected
+                        ? const Color(0xFF1565C0).withOpacity(0.3)
+                        : Colors.black.withOpacity(0.05),
+                    blurRadius: isSelected ? 8 : 4,
+                    offset: Offset(0, isSelected ? 4 : 1),
+                  ),
+                ],
+              ),
+              child: Text(
+                controller.tabs[i],
+                style: TextStyle(
+                  color: isSelected ? Colors.white : AppColor.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    ),
+  );
+}
+
+class _BookingCard extends StatelessWidget {
+  final ModelRiwayat item;
+  final RiwayatController controller;
+
+  const _BookingCard({required this.item, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              item.image,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.broken_image, size: 80),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                Text(
-                  item.location,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Rp ${item.price}",
-                      style: const TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(item.status).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        item.status,
-                        style: TextStyle(
-                          color: _getStatusColor(item.status),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    item.imageAsset,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 72,
+                      height: 72,
+                      color: AppColor.grey200,
+                      child: const Icon(
+                        Icons.broken_image,
+                        color: AppColor.grey300,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
+}
 
-  // Helper untuk warna status
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'dibayar':
-        return Colors.green;
-      case 'menunggu':
-        return Colors.orange;
-      case 'refound':
-      case 'refund':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+Widget _buildStatusActions(
+    ModelRiwayat item, RiwayatController controller) {
+  switch (item.status) {
+    case BookingStatus.menunggu:
+      return ElevatedButton(
+        onPressed: () => controller.bayarSekarang(item),
+        child: const Text('Bayar Sekarang'),
+      );
+    case BookingStatus.dibayar:
+      return ElevatedButton(
+        onPressed: () => controller.ajukanRefund(item),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColor.amber,
+        ),
+        child: const Text('Ajukan Refund'),
+      );
+    case BookingStatus.refund:
+      return const Text(
+        'Refund Diproses',
+        style: TextStyle(color: AppColor.grey),
+      );
+    default:
+      return const SizedBox(); // ✅ FIX biar aman
   }
 }
