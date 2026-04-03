@@ -174,7 +174,54 @@ class _BookingCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _StatusBadge(status: item.status),
+                      const SizedBox(height: 4,),
+                      Text(item.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),),
+                      const SizedBox(height: 4,),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined, size: 12, color: AppColor.grey,),
+                          const SizedBox(width: 2,),
+                          Expanded(child: Text(item.location, style: const TextStyle(fontSize: 11, color: AppColor.grey), overflow: TextOverflow.ellipsis,),)
+                        ],
+                      )
+                    ]
+                  )
+                ),
+                if (item.status == BookingStatus.menunggu && item.canceldate != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF6B00),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(item.counttime!, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColor.white, fontFamily: 'monospace'),),
                 )
+                else 
+                Text(item.id, style: const TextStyle(fontSize: 11, color: AppColor.grey),)
+              ],
+            ),
+            const SizedBox(height: 12,),
+            const Divider(height: 1, color: AppColor.grey300,),
+            const SizedBox(height: 12,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.status == BookingStatus.refund ? (item.canceldate ?? " ") : 'TOTAL', style: const TextStyle(fontSize: 11, color: AppColor.grey, letterSpacing: 0.5),),
+                    if (item.status != BookingStatus.refund)
+                    Text(item.price, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),)
+                  ],
+                ),
+                _buildActionButton(),
               ],
             )
           ],
@@ -182,30 +229,77 @@ class _BookingCard extends StatelessWidget {
       ),
     );
   }
-}
-
-Widget _buildStatusActions(
-    ModelRiwayat item, RiwayatController controller) {
+  Widget _buildActionButton() {
   switch (item.status) {
+    case BookingStatus.dibayar:
+      return OutlinedButton(
+        onPressed: () => controller.ajukanRefund(item),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Color(0xFF1565C0)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        ),
+        child: const Text(
+          'Ajukan Refund',
+          style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1565C0)),
+        ),
+      );
+
     case BookingStatus.menunggu:
       return ElevatedButton(
         onPressed: () => controller.bayarSekarang(item),
-        child: const Text('Bayar Sekarang'),
-      );
-    case BookingStatus.dibayar:
-      return ElevatedButton(
-        onPressed: () => controller.ajukanRefund(item),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColor.amber,
+          backgroundColor: const Color(0xFF1565C0),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          elevation: 0,
         ),
-        child: const Text('Ajukan Refund'),
+        child: const Text(
+          'Bayar Sekarang',
+          style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white),
+        ),
       );
+
     case BookingStatus.refund:
-      return const Text(
-        'Refund Diproses',
-        style: TextStyle(color: AppColor.grey),
-      );
-    default:
-      return const SizedBox(); // ✅ FIX biar aman
+      return const SizedBox.shrink();
+  }
+
+  }
+}
+
+
+class _StatusBadge extends StatelessWidget {
+  final BookingStatus status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context){
+    final config = _config(status);
+    return Container(
+      padding:  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: config['bg'] as Color,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(config['label'] as String, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: config['text'] as Color, letterSpacing: 0.5),),
+    );
+  }
+ Map<String, dynamic> _config(BookingStatus status) {
+    switch (status) {
+      case BookingStatus.dibayar:
+        return {'label': 'DIBAYAR', 'bg': const Color(0xFFE3F2FD), 'text': const Color(0xFF1565C0)};
+      case BookingStatus.menunggu:
+        return {'label': 'MENUNGGU', 'bg': const Color(0xFFFFF3E0), 'text': const Color(0xFFE65100)};
+      case BookingStatus.refund:
+        return {'label': 'REFUNDED', 'bg': const Color(0xFFF3E5F5), 'text': const Color(0xFF6A1B9A)};
+    }
   }
 }
