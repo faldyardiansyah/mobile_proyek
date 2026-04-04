@@ -12,7 +12,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final AuthController controller = Get.put(AuthController());
+  final AuthController controller = Get.find<AuthController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,9 +89,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               "NAMA LENGKAP",
               "Masukkan nama lengkap Anda",
               Icons.person,
+              controller: controller.namaRegisterController,
             ),
             const SizedBox(height: 10),
-            _buildInputField("EMAIL", "Masukkan email Anda", Icons.email),
+            _buildInputField("EMAIL", "Masukkan email Anda", Icons.email, controller: controller.registerEmailController),
             const SizedBox(height: 20),
             const Text(
               "KATA SANDI",
@@ -104,9 +105,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 8),
             Obx(
               () => TextField(
+                controller: controller.registerPasswordController,
                 obscureText: controller.isRegisterPasswordHidden.value,
                 decoration: InputDecoration(
-                  hintText: "Minimal 8 karakter",
+                  hintText: "Minimal 6 karakter",
                   hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                   prefixIcon: const Icon(
                     Icons.lock_outline,
@@ -157,53 +159,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ],
             ),
             const SizedBox(height: 30),
-            Container(
-              width: double.infinity,
-              height: 55,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColor.primaryLinear.colors[0].withOpacity(0.4),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+            Obx(() => Container(
+                  width: double.infinity,
+                  height: 55,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColor.primaryLinear.colors[0].withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child:
-                  ElevatedButton(
-                        onPressed: () => controller.register(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Daftar Akun",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                  child: ElevatedButton(
+                    // Jika loading, tombol otomatis disable (null)
+                    onPressed: controller.isLoading.value ? null : () => controller.register(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Daftar Akun",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColor.white,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Icon(
+                                Icons.arrow_forward,
+                                size: 16,
                                 color: AppColor.white,
                               ),
-                            ),
-                            SizedBox(width: 10),
-                            Icon(
-                              Icons.arrow_forward,
-                              size: 16,
-                              color: AppColor.white,
-                            ),
-                          ],
-                        ),
-                      )
-                      .animate(onPlay: (controller) => controller.repeat())
-                      .shimmer(
-                        duration: 3500.ms,
-                        color: Colors.white.withOpacity(0.4),
-                      ),
-            ),
+                            ],
+                          ),
+                  ),
+                )
+                .animate(onPlay: (controller) => controller.repeat())
+                .shimmer(
+                  duration: 3500.ms,
+                  color: Colors.white.withOpacity(0.4),
+                )),
             const SizedBox(height: 20),
             Center(
               child: TextButton(
@@ -232,7 +243,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-Widget _buildInputField(String label, String hint, IconData icon) {
+Widget _buildInputField(String label, String hint, IconData icon, {required controller}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -246,6 +257,7 @@ Widget _buildInputField(String label, String hint, IconData icon) {
       ),
       const SizedBox(height: 8),
       TextField(
+        controller: controller,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Color(0xFF94A3B8)),

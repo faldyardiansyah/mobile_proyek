@@ -10,7 +10,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AuthController authController = Get.put(AuthController());
+    final AuthController controller = Get.find<AuthController>();
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -57,7 +57,7 @@ class LoginScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         _buildTextField(
                           hint: "Masukkan email",
-                          icon: Icons.email_outlined,
+                          icon: Icons.email_outlined, controller: controller.emailLoginController,
                         ),
                         const SizedBox(height: 8),
                         _buildForgotPasswordRow(),
@@ -67,22 +67,23 @@ class LoginScreen extends StatelessWidget {
                           () => _buildTextField(
                             hint: "Masukkan password",
                             icon: Icons.lock_outline,
+                            controller: controller.passwordLoginController,
                             isPassword: true,
-                            obscureText: authController.isHidden.value,
+                            obscureText: controller.isHidden.value,
                             suffixIcon: IconButton(
                               icon: Icon(
-                                authController.isHidden.value
+                                controller.isHidden.value
                                     ? Icons.visibility_off
                                     : Icons.visibility,
                                 color: Colors.grey,
                               ),
-                              onPressed: () => authController.togglePassword(),
+                              onPressed: () => controller.togglePassword(),
                             ),
                           ),
                         ),
 
                         const SizedBox(height: 30),
-                        _buildLoginButton(authController),
+                        _buildLoginButton(controller),
                         const SizedBox(height: 20),
                         const Center(
                           child: Text(
@@ -123,7 +124,7 @@ class LoginScreen extends StatelessWidget {
     required IconData icon,
     bool isPassword = false,
     bool obscureText = false,
-    Widget? suffixIcon,
+    Widget? suffixIcon, required TextEditingController controller,
   }) {
     return TextField(
       obscureText: obscureText,
@@ -175,7 +176,7 @@ class LoginScreen extends StatelessWidget {
       ),
       child:
           ElevatedButton(
-                onPressed: () => controller.login(),
+                onPressed: controller.isLoading.value ? null : controller.login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E88E5),
                   shape: RoundedRectangleBorder(

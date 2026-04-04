@@ -2,9 +2,12 @@ import "package:flutter/material.dart";
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/splash/splash_screen.dart';
 import 'auth/controller/auth_controller.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:appkonkos_mobile/services/api_service.dart';
 
-void main() {
-
+void main() async {
+  await GetStorage.init();
+  Get.put(ApiService());
   Get.put(AuthController());
 
   runApp(const MyApp());
