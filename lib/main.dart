@@ -1,11 +1,15 @@
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/splash/splash_screen.dart';
+import 'package:appkonkos_mobile/auth/login_screen.dart';
+import 'package:appkonkos_mobile/auth/register_screen.dart';
+import 'package:appkonkos_mobile/modules/home/home_screen.dart';
 import 'auth/controller/auth_controller.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   Get.put(ApiService());
   Get.put(AuthController());
@@ -26,6 +30,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const SplashScreen(),
+      getPages: [
+        GetPage(name: '/login',    page: () => const LoginScreen()),
+        GetPage(name: '/register', page: () => const RegisterScreen()),
+        GetPage(name: '/home',     page: () =>  HomeScreen()),
+      ],
     );
   }
 }
