@@ -141,7 +141,7 @@ class AuthController extends GetxController {
 
       Get.snackbar(
         'Berhasil',
-        'Selamat datang ${response.data['user']['nama']}',
+        'Register ${response.data['user']['nama']}',
         backgroundColor: Colors.green.shade50,
         colorText: Colors.green.shade800,
         snackPosition: SnackPosition.TOP,

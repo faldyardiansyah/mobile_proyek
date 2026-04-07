@@ -145,6 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       text: "Saya setuju dengan syarat dan ketentuan Layanan",
                       style: TextStyle(fontSize: 14, color: AppColor.grey),
                       children: [
+                        WidgetSpan(child: SizedBox(width: 4)),
                         TextSpan(
                           text: "Ketentuan Layanan & Privasi",
                           style: TextStyle(
