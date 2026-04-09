@@ -2,6 +2,7 @@ import 'package:appkonkos_mobile/auth/login_screen.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import './personal_info_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -92,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _menu(icon: Icons.person_outline, title: "Informasi Pribadi", onTap: (){}),
+                  _menu(icon: Icons.person_outline, title: "Informasi Pribadi", onTap: (){Get.to(() => const PersonalInfoScreen());}),
                   const SizedBox(height: 5),
                   _menu(icon: Icons.credit_card, title: "Metode Pembayaran", onTap: (){}),
                   const SizedBox(height: 20),
