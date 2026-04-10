@@ -20,6 +20,8 @@ class AuthController extends GetxController {
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
 
+  var user = {}.obs;
+
   @override
   void onClose() {
     emailLoginController.dispose();
@@ -28,6 +30,14 @@ class AuthController extends GetxController {
     registerEmailController.dispose();
     registerPasswordController.dispose();
     super.onClose();
+  }
+
+  void onInit(){
+    super.onInit();
+    final storedUser = _storage.read('user');
+    if (storedUser != null) {
+      user.value = Map<String, dynamic>.from(storedUser);
+    }
   }
 
   void togglePassword() => isHidden.value = !isHidden.value;
@@ -57,6 +67,7 @@ class AuthController extends GetxController {
         'password': passwordLoginController.text,
       });
       _storage.write('token', response.data['token']);
+      user.value = response.data['user'];
       _storage.write('user', response.data['user']);
 
       Get.snackbar(

@@ -1,11 +1,14 @@
-import 'package:appkonkos_mobile/auth/login_screen.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import './personal_info_screen.dart';
+import './payment_screen.dart';
+import './help_screen.dart';
+import '../../auth/controller/auth_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  ProfileScreen({super.key});
+  final authC = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
@@ -52,16 +55,18 @@ class ProfileScreen extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          const Text(
-            "Faldy Ardiansyah",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-
+          Obx(() {
+            final nama = authC.user['nama'] ?? 'User';
+            return Text(
+              nama,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          }),
           const SizedBox(height: 5),
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -95,13 +100,13 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   _menu(icon: Icons.person_outline, title: "Informasi Pribadi", onTap: (){Get.to(() => const PersonalInfoScreen());}),
                   const SizedBox(height: 5),
-                  _menu(icon: Icons.credit_card, title: "Metode Pembayaran", onTap: (){}),
+                  _menu(icon: Icons.credit_card, title: "Metode Pembayaran", onTap: (){Get.to(()=> const PaymentScreen());}),
                   const SizedBox(height: 20),
                   const Text("Dukungan", style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),),
                   const SizedBox(height: 10),
-                  _menu(icon: Icons.help_outline, title: "Pusat Bantuan", onTap: (){}),
+                  _menu(icon: Icons.help_outline, title: "Pusat Bantuan", onTap: (){Get.to(() => const HelpScreen());}),
                   const SizedBox(height: 20),
-                  ElevatedButton.icon(onPressed: (){Get.offAll(() => const LoginScreen());}, label: const Text("Keluar Sesi"), icon: const Icon(Icons.logout, size: 18,), style: ElevatedButton.styleFrom(
+                  ElevatedButton.icon(onPressed: (){Get.offAll(() => authC.logout());}, label: const Text("Keluar Sesi"), icon: const Icon(Icons.logout, size: 18,), style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColor.primary,
                     elevation: 0,

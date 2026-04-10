@@ -7,9 +7,12 @@ import 'package:appkonkos_mobile/utils/app_color.dart';
 import './controllers/home_controller.dart';
 import '../chat/chat_screen.dart';
 import '../wishlist/wishlist_screen.dart';
+import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class HomeScreen extends StatelessWidget {
   final controller = Get.put(HomeController());
+  final authC = Get.find<AuthController>();
 
   HomeScreen({super.key});
 
@@ -26,7 +29,7 @@ class HomeScreen extends StatelessWidget {
             const WishlistScreen(),
             const SizedBox(),
             const RiwayatScreen(),
-            const ProfileScreen(),
+            ProfileScreen(),
           ],
         ),
       ),
@@ -59,7 +62,7 @@ class HomeScreen extends StatelessWidget {
               height: 40,
               color: AppColor.white,
             ),
-          ),
+          ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -106,7 +109,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHomeContent() {
-    return SafeArea(    
+    return SafeArea(
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +133,7 @@ class HomeScreen extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: controller.properties.length,
                 itemBuilder: (context, index) =>
-                    _buildPropertyCard(controller.properties[index]),
+                    _buildPropertyCard(controller.properties[index], index),
               );
             }),
             const SizedBox(height: 100),
@@ -212,7 +215,7 @@ class HomeScreen extends StatelessWidget {
           );
         },
       ),
-    );
+    ).animate().fadeIn(delay: (index * 100).ms);
   }
 
   Widget _buildHeaderFancy() {
@@ -234,10 +237,19 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 5),
-                const Text(
-                    "Halo, Selamat datang, Faldy Ardiansyah",
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+              Obx(() {
+                if (authC.user.isEmpty) {
+                  return const Text("Loading...");
+                }
+
+                return Text(
+                  "Halo, Selamat datang, ${authC.user['nama']}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
                   ),
+                ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.3);
+              }),
             ],
           ),
           _buildCircleIconButton(Icons.notifications_none_rounded),
@@ -322,7 +334,7 @@ class HomeScreen extends StatelessWidget {
                     color: isSelected ? Colors.white : const Color(0xFF64748B),
                     fontWeight: FontWeight.bold,
                   ),
-                ),
+                ).animate(delay: (index * 100).ms).fadeIn().slideX(begin: 0.2),
               ),
             );
           },
@@ -331,7 +343,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPropertyCard(dynamic data) {
+  Widget _buildPropertyCard(dynamic data, int index) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       decoration: BoxDecoration(
@@ -517,7 +529,10 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ).animate(delay: (index * 100).ms)
+.fadeIn(duration: 500.ms)
+.slideY(begin: 0.3)
+.scale(begin: const Offset(0.95, 0.95));
   }
 
   Widget _badge(String text, Color bg, Color textColor) {

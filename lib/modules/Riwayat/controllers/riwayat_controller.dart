@@ -38,5 +38,4 @@ class RiwayatController extends GetxController{
       snackPosition: SnackPosition.TOP,
     );
   }
-
 }

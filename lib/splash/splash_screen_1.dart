@@ -28,10 +28,10 @@ class SplashScreen1 extends StatelessWidget {
                           color: Colors.blueAccent,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.home_rounded,
-                          color: AppColor.white,
-                          size: 24,
+                        child: Image(
+                          image: AssetImage("assets/image/logo.png"),
+                          width: 16,
+                          height: 16,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -47,7 +47,7 @@ class SplashScreen1 extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                     Get.to(() => const SplashScreen3());
+                      Get.to(() => const SplashScreen3());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
@@ -55,10 +55,7 @@ class SplashScreen1 extends StatelessWidget {
                     ),
                     child: const Text(
                       "Lewati",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColor.grey,
-                      ),
+                      style: TextStyle(fontSize: 14, color: AppColor.grey),
                     ),
                   ),
                 ],
@@ -69,8 +66,8 @@ class SplashScreen1 extends StatelessWidget {
               const Text(
                 "Cari Kosan & Kontrakan",
                 style: TextStyle(
-                  fontSize: 20, 
-                  fontWeight: FontWeight.w800, 
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
                   color: Color(0xFF1A1A1A),
                 ),
               ).animate().slideY(duration: 600.ms),
@@ -113,9 +110,15 @@ class SplashScreen1 extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const CircleAvatar(radius: 4, backgroundColor: Colors.black12),
+                  const CircleAvatar(
+                    radius: 4,
+                    backgroundColor: Colors.black12,
+                  ),
                   const SizedBox(width: 8),
-                  const CircleAvatar(radius: 4, backgroundColor: Colors.black12),
+                  const CircleAvatar(
+                    radius: 4,
+                    backgroundColor: Colors.black12,
+                  ),
                 ],
               ),
               const SizedBox(height: 30),
@@ -124,7 +127,7 @@ class SplashScreen1 extends StatelessWidget {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                      Get.to(() => const SplashScreen2());
+                    Get.to(() => const SplashScreen2());
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4A89F3),
@@ -139,8 +142,8 @@ class SplashScreen1 extends StatelessWidget {
                       Text(
                         "Lanjut",
                         style: TextStyle(
-                          color: AppColor.white, 
-                          fontSize: 16, 
+                          color: AppColor.white,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -167,7 +170,7 @@ Widget _buildImage() {
           color: Colors.black.withOpacity(0.1),
           blurRadius: 20,
           offset: const Offset(0, 10),
-        )
+        ),
       ],
     ),
     child: ClipRRect(
@@ -230,7 +233,7 @@ Widget _buildImage() {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     ),

@@ -73,14 +73,29 @@ class _ChatScreenState extends State<ChatScreen> {
       ],
     };
 
-    final response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
-    );
+    http.Response response;
+
+    int retry = 0;
+    while (true) {
+      response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 503 && retry < 2) {
+        retry++;
+        await Future.delayed(const Duration(seconds: 2));
+        continue;
+      }
+
+      break;
+    }
 
     if (response.statusCode != 200) {
-      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+      if (response.statusCode != 200) {
+        throw Exception('Server sibuk, coba lagi ya 😅');
+      }
     }
 
     final data = jsonDecode(response.body);
