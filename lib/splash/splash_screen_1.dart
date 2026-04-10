@@ -28,10 +28,10 @@ class SplashScreen1 extends StatelessWidget {
                           color: Colors.blueAccent,
                           shape: BoxShape.circle,
                         ),
-                        child: Image(
-                          image: AssetImage("assets/image/logo.png"),
-                          width: 16,
-                          height: 16,
+                        child: const Icon(
+                          Icons.home,
+                          color: Colors.white,
+                          size: 16,
                         ),
                       ),
                       const SizedBox(width: 12),

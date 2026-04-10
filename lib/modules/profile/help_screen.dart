@@ -2,7 +2,6 @@ import 'package:appkonkos_mobile/modules/chat/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
-import '../chat/chat_screen.dart';
 
 class HelpScreen extends StatelessWidget {
   const HelpScreen({super.key});
