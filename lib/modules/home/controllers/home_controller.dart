@@ -44,20 +44,25 @@ class HomeController extends GetxController {
         isYearly: false,
       ),
     ];
-    allProperties.addAll(data);
+    allProperties.assignAll(data);
     properties.assignAll(data);
   }
 
   void applyFilter(){
-    String category = categories[selectedCategoryIndex.value];
-    String query = searchQuery.value.toLowerCase();
+    String selectedCategory = categories[selectedCategoryIndex.value].trim();
+    String query = searchQuery.value.toLowerCase().trim();
 
-    properties.assignAll(allProperties.where((property) {
-      bool matchesCategory = category == "Semua" || property.type == category;
-      bool matchesSearch = property.name.toLowerCase().contains(query) || property.location.toLowerCase().contains(query);
-      return matchesCategory && matchesSearch;
-    }));
-  }
+   var filteredData = allProperties.where((property) {
+    bool matchesCategory = selectedCategory == "Semua" || 
+                           property.type.trim() == selectedCategory;
+    bool matchesSearch = property.name.toLowerCase().contains(query) || 
+                         property.location.toLowerCase().contains(query);
+
+    return matchesCategory && matchesSearch;
+  }).toList();
+  properties.assignAll(filteredData);
+  print("Kategori: $selectedCategory | Jumlah Data: ${properties.length}");
+}
 
   void changeCategory(int index) {
     selectedCategoryIndex.value = index;

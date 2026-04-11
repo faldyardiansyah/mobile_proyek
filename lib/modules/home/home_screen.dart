@@ -11,7 +11,7 @@ import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class HomeScreen extends StatelessWidget {
-  final controller = Get.put(HomeController());
+  final HomeController controller = Get.put(HomeController());
   final authC = Get.find<AuthController>();
 
   HomeScreen({super.key});
@@ -328,9 +328,9 @@ class HomeScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             bool isSelected = controller.selectedCategoryIndex.value == index;
             return GestureDetector(
-              onTap: () => {
-                controller.changeCategory(index),
-                HapticFeedback.lightImpact(),
+              onTap: () {
+                controller.changeCategory(index);
+                HapticFeedback.lightImpact();
               },
               child: Container(
                 margin: const EdgeInsets.only(right: 10),
@@ -351,7 +351,7 @@ class HomeScreen extends StatelessWidget {
                     color: isSelected ? Colors.white : const Color(0xFF64748B),
                     fontWeight: FontWeight.bold,
                   ),
-                ).animate(delay: (index * 100).ms).fadeIn().slideX(begin: 0.2),
+                ),
               ),
             );
           },
