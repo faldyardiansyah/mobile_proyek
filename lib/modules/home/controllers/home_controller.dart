@@ -2,7 +2,9 @@ import 'package:get/get.dart';
 import '../models/property_model.dart';
 
 class HomeController extends GetxController {
+  final RxList<Property> allProperties = <Property>[].obs;
   final RxList<Property> properties = <Property>[].obs;
+  final RxString searchQuery = ''.obs;
   final RxList<String> categories = <String>[
     "Semua",
     "Putra",
@@ -42,13 +44,29 @@ class HomeController extends GetxController {
         isYearly: false,
       ),
     ];
-    properties.assignAll(
-      data,
-    ); 
+    allProperties.addAll(data);
+    properties.assignAll(data);
+  }
+
+  void applyFilter(){
+    String category = categories[selectedCategoryIndex.value];
+    String query = searchQuery.value.toLowerCase();
+
+    properties.assignAll(allProperties.where((property) {
+      bool matchesCategory = category == "Semua" || property.type == category;
+      bool matchesSearch = property.name.toLowerCase().contains(query) || property.location.toLowerCase().contains(query);
+      return matchesCategory && matchesSearch;
+    }));
   }
 
   void changeCategory(int index) {
     selectedCategoryIndex.value = index;
+    applyFilter();
+  }
+
+  void searchProperty(String query) {
+    searchQuery.value = query;
+    applyFilter();
   }
 
   var wishlist = <dynamic>[].obs;

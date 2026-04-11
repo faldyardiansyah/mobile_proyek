@@ -120,11 +120,24 @@ class HomeScreen extends StatelessWidget {
             _buildSectionTitle("Properti Terdekat"),
 
             Obx(() {
-              if (controller.properties.isEmpty) {
+              if (controller.properties.isEmpty && controller.searchQuery.value.isEmpty) {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(50),
                     child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              if (controller.properties.isEmpty && controller.searchQuery.value.isNotEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(50),
+                    child: Text(
+                      "Tidak ada properti yang cocok dengan pencarianmu.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 );
               }
@@ -276,8 +289,9 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const TextField(
-                decoration: InputDecoration(
+              child: TextField(
+                onChanged: (value) => controller.searchProperty(value),
+                decoration: const InputDecoration(
                   icon: Icon(Icons.search, color: Color(0xFF94A3B8)),
                   hintText: "Cari hunian impianmu...",
                   border: InputBorder.none,
@@ -314,7 +328,10 @@ class HomeScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             bool isSelected = controller.selectedCategoryIndex.value == index;
             return GestureDetector(
-              onTap: () => controller.changeCategory(index),
+              onTap: () => {
+                controller.changeCategory(index),
+                HapticFeedback.lightImpact(),
+              },
               child: Container(
                 margin: const EdgeInsets.only(right: 10),
                 padding: const EdgeInsets.symmetric(horizontal: 25),
