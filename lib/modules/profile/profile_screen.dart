@@ -106,7 +106,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 10),
                   _menu(icon: Icons.help_outline, title: "Pusat Bantuan", onTap: (){Get.to(() => const HelpScreen());}),
                   const SizedBox(height: 20),
-                  ElevatedButton.icon(onPressed: (){Get.offAll(() => authC.logout());}, label: const Text("Keluar Sesi"), icon: const Icon(Icons.logout, size: 18,), style: ElevatedButton.styleFrom(
+                  ElevatedButton.icon(onPressed: (){authC.logout();}, label: const Text("Keluar Sesi"), icon: const Icon(Icons.logout, size: 18,), style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColor.primary,
                     elevation: 0,

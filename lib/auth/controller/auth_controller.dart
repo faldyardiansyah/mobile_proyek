@@ -15,12 +15,20 @@ class AuthController extends GetxController {
 
   final emailLoginController = TextEditingController();
   final passwordLoginController = TextEditingController();
-
   final namaRegisterController = TextEditingController();
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
 
   var user = {}.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final storedUser = _storage.read('user');
+    if (storedUser != null) {
+      user.value = Map<String, dynamic>.from(storedUser);
+    }
+  }
 
   @override
   void onClose() {
@@ -32,31 +40,13 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  void onInit(){
-    super.onInit();
-    final storedUser = _storage.read('user');
-    if (storedUser != null) {
-      user.value = Map<String, dynamic>.from(storedUser);
-    }
-  }
-
   void togglePassword() => isHidden.value = !isHidden.value;
-  void toggleRegisterPassword() =>
-      isRegisterPasswordHidden.value = !isRegisterPasswordHidden.value;
+  void toggleRegisterPassword() => isRegisterPasswordHidden.value = !isRegisterPasswordHidden.value;
   void toggleAgreeTerms(bool? v) => isAgreeTerms.value = v ?? false;
 
   Future<void> login() async {
-    if (emailLoginController.text.isEmpty ||
-        passwordLoginController.text.isEmpty) {
-      Get.snackbar(
-        'Perhatian',
-        'Email dan password tidak boleh kosong',
-        backgroundColor: Colors.orange.shade50,
-        colorText: Colors.orange.shade800,
-        snackPosition: SnackPosition.TOP,  
-        borderRadius: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),     
-      );
+    if (emailLoginController.text.isEmpty || passwordLoginController.text.isEmpty) {
+      _showSnackbar('Perhatian', 'Email dan password wajib diisi', Colors.orange);
       return;
     }
 
@@ -66,76 +56,23 @@ class AuthController extends GetxController {
         'email': emailLoginController.text.trim(),
         'password': passwordLoginController.text,
       });
-      _storage.write('token', response.data['token']);
-      user.value = response.data['user'];
-      _storage.write('user', response.data['user']);
 
-      Get.snackbar(
-        'Berhasil',
-        'Selamat datang ${response.data['user']['nama']}',
-        backgroundColor: Colors.green.shade50,
-        colorText: Colors.green.shade800,
-        snackPosition: SnackPosition.TOP,
-        borderRadius: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
+      _storage.write('token', response.data['token']);
+      _storage.write('user', response.data['user']);
+      user.value = response.data['user'];
+
       Get.offAllNamed('/home');
+      _showSnackbar('Berhasil', 'Selamat datang ${user.value['nama']}', Colors.green);
     } on DioException catch (e) {
-      final message =
-          e.response?.data?['message'] ?? 'Login gagal, silakan coba lagi';
-      Get.snackbar(
-        'Login Gagal',
-        message,
-        backgroundColor: Colors.red.shade50,
-        colorText: Colors.red.shade800,
-        snackPosition: SnackPosition.TOP,
-        borderRadius: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
+      _showSnackbar('Login Gagal', e.response?.data?['message'] ?? 'Terjadi kesalahan', Colors.red);
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> register() async {
-    if (namaRegisterController.text.isEmpty ||
-        registerEmailController.text.isEmpty ||
-        registerPasswordController.text.isEmpty) {
-      Get.snackbar(
-        'Perhatian',
-        'Semua field harus diisi',
-        backgroundColor: Colors.orange.shade50,
-        colorText: Colors.orange.shade800,
-        snackPosition: SnackPosition.TOP,
-        borderRadius: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
-      return;
-    }
-
-    if (!isAgreeTerms.value) {
-      Get.snackbar(
-        'Perhatian',
-        'Anda harus menyetujui syarat dan ketentuan',
-        backgroundColor: Colors.orange.shade50,
-        colorText: Colors.orange.shade800,
-        snackPosition: SnackPosition.TOP,
-          borderRadius: 12,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
-      return;
-    }
-
-    if (registerPasswordController.text.length < 6) {
-      Get.snackbar(
-        'Perhatian',
-        'Password harus minimal 6 karakter',
-        backgroundColor: Colors.orange.shade50,
-        colorText: Colors.orange.shade800,
-        snackPosition: SnackPosition.TOP,
-        borderRadius: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
+    if (namaRegisterController.text.isEmpty || registerEmailController.text.isEmpty || !isAgreeTerms.value) {
+      _showSnackbar('Perhatian', 'Lengkapi data dan setujui syarat ketentuan', Colors.orange);
       return;
     }
 
@@ -147,44 +84,46 @@ class AuthController extends GetxController {
         'password': registerPasswordController.text,
         'password_confirmation': registerPasswordController.text,
       });
+
       _storage.write('token', response.data['token']);
       _storage.write('user', response.data['user']);
-
-      Get.snackbar(
-        'Berhasil',
-        'Register ${response.data['user']['nama']}',
-        backgroundColor: Colors.green.shade50,
-        colorText: Colors.green.shade800,
-        snackPosition: SnackPosition.TOP,
-        borderRadius: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
+      
       Get.offAllNamed('/login');
+      _showSnackbar('Berhasil', 'Registrasi berhasil, silakan login', Colors.green);
     } on DioException catch (e) {
-      final message =
-          e.response?.data?['message'] ?? 'Registrasi gagal, silakan coba lagi';
-      Get.snackbar(
-        'Registrasi Gagal',
-        message,
-        backgroundColor: Colors.red.shade50,
-        colorText: Colors.red.shade800,
-        snackPosition: SnackPosition.TOP,
-        borderRadius: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      );
+      _showSnackbar('Gagal', e.response?.data?['message'] ?? 'Registrasi gagal', Colors.red);
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> logout() async {
+    String namaUser = user.value['nama'] ?? 'Pengguna';
+    
     try {
-      await _api.post('/auth/logout', {});
+      // Timeout agar tidak stuck jika server tidak merespon
+      await _api.post('/auth/logout', {}).timeout(const Duration(seconds: 2));
+    } catch (_) {
     } finally {
       _storage.erase();
+      user.value = {}; 
       Get.offAllNamed('/login');
+      _showSnackbar('Berhasil', 'Berhasil Logout dari akun $namaUser', Colors.green);
     }
   }
 
   bool get isLoggedIn => _storage.read('token') != null;
+
+  void _showSnackbar(String title, String message, MaterialColor color) {
+    Get.snackbar(
+      title,
+      message,
+      backgroundColor: color.shade50,
+      colorText: color.shade800,
+      snackPosition: SnackPosition.TOP,
+      borderRadius: 12,
+      margin: const EdgeInsets.all(10),
+      duration: const Duration(seconds: 2),
+    );
+  }
 }
