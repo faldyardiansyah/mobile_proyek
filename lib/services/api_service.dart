@@ -54,4 +54,16 @@ class ApiService extends GetxService {
   Future<dio_lib.Response<dynamic>> get(String endpoint, {Map<String, dynamic>? params}) async {
     return await _dio.get(endpoint, queryParameters: params);
   }
+
+  Future<dio_lib.Response<dynamic>> put(String endpoint, Map<String, dynamic> data) async {
+    return await _dio.put(endpoint, data: data);
+  }
+
+  Future<dio_lib.Response<dynamic>> getProfile() async {
+    return await get('/profile');
+  }
+
+  Future<dio_lib.Response<dynamic>> updateProfile(Map<String, dynamic> data) async {
+    return await put('/profile/update', data);
+  }
 }
