@@ -326,7 +326,8 @@ class HomeScreen extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           itemCount: controller.categories.length,
           itemBuilder: (context, index) {
-            bool isSelected = controller.selectedCategoryIndex.value == index;
+           return Obx((){
+             bool isSelected = controller.selectedCategoryIndex.value == index;
             return GestureDetector(
               onTap: () {
                 controller.changeCategory(index);
@@ -354,6 +355,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             );
+           });
           },
         ),
       ),

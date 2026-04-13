@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _menu(icon: Icons.person_outline, title: "Informasi Pribadi", onTap: (){Get.to(() => const PersonalInfoScreen());}),
+                  _menu(icon: Icons.person_outline, title: "Informasi Pribadi", onTap: (){Get.to(() =>  PersonalInfoScreen());}),
                   const SizedBox(height: 5),
                   _menu(icon: Icons.credit_card, title: "Metode Pembayaran", onTap: (){Get.to(()=> const PaymentScreen());}),
                   const SizedBox(height: 20),
