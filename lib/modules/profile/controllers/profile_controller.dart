@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
@@ -12,7 +13,7 @@ class ProfileController extends GetxController {
   late TextEditingController phoneController;
 
   @override
-  void onInit(){
+  void onInit() {
     super.onInit();
     nameController = TextEditingController();
     emailController = TextEditingController();
@@ -28,7 +29,8 @@ class ProfileController extends GetxController {
         var userData = response.data['data'];
         nameController.text = userData['nama'] ?? '';
         emailController.text = userData['email'] ?? '';
-        phoneController.text = userData['telepon'] ?? '';
+        String telp = userData['telepon'] ?? '';
+        phoneController.text = telp.isEmpty ? '-' : telp;
       }
     } catch (e) {
       Get.snackbar("Error", "Gagal mengambil data profil");
@@ -38,22 +40,50 @@ class ProfileController extends GetxController {
   }
 
   Future<void> updateProfile() async {
-    isLoading.value = true;
     try {
-      final response = await _apiService.updateProfile({
+      isLoading.value = true;
+
+      String phoneInput = phoneController.text.trim();
+      dynamic phoneValue = (phoneInput == '-' || phoneInput.isEmpty) ? null : phoneInput;
+
+      var data = {
         'nama': nameController.text,
         'email': emailController.text,
-        'telepon': phoneController.text,
-      });
+        'telepon': phoneValue,
+      };
+
+      final response = await _apiService.updateProfile(data);
 
       if (response.statusCode == 200) {
-        Get.snackbar("Sukses", "Profil berhasil diperbarui", 
-            backgroundColor: Colors.green, colorText: Colors.white);
+        final authController = Get.find<AuthController>();
+        authController.user['nama'] = nameController.text;
+        authController.user['email'] = emailController.text;
+        authController.user['telepon'] = phoneValue;
+
+        authController.user.refresh();
+
+        if (phoneValue == null) phoneController.text = '-';
+
+        Get.snackbar(
+          "Sukses", 
+          "Profil berhasil diperbarui", 
+          backgroundColor: Colors.green, 
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+        );
       }
     } catch (e) {
       Get.snackbar("Gagal", "Terjadi kesalahan saat menyimpan data");
     } finally {
       isLoading.value = false;
     }
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    super.onClose();
   }
 }
