@@ -74,27 +74,44 @@ class HomeController extends GetxController {
     applyFilter();
   }
 
+  var selectedType = ''.obs;
+  void setType(String type){
+    selectedType.value = type;
+    applyFilter();
+  }
   void applyFilter() {
     String selectedCategory = categories[selectedCategoryIndex.value].trim();
     String query = searchQuery.value.toLowerCase().trim();
 
     var filteredData = allProperties.where((property) {
-      bool matchesCategory = selectedCategory == "Semua" || 
-                             property.type.trim() == selectedCategory;
+    bool matchesCategory = selectedCategory == "Semua" || 
+        property.type.trim() == selectedCategory;
 
-      bool matchesSearch = property.name.toLowerCase().contains(query) || 
-                           property.location.toLowerCase().contains(query);
+    bool matchesSearch =
+        property.name.toLowerCase().contains(query) ||
+        property.location.toLowerCase().contains(query);
 
-      bool matchesRating = property.rating >= minRating.value;
+    bool matchesRating = property.rating >= minRating.value;
 
-      bool matchesSpecificLoc = selectedLocation.value == "Semua" || 
-                                property.location.contains(selectedLocation.value);
+    bool matchesLocation =
+        selectedLocation.value == "Semua" ||
+        property.location.contains(selectedLocation.value);
 
-      double priceDouble = double.tryParse(property.price.replaceAll('.', '')) ?? 0;
-      bool matchesPrice = priceDouble <= maxPrice.value;
+    double priceDouble =
+        double.tryParse(property.price.replaceAll('.', '')) ?? 0;
+    bool matchesPrice = priceDouble <= maxPrice.value;
 
-      return matchesCategory && matchesSearch && matchesRating && matchesSpecificLoc && matchesPrice;
-    }).toList();
+    bool matchesType =
+        selectedType.value.isEmpty || property.type == selectedType.value;
+
+    return matchesCategory &&
+        matchesSearch &&
+        matchesRating &&
+        matchesLocation &&
+        matchesPrice &&
+        matchesType;
+
+  }).toList();
 
     if (selectedSort.value == "low") {
       filteredData.sort((a, b) {

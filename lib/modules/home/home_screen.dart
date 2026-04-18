@@ -667,6 +667,18 @@ class HomeScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 25),
+              const Text("Tipe Hunian", style: TextStyle(fontWeight: FontWeight.bold),),
+              const SizedBox(height: 10),
+              Obx(() => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _filterChip("Semua", controller.selectedType.value == "", () => controller.setType("")),
+                  _filterChip("Putra", controller.selectedType.value == "Putra", () => controller.setType("Putra")),
+                  _filterChip("Putri", controller.selectedType.value == "Putri", () => controller.setType("Putri")),
+                  _filterChip("Campur", controller.selectedType.value == "Campur", () => controller.setType("Campur")),
+                ],
+              )),
+              const SizedBox(height: 25),
               const Text(
                 "Urutan Harga",
                 style: TextStyle(fontWeight: FontWeight.bold),
