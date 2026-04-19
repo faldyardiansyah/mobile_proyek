@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/modules/home/detail_screen.dart';
 import 'package:appkonkos_mobile/modules/riwayat/riwayat_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -560,7 +561,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {Get.to(()=> const DetailScreen());},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColor.primary,
                             shape: RoundedRectangleBorder(
