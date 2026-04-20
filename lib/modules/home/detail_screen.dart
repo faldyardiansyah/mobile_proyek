@@ -9,40 +9,40 @@ class DetailScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          // KONTEN UTAMA (SCROLLABLE)
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Gambar Header
                 Container(
                   height: 350,
                   width: double.infinity,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: const NetworkImage(
-                        'https://id.pinterest.com/ideas/ide-kos-kosan/932348045885/',
-                      ),
+                      // Gunakan direct link ke gambar (contoh menggunakan placeholder)
+                      image: NetworkImage('https://picsum.photos/800/1200'),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
+                
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Badge & Rating
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(
+                            child: const Text(
                               "PUTRI ONLY",
                               style: TextStyle(
                                 color: Colors.blue,
@@ -50,45 +50,81 @@ class DetailScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Row(
+                          const Row(
                             children: [
                               Icon(Icons.star, color: Colors.orange, size: 20),
-                              Text(
-                                "4.8",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                "(128 ulasan)",
-                                style: TextStyle(color: Colors.grey),
-                              ),
+                              Text(" 4.8", style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(" (128 Ulasan)", style: TextStyle(color: Colors.grey)),
                             ],
                           ),
                         ],
                       ),
-                      SizedBox(height: 15),
-                      Text(
-                        "Kost Faldy",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      
+                      const SizedBox(height: 15),
+                      const Text("Kost Eksklusif Green Garden", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      const Text("Jakarta Selatan", style: TextStyle(color: Colors.grey)),
+
+                      const SizedBox(height: 25),
+                      const Text("Ketersediaan Kamar", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(height: 15),
+                      
+                      // Grid Kamar
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
                         ),
+                        itemCount: 8,
+                        itemBuilder: (context, index) {
+                          bool isTersedia = index != 1 && index != 3; 
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: isTersedia ? Colors.blue.withOpacity(0.05) : Colors.grey[100],
+                              border: Border.all(color: isTersedia ? Colors.blue : Colors.transparent),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("A${index + 1}", 
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold, 
+                                    color: isTersedia ? Colors.blue : Colors.grey
+                                  )
+                                ),
+                                Text(isTersedia ? "Tersedia" : "Terisi", 
+                                  style: TextStyle(
+                                    fontSize: 10, 
+                                    color: isTersedia ? Colors.blue : Colors.grey
+                                  )
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                      SizedBox(height: 25),
-                      Text("Ketersediaan kamar", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 15),
-                      GridView.builder(shrinkWrap: true, physics: NeverScrollableScrollPhysics(), gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 10, crossAxisSpacing: 10), itemBuilder: (context, index){
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(child: Text("Kamar ${index + 1}")),
-                        );
-                      }, itemCount: 6),
+                      
+                      const SizedBox(height: 100), // Spacer bawah
                     ],
                   ),
                 ),
               ],
+            ),
+          ),
+
+          // TOMBOL BACK (Melayang di atas Stack)
+          Positioned(
+            top: 50,
+            left: 20,
+            child: CircleAvatar(
+              backgroundColor: Colors.white.withOpacity(0.8),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Get.back(),
+              ),
             ),
           ),
         ],
