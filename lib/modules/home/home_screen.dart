@@ -396,7 +396,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildPropertyCard(dynamic data, int index) {
-    return Container(
+      return GestureDetector(
+    onTap: () {
+      Get.to(() => const DetailScreen(), arguments: data);
+    },
+    child: Container(
           margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -584,7 +588,8 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-        )
+        ),
+      )
         .animate(delay: (index * 100).ms)
         .fadeIn(duration: 500.ms)
         .slideY(begin: 0.3)

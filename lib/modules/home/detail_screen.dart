@@ -114,8 +114,7 @@ class DetailScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          // TOMBOL BACK (Melayang di atas Stack)
+          
           Positioned(
             top: 50,
             left: 20,
