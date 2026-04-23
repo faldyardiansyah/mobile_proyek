@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
             _buildHomeContent(),
             const WishlistScreen(),
             const SizedBox(),
-            const RiwayatScreen(),
+             RiwayatScreen(),
             ProfileScreen(),
           ],
         ),
