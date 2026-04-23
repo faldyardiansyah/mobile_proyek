@@ -1,5 +1,5 @@
 import 'package:appkonkos_mobile/modules/home/detail_screen.dart';
-import '../riwayat/riwayat_screen.dart';
+import 'package:appkonkos_mobile/modules/riwayat/riwayat_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +11,7 @@ import '../chat/chat_screen.dart';
 import '../wishlist/wishlist_screen.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
 
 class HomeScreen extends StatelessWidget {
   final HomeController controller = Get.put(HomeController());
