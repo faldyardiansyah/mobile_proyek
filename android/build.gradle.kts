@@ -5,6 +5,16 @@ allprojects {
     }
 }
 
+// 🔥 INI YANG PENTING (FIX UTAMA)
+subprojects {
+    configurations.all {
+        resolutionStrategy {
+            force("androidx.core:core:1.12.0")
+        }
+    }
+}
+
+// (punya kamu tetap)
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")
@@ -14,8 +24,6 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
