@@ -2,9 +2,9 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     tags:
-      - 'v*'
+      - "v*"
 permissions:
   contents: write
 
@@ -19,7 +19,7 @@ jobs:
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.7' 
+          flutter-version: "3.41.7"
 
       - name: 📦 Install Dependencies
         run: flutter pub get
@@ -44,3 +44,25 @@ jobs:
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📢 Notify Telegram (Success)
+        if: success()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="✅ Build APK berhasil untuk commit ${{ github.sha }}"
+
+      - name: ❌ Notify Telegram (Failed)
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="❌ Build gagal di workflow GitHub Actions"
+
+      - name: 📤 Send APK to Telegram
+        if: success()
+        run: |
+          curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument \
+          -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -F document=@build/app/outputs/flutter-apk/app-release.apk \
+          -F caption="📦 APK terbaru berhasil di-build 🚀"
