@@ -14,10 +14,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 
 class HomeScreen extends StatelessWidget {
-  final HomeController controller = Get.put(HomeController());
-  final authC = Get.find<AuthController>();
-
   HomeScreen({super.key});
+  HomeController get controller => Get.find<HomeController>();
+  AuthController get authC => Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
