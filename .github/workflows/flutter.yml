@@ -66,14 +66,16 @@ jobs:
           🚀 Siap digunakan!"
 
       - name: ❌ Notify Telegram (Failed)
-        if: failure()
+        if: failure() # Ini sudah benar, tapi pastikan step Build-nya tidak 'crash' total
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d parse_mode=Markdown \
           -d text="❌ *Build Gagal!*
           📦 Repo: ${{ github.repository }}
           🧾 Commit: ${{ github.sha }}
           👤 Author: ${{ github.actor }}
+          ⚠️ Silakan cek di tab Actions GitHub"
 
 ⚠️ Silakan cek di tab Actions GitHub"
 
