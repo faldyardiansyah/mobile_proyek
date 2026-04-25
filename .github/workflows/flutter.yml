@@ -20,6 +20,13 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.41.5"
+      
+      - name: Cache Flutter
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
 
       - name: 📦 Install Dependencies
         run: flutter pub get
@@ -50,14 +57,25 @@ jobs:
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="✅ Build APK berhasil untuk commit ${{ github.sha }}"
+          -d parse_mode=Markdown \
+          -d text="✅ *Build APK Berhasil!*
+          📦 Repo: ${{ github.repository }}
+          🔖 Version: ${{ github.ref_name }}
+          🧾 Commit: ${{ github.sha }}
+          👤 Author: ${{ github.actor }}
+          🚀 Siap digunakan!"
 
       - name: ❌ Notify Telegram (Failed)
         if: failure()
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="❌ Build gagal di workflow GitHub Actions"
+          -d text="❌ *Build Gagal!*
+          📦 Repo: ${{ github.repository }}
+          🧾 Commit: ${{ github.sha }}
+          👤 Author: ${{ github.actor }}
+
+⚠️ Silakan cek di tab Actions GitHub"
 
       - name: 📤 Send APK to Telegram
         if: success()
@@ -65,4 +83,8 @@ jobs:
           curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument \
           -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
           -F document=@build/app/outputs/flutter-apk/app-release.apk \
-          -F caption="📦 APK terbaru berhasil di-build 🚀"
+          -F caption="📦 *APK Berhasil Dibuild!*
+          🔖 Version: ${{ github.ref_name }}
+          👤 By: ${{ github.actor }}
+          🚀 Silakan download dan install" \
+          -F parse_mode=Markdown
