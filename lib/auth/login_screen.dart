@@ -126,6 +126,8 @@ class LoginScreen extends StatelessWidget {
       controller: controller,       
       obscureText: obscureText,
       keyboardType: keyboardType,
+      scribbleEnabled: false,
+      enableIMEPersonalizedLearning: false,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, color: const Color(0xFF1E88E5)),

@@ -107,6 +107,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               () => TextField(
                 controller: controller.registerPasswordController,
                 obscureText: controller.isRegisterPasswordHidden.value,
+                scribbleEnabled: false, 
+                enableIMEPersonalizedLearning: false,
                 decoration: InputDecoration(
                   hintText: "Minimal 6 karakter",
                   hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
@@ -259,6 +261,8 @@ Widget _buildInputField(String label, String hint, IconData icon, {required cont
       const SizedBox(height: 8),
       TextField(
         controller: controller,
+        scribbleEnabled: false,
+        enableIMEPersonalizedLearning: false,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Color(0xFF94A3B8)),
