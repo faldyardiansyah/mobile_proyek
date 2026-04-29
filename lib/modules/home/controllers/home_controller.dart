@@ -1,17 +1,16 @@
 import 'package:get/get.dart';
 import '../models/property_model.dart';
+import '../../../services/api_service.dart';
 
 class HomeController extends GetxController {
   final RxList<Property> allProperties = <Property>[].obs;
   final RxList<Property> properties = <Property>[].obs;
   final RxString searchQuery = ''.obs;
-  
-  final RxList<String> categories = <String>[
-    "Semua",
-    "Putra",
-    "Putri",
-    "Campur",
-  ].obs;
+
+  final ApiService apiService = Get.find<ApiService>();
+
+  final RxList<String> categories = <String>["Semua", "Kosan", "Kontrakan"].obs;
+
   final RxInt selectedCategoryIndex = 0.obs;
 
   final RxString selectedSort = ''.obs;
@@ -19,39 +18,34 @@ class HomeController extends GetxController {
   final RxString selectedLocation = 'Semua'.obs;
   final RxDouble maxPrice = 10000000.0.obs;
 
+  var selectedType = ''.obs;
+  var tabIndex = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
-    loadDummyData();
+    loadProperties();
   }
 
-  var tabIndex = 0.obs;
+  Future<void> loadProperties() async {
+    try {
+      final response = await apiService.get('/all-properties');
+
+      print("DATA API: ${response.data}");
+
+      final List data = response.data['data'] ?? [];
+
+      final result = data.map((e) => Property.fromJson(e)).toList();
+
+      allProperties.assignAll(result);
+      properties.assignAll(result);
+    } catch (e) {
+      print("ERROR LOAD PROPERTY: $e");
+    }
+  }
 
   void changeTab(int index) {
     tabIndex.value = index;
-  }
-
-  void loadDummyData() {
-    var data = [
-      Property(
-        name: "Kost Exclusive Melati",
-        type: "Putra",
-        location: "Kebayoran Baru, Jakarta Selatan",
-        price: "2.500.000",
-        rating: 4.8,
-        isYearly: false,
-      ),
-      Property(
-        name: "Kontrakan Pak Budi",
-        type: "Campur",
-        location: "Lobener, Indramayu",
-        price: "600.000",
-        rating: 4.5,
-        isYearly: false,
-      ),
-    ];
-    allProperties.assignAll(data);
-    properties.assignAll(data);
   }
 
   void setSort(String type) {
@@ -74,60 +68,9 @@ class HomeController extends GetxController {
     applyFilter();
   }
 
-  var selectedType = ''.obs;
-  void setType(String type){
+  void setType(String type) {
     selectedType.value = type;
     applyFilter();
-  }
-  void applyFilter() {
-    String selectedCategory = categories[selectedCategoryIndex.value].trim();
-    String query = searchQuery.value.toLowerCase().trim();
-
-    var filteredData = allProperties.where((property) {
-    bool matchesCategory = selectedCategory == "Semua" || 
-        property.type.trim() == selectedCategory;
-
-    bool matchesSearch =
-        property.name.toLowerCase().contains(query) ||
-        property.location.toLowerCase().contains(query);
-
-    bool matchesRating = property.rating >= minRating.value;
-
-    bool matchesLocation =
-        selectedLocation.value == "Semua" ||
-        property.location.contains(selectedLocation.value);
-
-    double priceDouble =
-        double.tryParse(property.price.replaceAll('.', '')) ?? 0;
-    bool matchesPrice = priceDouble <= maxPrice.value;
-
-    bool matchesType =
-        selectedType.value.isEmpty || property.type == selectedType.value;
-
-    return matchesCategory &&
-        matchesSearch &&
-        matchesRating &&
-        matchesLocation &&
-        matchesPrice &&
-        matchesType;
-
-  }).toList();
-
-    if (selectedSort.value == "low") {
-      filteredData.sort((a, b) {
-        double pA = double.tryParse(a.price.replaceAll('.', '')) ?? 0;
-        double pB = double.tryParse(b.price.replaceAll('.', '')) ?? 0;
-        return pA.compareTo(pB);
-      });
-    } else if (selectedSort.value == "high") {
-      filteredData.sort((a, b) {
-        double pA = double.tryParse(a.price.replaceAll('.', '')) ?? 0;
-        double pB = double.tryParse(b.price.replaceAll('.', '')) ?? 0;
-        return pB.compareTo(pA);
-      });
-    }
-
-    properties.assignAll(filteredData);
   }
 
   void changeCategory(int index) {
@@ -140,15 +83,71 @@ class HomeController extends GetxController {
     applyFilter();
   }
 
-  var wishlist = <Property>[].obs;
+  void applyFilter() {
+    String selectedCategory = categories[selectedCategoryIndex.value];
+    String query = searchQuery.value.toLowerCase().trim();
+
+    var filtered = allProperties.where((property) {
+      double price =
+          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ??
+          0;
+
+      bool matchesCategory =
+          selectedCategory == "Semua" || property.type == selectedCategory;
+
+      bool matchesSearch =
+          property.name.toLowerCase().contains(query) ||
+          property.location.toLowerCase().contains(query);
+
+      bool matchesRating = property.rating >= minRating.value;
+
+      bool matchesLocation =
+          selectedLocation.value == "Semua" ||
+          property.location.contains(selectedLocation.value);
+
+      bool matchesPrice = price <= maxPrice.value;
+
+      bool matchesType =
+          selectedType.value.isEmpty || property.type == selectedType.value;
+
+      return matchesCategory &&
+          matchesSearch &&
+          matchesRating &&
+          matchesLocation &&
+          matchesPrice &&
+          matchesType;
+    }).toList();
+
+    if (selectedSort.value == "low") {
+      filtered.sort((a, b) {
+        double pA =
+            double.tryParse(a.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        double pB =
+            double.tryParse(b.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        return pA.compareTo(pB);
+      });
+    } else if (selectedSort.value == "high") {
+      filtered.sort((a, b) {
+        double pA =
+            double.tryParse(a.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        double pB =
+            double.tryParse(b.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+        return pB.compareTo(pA);
+      });
+    }
+
+    properties.assignAll(filtered);
+  }
+
+  final wishlist = <Property>[].obs;
 
   bool isFavorite(Property item) {
-    return wishlist.contains(item);
+    return wishlist.any((e) => e.id == item.id);
   }
 
   void toggleFavorite(Property item) {
-    if (wishlist.contains(item)) {
-      wishlist.remove(item);
+    if (isFavorite(item)) {
+      wishlist.removeWhere((e) => e.id == item.id);
     } else {
       wishlist.add(item);
     }

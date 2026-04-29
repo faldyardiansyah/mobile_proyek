@@ -6,7 +6,7 @@ class ApiService extends GetxService {
   late dio_lib.Dio _dio;
   final _storage = GetStorage();
 
-  static const String baseUrl = 'http://103.174.237.198:8083/api';
+static const String baseUrl = 'http://192.168.1.9:8000/api';
 
   @override
   void onInit() {
@@ -65,5 +65,9 @@ class ApiService extends GetxService {
 
   Future<dio_lib.Response<dynamic>> updateProfile(Map<String, dynamic> data) async {
     return await put('/profile/update', data);
+  }
+
+  Future<dio_lib.Response<dynamic>> getProperties() async {
+    return await get('/all-properties');
   }
 }

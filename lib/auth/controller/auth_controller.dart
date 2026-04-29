@@ -75,7 +75,7 @@ class AuthController extends GetxController {
           Get.offAllNamed('/home');
           _showSnackbar(
             'Berhasil',
-            'Selamat datang ${user.value['nama']}',
+            'Selamat datang ${user.value['name']}',
             Colors.green,
           );
         } else {
@@ -102,64 +102,67 @@ class AuthController extends GetxController {
   }
 
   Future<void> register() async {
-    if (namaRegisterController.text.isEmpty ||
-        registerEmailController.text.isEmpty ||
-        !isAgreeTerms.value) {
-      _showSnackbar(
-        'Perhatian',
-        'Lengkapi data dan setujui syarat ketentuan',
-        Colors.orange,
-      );
-      return;
-    }
+  if (namaRegisterController.text.isEmpty ||
+      registerEmailController.text.isEmpty ||
+      registerPasswordController.text.isEmpty ||
+      !isAgreeTerms.value) {
+    _showSnackbar('Perhatian', 'Lengkapi data dan setujui syarat ketentuan', Colors.orange);
+    return;
+  }
 
-    try {
-      isLoading.value = true;
+  try {
+    isLoading.value = true;
 
-      final response = await _api.post('/auth/register', {
-        'nama': namaRegisterController.text.trim(),
-        'email': registerEmailController.text.trim(),
-        'password': registerPasswordController.text,
-        'password_confirmation': registerPasswordController.text,
-      });
+    final response = await _api.post('/auth/register', {
+      'name': namaRegisterController.text.trim(),
+      'email': registerEmailController.text.trim(),
+      'password': registerPasswordController.text,
+      'password_confirmation': registerPasswordController.text,
+    });
 
-      if (response != null && response.statusCode == 200) {
-        final data = response.data;
+    if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      final data = response.data;
 
-        if (data != null && data['token'] != null && data['user'] != null) {
-          _storage.write('token', data['token']);
-          _storage.write('user', data['user']);
+      if (data != null && data['token'] != null) {
+        
+        namaRegisterController.clear();
+        registerEmailController.clear();
+        registerPasswordController.clear();
+        isAgreeTerms.value = false;
 
-          Get.offAllNamed('/login');
-          _showSnackbar(
-            'Berhasil',
-            'Registrasi berhasil, silakan login',
-            Colors.green,
-          );
-        } else {
-          _showSnackbar('Gagal', 'Data server tidak valid', Colors.red);
-        }
+        Get.offAllNamed('/login');
+        
+        _showSnackbar(
+          'Berhasil',
+          'Registrasi berhasil, silakan login',
+          Colors.green,
+        );
       } else {
-        _showSnackbar('Gagal', 'Registrasi gagal', Colors.red);
+        print("DEBUG: Response data tidak lengkap: $data");
+        _showSnackbar('Gagal', 'Respon server tidak sesuai format', Colors.red);
       }
-    } on DioException catch (e) {
-      _showSnackbar(
-        'Gagal',
-        e.response?.data?['message'] ?? 'Registrasi gagal',
-        Colors.red,
-      );
-    } catch (e) {
-      _showSnackbar('Error', 'Terjadi error: $e', Colors.red);
-    } finally {
-      isLoading.value = false;
+    }
+  } on DioException catch (e) {
+  String errorMessage = 'Terjadi kesalahan';
+
+  if (e.response != null && e.response?.data != null) {
+    var errors = e.response?.data['errors'];
+    if (errors != null && errors is Map) {
+      errorMessage = errors.values.first[0].toString();
+    } else {
+      errorMessage = e.response?.data['message'] ?? 'Registrasi gagal';
     }
   }
+  _showSnackbar('Gagal', errorMessage, Colors.red);
+} finally {
+  isLoading.value = false;
+}
+}
 
   Future<void> logout() async {
     String namaUser = user.value['nama'] ?? 'Pengguna';
 
     try {
-      // Timeout agar tidak stuck jika server tidak merespon
       await _api.post('/auth/logout', {}).timeout(const Duration(seconds: 2));
     } catch (_) {
     } finally {

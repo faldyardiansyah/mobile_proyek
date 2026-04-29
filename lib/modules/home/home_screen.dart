@@ -12,7 +12,6 @@ import '../wishlist/wishlist_screen.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
   HomeController get controller {
@@ -21,7 +20,7 @@ class HomeScreen extends StatelessWidget {
     }
     return Get.find<HomeController>();
   }
-  
+
   AuthController get authC => Get.find<AuthController>();
 
   @override
@@ -36,7 +35,7 @@ class HomeScreen extends StatelessWidget {
             _buildHomeContent(),
             const WishlistScreen(),
             const SizedBox(),
-             RiwayatScreen(),
+            RiwayatScreen(),
             ProfileScreen(),
           ],
         ),
@@ -117,153 +116,155 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHomeContent() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeaderFancy(),
-            _buildSearchWithFilter(),
-            _buildCategoryScroll(),
-            _buildSectionTitle("Properti Terdekat"),
+    return RefreshIndicator(
+      onRefresh: () => controller.loadProperties(),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeaderFancy(),
+              _buildSearchWithFilter(),
+              _buildCategoryScroll(),
+              _buildSectionTitle("Properti Terdekat"),
 
-            Obx(() {
-              if (controller.properties.isEmpty &&
-                  controller.searchQuery.value.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(60),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Lottie.asset(
-                          'assets/lottie/404.json',
-                          width: 200,
-                          height: 200,
-                          repeat: true,
-                        ),
-                        SizedBox(height: 20),
-                        const Text(
-                          "Data tidak ditemukan",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
+              Obx(() {
+                if (controller.properties.isEmpty &&
+                    controller.searchQuery.value.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(60),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Lottie.asset(
+                            'assets/lottie/404.json',
+                            width: 200,
+                            height: 200,
+                            repeat: true,
+                          ),
+                          SizedBox(height: 20),
+                          const Text(
+                            "Data tidak ditemukan",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }
+                  );
+                }
 
-              if (controller.properties.isEmpty &&
-                  controller.searchQuery.value.isNotEmpty) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(50),
-                    child: Text(
-                      "Tidak ada properti yang cocok dengan pencarianmu.",
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                      textAlign: TextAlign.center,
+                if (controller.properties.isEmpty &&
+                    controller.searchQuery.value.isNotEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(50),
+                      child: Text(
+                        "Tidak ada properti yang cocok dengan pencarianmu.",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
+                  );
+                }
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.properties.length,
+                  itemBuilder: (context, index) =>
+                      _buildPropertyCard(controller.properties[index], index),
                 );
-              }
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.properties.length,
-                itemBuilder: (context, index) =>
-                    _buildPropertyCard(controller.properties[index], index),
-              );
-            }),
-            const SizedBox(height: 100),
-          ],
+              }),
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildNavItem(
-  String imagePath,
-  String label,
-  int index, {
-  bool hasNotification = false,
-}) {
-  bool isSelected = controller.tabIndex.value == index;
+    String imagePath,
+    String label,
+    int index, {
+    bool hasNotification = false,
+  }) {
+    bool isSelected = controller.tabIndex.value == index;
 
-  return InkWell(
-    onTap: () {
-      controller.tabIndex.value = index;
-      HapticFeedback.lightImpact();
-    },
-    borderRadius: BorderRadius.circular(20),
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutBack,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? AppColor.primary.withOpacity(0.12)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: isSelected ? -6 : 0),
-            duration: const Duration(milliseconds: 300),
-            builder: (context, value, child) {
-              return Transform.translate(
-                offset: Offset(0, value),
-                child: child,
-              );
-            },
-            child: Stack(
-              children: [
-                Image.asset(
-                  imagePath,
-                  width: isSelected ? 26 : 24,
-                  height: isSelected ? 26 : 24,
-                  color: isSelected
-                      ? AppColor.primary
-                      : const Color(0xFF94A3B8),
-                ),
+    return InkWell(
+      onTap: () {
+        controller.tabIndex.value = index;
+        HapticFeedback.lightImpact();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutBack,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColor.primary.withOpacity(0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: isSelected ? -6 : 0),
+              duration: const Duration(milliseconds: 300),
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, value),
+                  child: child,
+                );
+              },
+              child: Stack(
+                children: [
+                  Image.asset(
+                    imagePath,
+                    width: isSelected ? 26 : 24,
+                    height: isSelected ? 26 : 24,
+                    color: isSelected
+                        ? AppColor.primary
+                        : const Color(0xFF94A3B8),
+                  ),
 
-                if (hasNotification)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      height: 8,
-                      width: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
+                  if (hasNotification)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        height: 8,
+                        width: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          const SizedBox(height: 4),
+            const SizedBox(height: 4),
 
-          AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 300),
-            style: TextStyle(
-              fontSize: isSelected ? 11 : 10,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected
-                  ? AppColor.primary
-                  : const Color(0xFF94A3B8),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
+              style: TextStyle(
+                fontSize: isSelected ? 11 : 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? AppColor.primary : const Color(0xFF94A3B8),
+              ),
+              child: Text(label),
             ),
-            child: Text(label),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  ).animate().fadeIn(delay: (index * 100).ms);
-}
+    ).animate().fadeIn(delay: (index * 100).ms);
+  }
 
   Widget _buildHeaderFancy() {
     return Padding(
@@ -290,7 +291,7 @@ class HomeScreen extends StatelessWidget {
                 }
 
                 return Text(
-                  "Halo, Selamat datang, ${authC.user['nama']}",
+                  "Halo, Selamat datang, ${authC.user['name']}",
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 14,
@@ -401,201 +402,222 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // buat rentang harga
+  String _formatHarga(String angka) {
+    final number = int.tryParse(angka) ?? 0;
+    return number.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
+  }
+
   Widget _buildPropertyCard(dynamic data, int index) {
-      return GestureDetector(
-    onTap: () {
-      Get.to(() => const DetailScreen(), arguments: data);
-    },
-    child: Container(
-          margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                    child: Image.network(
-                      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=400",
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Row(
-                      children: [
-                        _badge("TERSEDIA", AppColor.primary, Colors.white),
-                        const SizedBox(width: 8),
-                        _badge(data.type, Colors.white, AppColor.primary),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Obx(() {
-                      bool isFav = controller.isFavorite(data);
-
-                      return GestureDetector(
-                        onTap: () {
-                          controller.toggleFavorite(data);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 6,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            isFav ? Icons.favorite : Icons.favorite_border,
-                            color: isFav ? AppColor.primary : Colors.grey,
-                            size: 20,
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+          onTap: () {
+            Get.to(() => const DetailScreen(), arguments: data);
+          },
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Stack(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            data.name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF4EAD7),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Color(0xFFFFC107),
-                                size: 14,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${data.rating}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                  color: Color(0xFFB45309),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      child: Image.network(
+                        data.foto,
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on_outlined,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
-                        Text(
-                          " ${data.location}",
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: Row(
+                        children: [
+                          _badge("TERSEDIA", AppColor.primary, Colors.white),
+                          const SizedBox(width: 8),
+                          _badge(
+                            data.type ?? "-",
+                            Colors.white,
+                            AppColor.primary,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            text: "Rp ${data.price}",
-                            style: const TextStyle(
-                              color: AppColor.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                            children: [
-                              const TextSpan(
-                                text: " /bulan",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {Get.to(()=> const DetailScreen());},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColor.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            "Pesan",
-                            style: TextStyle(
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Obx(() {
+                        bool isFav = controller.isFavorite(data);
+
+                        return GestureDetector(
+                          onTap: () {
+                            controller.toggleFavorite(data);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
                               color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isFav ? Icons.favorite : Icons.favorite_border,
+                              color: isFav ? AppColor.primary : Colors.grey,
+                              size: 20,
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      }),
                     ),
                   ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              data.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF4EAD7),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: Color(0xFFFFC107),
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${data.rating}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: Color(0xFFB45309),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
+                          Text(
+                            " ${data.location}",
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                color: AppColor.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text:
+                                      data.price == data.priceMax ||
+                                          data.priceMax == '0'
+                                      ? "Rp ${_formatHarga(data.price)}"
+                                      : "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
+                                ),
+                                TextSpan(
+                                  text: "/${data.period}",
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Get.to(() => const DetailScreen());
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColor.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              "Pesan",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      )
+        )
         .animate(delay: (index * 100).ms)
         .fadeIn(duration: 500.ms)
         .slideY(begin: 0.3)
@@ -679,17 +701,33 @@ class HomeScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 25),
-              const Text("Tipe Hunian", style: TextStyle(fontWeight: FontWeight.bold),),
+              const Text(
+                "Tipe Hunian",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 10),
-              Obx(() => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _filterChip("Semua", controller.selectedType.value == "", () => controller.setType("")),
-                  _filterChip("Putra", controller.selectedType.value == "Putra", () => controller.setType("Putra")),
-                  _filterChip("Putri", controller.selectedType.value == "Putri", () => controller.setType("Putri")),
-                  _filterChip("Campur", controller.selectedType.value == "Campur", () => controller.setType("Campur")),
-                ],
-              )),
+              Obx(
+                () => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _filterChip(
+                      "Semua",
+                      controller.selectedType.value == "",
+                      () => controller.setType(""),
+                    ),
+                    _filterChip(
+                      "Kosan",
+                      controller.selectedType.value == "Kosan",
+                      () => controller.setType("Kosan"),
+                    ),
+                    _filterChip(
+                      "Kontrakan",
+                      controller.selectedType.value == "Kontrakan",
+                      () => controller.setType("Kontrakan"),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 25),
               const Text(
                 "Urutan Harga",

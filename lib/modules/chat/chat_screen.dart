@@ -4,6 +4,7 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../home/controllers/home_controller.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -25,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
 
-  final String apiKey = 'AIzaSyAeZv3Aolub2Uetg5bU1lmb-ha3zMUsudw';
+  final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
   final String modelName = 'gemini-2.5-flash';
 
   @override
@@ -40,45 +41,40 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future<String> askGemini(String userMessage) async {
-    final kosList = homeController.properties
-        .map((p) => '${p.name} (${p.type}, ${p.location}, Rp${p.price})')
-        .join(', ');
+Future<String> askGemini(String userMessage) async {
+  final kosList = homeController.allProperties
+      .map((p) => '${p.name} (Tipe: ${p.type}, Lokasi: ${p.location}, Harga: Rp${p.price})')
+      .join(', ');
 
-    final uri = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
-    );
+  final body = {
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": """
+              Kamu adalah asisten ramah Appkonkos.
+              Data properti tersedia: $kosList
 
-    final body = {
-      "contents": [
-        {
-          "parts": [
-            {
-              "text":
-                  """
-              kamu adalah Kamu adalah asisten ramah Appkonkos.
-              Aturan menjawab:
-              - Jangan gunakan tanda ** atau format markdown.
-              - Jawab dengan teks biasa yang rapi.
-              - Fokus membantu mencari kos dan kontrakan.
+              Pertanyaan user ini: $userMessage
 
-              Data kos yang tersedia:
-              $kosList
-              Pertanyaan user:
-              $userMessage
-              """,
-            },
-          ],
-        },
-      ],
-    };
+              Tugasmu:
+              1. Bantu user mencari tempat tinggal berdasarkan data di atas.
+              2. Jika ada yang cocok, sebutkan namanya dan tambahkan kode [MATCH: Nama Properti] di akhir kalimat.
+              3. Contoh: "Ada nih, Kontrakan Pak Budi di Lohbener sangat terjangkau. [MATCH: Kontrakan Pak Budi]"
+              4. Jawab dengan teks biasa, jangan gunakan markdown (**).
+              """
+          },
+        ],
+      },
+    ],
+  };
 
     http.Response response;
 
     int retry = 0;
     while (true) {
       response = await http.post(
-        uri,
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
@@ -93,9 +89,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     if (response.statusCode != 200) {
-      if (response.statusCode != 200) {
         throw Exception('Server sibuk, coba lagi ya 😅');
-      }
     }
 
     final data = jsonDecode(response.body);
@@ -120,26 +114,129 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       });
     } catch (e) {
-      setState(() => _isTyping = false);
-      Get.snackbar(
-        "Error",
-        e.toString(),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    }
+  setState(() => _isTyping = false);
+  Get.snackbar(
+    "Waduh!",
+    "Asisten sedang istirahat. Coba lagi dalam 1 menit ya!",
+    backgroundColor: Colors.orange,
+    colorText: Colors.white,
+  );
+  print("Detail Error: $e"); 
+}
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Chat Bot AI")),
-      body: DashChat(
-        currentUser: _currentUser,
-        onSend: _handleSendMessage,
-        messages: _messages,
-        typingUsers: _isTyping ? [_botUser] : [],
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: const Text("Asisten Appkonkos AI")),
+    body: DashChat(
+      currentUser: _currentUser,
+      onSend: _handleSendMessage,
+      messages: _messages,
+      typingUsers: _isTyping ? [_botUser] : [],
+      messageOptions: MessageOptions(
+        currentUserContainerColor: Colors.blueAccent,
+        currentUserTextColor: Colors.white,
+        containerColor: Colors.grey[200]!,
+        textColor: Colors.black87,
+        messageTextBuilder: (message, previousMessage, nextMessage) {
+          return _buildMessageCard(message);
+        },
       ),
-    );
+    ),
+  );
+}
+
+Widget _buildMessageCard(ChatMessage message) {
+  if (message.user.id == _botUser.id && message.text.contains('[MATCH:')) {
+    try {
+      final RegExp regExp = RegExp(r'\[MATCH:\s*(.*?)\]');
+      final match = regExp.firstMatch(message.text);
+      final String? foundName = match?.group(1)?.trim();
+      
+      final String cleanText = message.text.split('[MATCH:')[0].trim();
+
+      final property = homeController.allProperties.firstWhere(
+        (p) => p.name.toLowerCase().contains(foundName?.toLowerCase() ?? ""),
+        orElse: () => homeController.allProperties.first,
+      );
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(cleanText),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => Get.toNamed('/detail', arguments: property),
+            child: Container(
+              width: 260,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+                ],
+                border: Border.all(color: Colors.grey.shade100),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Gambar & Tipe
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                        child: Container(
+                          height: 130,
+                          width: double.infinity,
+                          color: Colors.blue.shade50,
+                          child: const Icon(Icons.home_work_rounded, size: 50, color: Colors.blue),
+                        ),
+                      ),
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(10)),
+                          child: Text(property.type, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Info & Rating
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(property.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, size: 16, color: Colors.orange),
+                            const SizedBox(width: 4),
+                            Text(property.rating.toString(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                            const SizedBox(width: 10),
+                            const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                            Expanded(child: Text(property.location, style: const TextStyle(fontSize: 11, color: Colors.grey), overflow: TextOverflow.ellipsis)),
+                          ],
+                        ),
+                        const Divider(height: 24),
+                        Text("Rp ${property.price}", style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 15)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    } catch (e) {
+      return Text(message.text); 
+    }
   }
+  return Text(message.text);
+}
 }

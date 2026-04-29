@@ -7,13 +7,14 @@ import 'package:appkonkos_mobile/modules/home/home_screen.dart';
 import 'auth/controller/auth_controller.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   Get.put(ApiService());
   Get.put(AuthController());
-
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
