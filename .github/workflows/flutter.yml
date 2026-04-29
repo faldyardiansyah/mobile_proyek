@@ -30,7 +30,14 @@ jobs:
 
       - name: 📦 Install Dependencies
         run: flutter pub get
+        
+      - name: 🔐 Create .env
+        run: |
+          echo "API_KEY=${{ secrets.API_KEY }}" > .env
+          echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
 
+      - name: 🧪 Run Tests
+        run: flutter test
       - name: 🧪 Run Tests
         run: flutter test
 
