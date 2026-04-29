@@ -11,10 +11,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await GetStorage.init();
   Get.put(ApiService());
   Get.put(AuthController());
-  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
