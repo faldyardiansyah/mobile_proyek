@@ -6,7 +6,7 @@ class ApiService extends GetxService {
   late dio_lib.Dio _dio;
   final _storage = GetStorage();
 
-static const String baseUrl = 'http://192.168.1.9:8000/api';
+static const String baseUrl = 'http://10.0.164.114:8000/api';
 
   @override
   void onInit() {
