@@ -450,12 +450,21 @@ class HomeScreen extends StatelessWidget {
                       child: Row(
                         children: [
                           _badge("TERSEDIA", AppColor.primary, Colors.white),
+                          if ((data.type ?? "").toLowerCase() == "kosan" &&
+                              (data.gender ?? "").isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            _badge(
+                              data.gender ?? "-",
+                              Colors.orange.shade100,
+                              Colors.orange.shade800,
+                            ),
                           const SizedBox(width: 8),
                           _badge(
                             data.type ?? "-",
                             Colors.white,
                             AppColor.primary,
                           ),
+                          ],
                         ],
                       ),
                     ),
@@ -592,7 +601,10 @@ class HomeScreen extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              Get.to(() => const DetailScreen());
+                              Get.to(
+                                () => const DetailScreen(),
+                                arguments: data,
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColor.primary,
@@ -626,7 +638,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _badge(String text, Color bg, Color textColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(8),
