@@ -9,7 +9,7 @@ class HomeController extends GetxController {
 
   final ApiService apiService = Get.find<ApiService>();
 
-  final RxList<String> categories = <String>["Semua", "Kosan", "Kontrakan"].obs;
+  final RxList<String> categories = <String>["Semua", "Putra", "Putri", "Campur", "Kontrakan"].obs;
 
   final RxInt selectedCategoryIndex = 0.obs;
 
@@ -89,11 +89,14 @@ class HomeController extends GetxController {
 
     var filtered = allProperties.where((property) {
       double price =
-          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ??
-          0;
+          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
 
       bool matchesCategory =
-          selectedCategory == "Semua" || property.type == selectedCategory;
+    selectedCategory == "Semua" ||
+    property.type.toLowerCase().trim() ==
+        selectedCategory.toLowerCase().trim() ||
+    property.gender.toLowerCase().trim() ==
+        selectedCategory.toLowerCase().trim();
 
       bool matchesSearch =
           property.name.toLowerCase().contains(query) ||
