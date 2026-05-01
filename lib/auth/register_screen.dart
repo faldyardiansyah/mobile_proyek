@@ -110,7 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 scribbleEnabled: false, 
                 enableIMEPersonalizedLearning: false,
                 decoration: InputDecoration(
-                  hintText: "Minimal 6 karakter",
+                  hintText: "Minimal 8 karakter",
                   hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                   prefixIcon: const Icon(
                     Icons.lock_outline,

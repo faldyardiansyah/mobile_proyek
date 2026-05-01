@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart' as dio_lib;
 import 'package:get/get.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ApiService extends GetxService {
   late dio_lib.Dio _dio;
   final _storage = GetStorage();
 
-static const String baseUrl = 'http://10.0.164.114:8000/api';
+ static String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://192.168.1.9:8000/api';
 
   @override
   void onInit() {

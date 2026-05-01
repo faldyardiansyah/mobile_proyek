@@ -2,7 +2,7 @@ class Property {
   final int id;
   final String name;
   final String price;
-  final String priceMax; 
+  final String priceMax;
   final String location;
   final double rating;
   final String type;
@@ -10,6 +10,7 @@ class Property {
   final String period;
   final double? lat;
   final double? lng;
+  final String gender; 
 
   Property({
     required this.id,
@@ -23,6 +24,7 @@ class Property {
     required this.period,
     this.lat,
     this.lng,
+    this.gender = '', 
   });
 
   factory Property.fromJson(Map<String, dynamic> json) {
@@ -30,7 +32,7 @@ class Property {
       id: json['id'] ?? 0,
       name: json['nama'] ?? '',
       price: json['harga'].toString(),
-      priceMax: json['harga_max']?.toString() ?? '0', 
+      priceMax: json['harga_max']?.toString() ?? '0',
       location: json['alamat'] ?? '',
       rating: (json['rating'] ?? 0).toDouble(),
       type: json['tipe'] ?? '',
@@ -38,6 +40,7 @@ class Property {
       period: json['period'] ?? '',
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lng: json['lng'] != null ? double.tryParse(json['lng'].toString()) : null,
+      gender: json['gender'] ?? '',
     );
   }
 }

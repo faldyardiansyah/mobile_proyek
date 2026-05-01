@@ -6,7 +6,7 @@ import 'package:appkonkos_mobile/services/api_service.dart';
 
 class AuthController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
-  final _storage = GetStorage();
+  final box = GetStorage();
 
   final isLoading = false.obs;
   final isHidden = true.obs;
@@ -24,7 +24,7 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final storedUser = _storage.read('user');
+    final storedUser = box.read('user');
     if (storedUser != null) {
       user.value = Map<String, dynamic>.from(storedUser);
     }
@@ -68,8 +68,8 @@ class AuthController extends GetxController {
         final data = response.data;
 
         if (data != null && data['token'] != null && data['user'] != null) {
-          _storage.write('token', data['token']);
-          _storage.write('user', data['user']);
+            box.write('token', data['token']);
+            box.write('user', data['user']);
           user.value = Map<String, dynamic>.from(data['user']);
 
           Get.offAllNamed('/home');
@@ -160,13 +160,14 @@ class AuthController extends GetxController {
 }
 
   Future<void> logout() async {
-    String namaUser = user.value['nama'] ?? 'Pengguna';
+    String namaUser = user.value['name'] ?? 'Pengguna';
 
     try {
       await _api.post('/auth/logout', {}).timeout(const Duration(seconds: 2));
     } catch (_) {
     } finally {
-      _storage.erase();
+     box.remove('token');
+      box.remove('user');
       user.value = {};
       Get.offAllNamed('/login');
       _showSnackbar(
@@ -177,7 +178,7 @@ class AuthController extends GetxController {
     }
   }
 
-  bool get isLoggedIn => _storage.read('token') != null;
+  bool get isLoggedIn => box.read('token') != null;
 
   void _showSnackbar(String title, String message, MaterialColor color) {
     Get.snackbar(

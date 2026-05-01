@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:appkonkos_mobile/splash/splash_screen_1.dart';
+import 'package:get_storage/get_storage.dart';
 
+final box = GetStorage();
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -18,9 +20,19 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _startTransition() async {
-    await Future.delayed(const Duration(seconds: 3));
+  await Future.delayed(const Duration(seconds: 3));
+
+  final token = box.read('token');
+  final isOnboardingDone = box.read('onboarding_done');
+
+  if (token != null) {
+    Get.offAllNamed('/home');
+  } else if (isOnboardingDone == true) {
+    Get.offAllNamed('/login');
+  } else {
     Get.off(() => const SplashScreen1());
   }
+}
 
   @override
   Widget build(BuildContext context) {

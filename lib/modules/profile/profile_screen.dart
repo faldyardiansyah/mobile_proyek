@@ -57,13 +57,10 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Obx(() {
-            final nama = authC.user['nama'] ?? 'User';
+            final nama = authC.user['name'] ?? 'User';
             return Text(
               nama,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             );
           }),
           const SizedBox(height: 5),
@@ -98,21 +95,64 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  _menu(icon: Icons.person_outline, title: "Informasi Pribadi", onTap: (){Get.to(() =>  PersonalInfoScreen());}),
+                  _menu(
+                    icon: Icons.person_outline,
+                    title: "Informasi Pribadi",
+                    onTap: () {
+                      Get.to(() => PersonalInfoScreen());
+                    },
+                  ),
                   const SizedBox(height: 5),
-                  _menu(icon: Icons.credit_card, title: "Metode Pembayaran", onTap: (){Get.to(()=> const PaymentScreen());}),
+                  _menu(
+                    icon: Icons.credit_card,
+                    title: "Metode Pembayaran",
+                    onTap: () {
+                      Get.to(() => const PaymentScreen());
+                    },
+                  ),
                   const SizedBox(height: 20),
-                  const Text("Dukungan", style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),),
+                  const Text(
+                    "Dukungan",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  _menu(icon: Icons.help_outline, title: "Pusat Bantuan", onTap: (){Get.to(() => const HelpScreen());}),
+                  _menu(
+                    icon: Icons.help_outline,
+                    title: "Pusat Bantuan",
+                    onTap: () {
+                      Get.to(() => const HelpScreen());
+                    },
+                  ),
                   const SizedBox(height: 20),
-                  ElevatedButton.icon(onPressed: (){authC.logout();}, label: const Text("Keluar Sesi"), icon: const Icon(Icons.logout, size: 18,), style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColor.primary,
-                    elevation: 0,
-                    side: const BorderSide(color: AppColor.primary),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Get.defaultDialog(
+                        title: "Logout",
+                        middleText: "Yakin mau keluar?",
+                        textConfirm: "Ya",
+                        textCancel: "Batal",
+                        onConfirm: () {
+                          Get.back();
+                          authC.logout();
+                        },
+                      );
+                    },
+                    label: const Text("Keluar Sesi"),
+                    icon: const Icon(Icons.logout, size: 18),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColor.primary,
+                      elevation: 0,
+                      side: const BorderSide(color: AppColor.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -125,7 +165,7 @@ class ProfileScreen extends StatelessWidget {
   Container _menu({
     required IconData icon,
     required String title,
-    required VoidCallback onTap
+    required VoidCallback onTap,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -133,11 +173,11 @@ class ProfileScreen extends StatelessWidget {
         color: AppColor.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: ListTile(leading: Icon(icon, color: AppColor.primary), title: Text(title),
-      trailing: const Icon(
-        Icons.arrow_forward_ios, size: 16,
-      ),
-        onTap: onTap
+      child: ListTile(
+        leading: Icon(icon, color: AppColor.primary),
+        title: Text(title),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
       ),
     );
   }

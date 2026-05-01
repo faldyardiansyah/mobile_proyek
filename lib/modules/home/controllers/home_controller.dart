@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../models/property_model.dart';
 import '../../../services/api_service.dart';
+import 'package:get_storage/get_storage.dart';
 
 class HomeController extends GetxController {
   final RxList<Property> allProperties = <Property>[].obs;
@@ -9,7 +10,13 @@ class HomeController extends GetxController {
 
   final ApiService apiService = Get.find<ApiService>();
 
-  final RxList<String> categories = <String>["Semua", "Putra", "Putri", "Campur", "Kontrakan"].obs;
+  final RxList<String> categories = <String>[
+    "Semua",
+    "Putra",
+    "Putri",
+    "Campur",
+    "Kontrakan",
+  ].obs;
 
   final RxInt selectedCategoryIndex = 0.obs;
 
@@ -18,6 +25,9 @@ class HomeController extends GetxController {
   final RxString selectedLocation = 'Semua'.obs;
   final RxDouble maxPrice = 10000000.0.obs;
 
+  final box = GetStorage();
+  var wishlist = <Property>[].obs;
+
   var selectedType = ''.obs;
   var tabIndex = 0.obs;
 
@@ -25,6 +35,17 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     loadProperties();
+    final user = box.read('user');
+    if (user != null) {
+      final userId = user['id'];
+
+      final data = box.read('wishlist_$userId');
+      if (data != null) {
+        wishlist.value = (data as List)
+            .map((e) => Property.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    }
   }
 
   Future<void> loadProperties() async {
@@ -89,14 +110,15 @@ class HomeController extends GetxController {
 
     var filtered = allProperties.where((property) {
       double price =
-          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ??
+          0;
 
       bool matchesCategory =
-    selectedCategory == "Semua" ||
-    property.type.toLowerCase().trim() ==
-        selectedCategory.toLowerCase().trim() ||
-    property.gender.toLowerCase().trim() ==
-        selectedCategory.toLowerCase().trim();
+          selectedCategory == "Semua" ||
+          property.type.toLowerCase().trim() ==
+              selectedCategory.toLowerCase().trim() ||
+          property.gender.toLowerCase().trim() ==
+              selectedCategory.toLowerCase().trim();
 
       bool matchesSearch =
           property.name.toLowerCase().contains(query) ||
@@ -142,17 +164,40 @@ class HomeController extends GetxController {
     properties.assignAll(filtered);
   }
 
-  final wishlist = <Property>[].obs;
-
   bool isFavorite(Property item) {
     return wishlist.any((e) => e.id == item.id);
   }
 
   void toggleFavorite(Property item) {
+    final user = box.read('user');
+    final userId = user['id'];
+
     if (isFavorite(item)) {
       wishlist.removeWhere((e) => e.id == item.id);
     } else {
       wishlist.add(item);
     }
+
+    box.write(
+      'wishlist_$userId',
+      wishlist
+          .map(
+            (e) => {
+              'id': e.id,
+              'nama': e.name,
+              'harga': e.price,
+              'harga_max': e.priceMax,
+              'alamat': e.location,
+              'rating': e.rating,
+              'tipe': e.type,
+              'foto': e.foto,
+              'period': e.period,
+              'lat': e.lat,
+              'lng': e.lng,
+              'gender': e.gender,
+            },
+          )
+          .toList(),
+    );
   }
 }

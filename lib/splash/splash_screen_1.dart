@@ -4,6 +4,9 @@ import 'splash_screen_2.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../utils/app_color.dart';
+import 'package:get_storage/get_storage.dart';
+
+final box = GetStorage();
 
 class SplashScreen1 extends StatelessWidget {
   const SplashScreen1({super.key});
@@ -47,7 +50,8 @@ class SplashScreen1 extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => const SplashScreen3());
+                      box.write('onboarding_done', true);
+                      Get.offAll(() => const SplashScreen3());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
