@@ -84,7 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               "Buat akun baru untuk mulai memesan kontrakan & kosan impian Anda",
               style: TextStyle(fontSize: 16, color: AppColor.grey),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 30),
             _buildInputField(
               "NAMA LENGKAP",
               "Masukkan nama lengkap Anda",
@@ -93,6 +93,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 10),
             _buildInputField("EMAIL", "Masukkan email Anda", Icons.email, controller: controller.registerEmailController),
+            const SizedBox(height: 10),
+            _buildInputField("NO. TELEPON", "Masukkan no. telepon Anda", Icons.phone, controller: controller.registerphoneController, keyboardType: TextInputType.phone),
             const SizedBox(height: 20),
             const Text(
               "KATA SANDI",
@@ -246,7 +248,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-Widget _buildInputField(String label, String hint, IconData icon, {required controller}) {
+Widget _buildInputField(String label, String hint, IconData icon, {required controller, TextInputType keyboardType = TextInputType.text}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -263,6 +265,7 @@ Widget _buildInputField(String label, String hint, IconData icon, {required cont
         controller: controller,
         scribbleEnabled: false,
         enableIMEPersonalizedLearning: false,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Color(0xFF94A3B8)),

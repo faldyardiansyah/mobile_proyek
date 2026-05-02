@@ -5,6 +5,7 @@ import './personal_info_screen.dart';
 import './payment_screen.dart';
 import './help_screen.dart';
 import '../../auth/controller/auth_controller.dart';
+import '../profile/controllers/profile_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
@@ -31,30 +32,57 @@ class ProfileScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 20),
 
-          Stack(
-            children: [
-              const CircleAvatar(
-                radius: 40,
-                backgroundColor: Color(0xFFD9C3A3),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColor.primary,
+          Obx(() {
+            final photoUrl = authC.user['profile_photo_url'];
+
+            return GestureDetector(
+              onTap: () => Get.to(
+                () => PersonalInfoScreen(),
+              ), // ← tap foto ke personal info
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 45,
+                    backgroundColor: const Color(0xFFD9C3A3),
+                    backgroundImage:
+                        (photoUrl != null && photoUrl.toString().isNotEmpty)
+                        ? NetworkImage(photoUrl.toString())
+                        : null,
+                    child: (photoUrl == null || photoUrl.toString().isEmpty)
+                        ? Text(
+                            (authC.user['name'] ?? 'U').toString().isNotEmpty
+                                ? (authC.user['name'] ?? 'U')
+                                      .toString()[0]
+                                      .toUpperCase()
+                                : 'U',
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          )
+                        : null,
                   ),
-                  child: const Icon(
-                    Icons.camera_alt_outlined,
-                    size: 16,
-                    color: Colors.white,
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColor.primary,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt_outlined,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          }),
           const SizedBox(height: 10),
           Obx(() {
             final nama = authC.user['name'] ?? 'User';

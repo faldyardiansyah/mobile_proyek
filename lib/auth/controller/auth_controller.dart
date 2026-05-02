@@ -18,6 +18,7 @@ class AuthController extends GetxController {
   final namaRegisterController = TextEditingController();
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
+  final registerphoneController = TextEditingController();
 
   var user = {}.obs;
 
@@ -37,6 +38,7 @@ class AuthController extends GetxController {
     namaRegisterController.dispose();
     registerEmailController.dispose();
     registerPasswordController.dispose();
+    registerphoneController.dispose();
     super.onClose();
   }
 
@@ -105,6 +107,7 @@ class AuthController extends GetxController {
   if (namaRegisterController.text.isEmpty ||
       registerEmailController.text.isEmpty ||
       registerPasswordController.text.isEmpty ||
+      registerphoneController.text.isEmpty ||
       !isAgreeTerms.value) {
     _showSnackbar('Perhatian', 'Lengkapi data dan setujui syarat ketentuan', Colors.orange);
     return;
@@ -116,6 +119,7 @@ class AuthController extends GetxController {
     final response = await _api.post('/auth/register', {
       'name': namaRegisterController.text.trim(),
       'email': registerEmailController.text.trim(),
+      'no_telepon': registerphoneController.text.trim(),
       'password': registerPasswordController.text,
       'password_confirmation': registerPasswordController.text,
     });
@@ -128,6 +132,7 @@ class AuthController extends GetxController {
         namaRegisterController.clear();
         registerEmailController.clear();
         registerPasswordController.clear();
+        registerphoneController.clear();
         isAgreeTerms.value = false;
 
         Get.offAllNamed('/login');

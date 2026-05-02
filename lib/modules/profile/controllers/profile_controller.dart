@@ -1,16 +1,27 @@
+import 'dart:io';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
+import 'package:dio/dio.dart' as dio_lib;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
 
 class ProfileController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   var isLoading = false.obs;
+  var selectedImage = Rxn<File>(); 
 
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
+  late TextEditingController oldPasswordController;
+  late TextEditingController newPasswordController;
+  late TextEditingController confirmPasswordController;
+
+  final isOldPassHidden = true.obs;
+  final isNewPassHidden = true.obs;
+  final isConfirmPassHidden = true.obs;
 
   @override
   void onInit() {
@@ -18,6 +29,9 @@ class ProfileController extends GetxController {
     nameController = TextEditingController();
     emailController = TextEditingController();
     phoneController = TextEditingController();
+    oldPasswordController = TextEditingController();
+    newPasswordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
     loadUserData();
   }
 
@@ -26,11 +40,15 @@ class ProfileController extends GetxController {
     try {
       final response = await _apiService.getProfile();
       if (response.statusCode == 200) {
-        var userData = response.data['data'];
-        nameController.text = userData['nama'] ?? '';
+        var userData = response.data['user'];
+        nameController.text = userData['name'] ?? '';
         emailController.text = userData['email'] ?? '';
-        String telp = userData['telepon'] ?? '';
+        String telp = userData['no_telepon'] ?? '';
         phoneController.text = telp.isEmpty ? '-' : telp;
+
+        final authC = Get.find<AuthController>();
+        authC.user['profile_photo_url'] = userData['profile_photo_url'];
+        authC.user.refresh();
       }
     } catch (e) {
       Get.snackbar("Error", "Gagal mengambil data profil");
@@ -39,41 +57,157 @@ class ProfileController extends GetxController {
     }
   }
 
+  Future<void> pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 800,
+    );
+    if (picked != null) {
+      selectedImage.value = File(picked.path);
+    }
+  }
+
+  void showImagePicker() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Pilih Foto',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _imageSourceOption(
+                  icon: Icons.camera_alt,
+                  label: 'Kamera',
+                  onTap: () {
+                    Get.back();
+                    pickImage(ImageSource.camera);
+                  },
+                ),
+                _imageSourceOption(
+                  icon: Icons.photo_library,
+                  label: 'Galeri',
+                  onTap: () {
+                    Get.back();
+                    pickImage(ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _imageSourceOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, size: 30, color: const Color(0xFF3F51B5)),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
   Future<void> updateProfile() async {
+    // Validasi password kalau diisi
+    if (newPasswordController.text.isNotEmpty) {
+      if (oldPasswordController.text.isEmpty) {
+        Get.snackbar('Perhatian', 'Masukkan password lama',
+            backgroundColor: Colors.orange.shade50,
+            colorText: Colors.orange.shade800);
+        return;
+      }
+      if (newPasswordController.text.length < 8) {
+        Get.snackbar('Perhatian', 'Password baru minimal 8 karakter',
+            backgroundColor: Colors.orange.shade50,
+            colorText: Colors.orange.shade800);
+        return;
+      }
+      if (newPasswordController.text != confirmPasswordController.text) {
+        Get.snackbar('Perhatian', 'Konfirmasi password tidak cocok',
+            backgroundColor: Colors.orange.shade50,
+            colorText: Colors.orange.shade800);
+        return;
+      }
+    }
+
     try {
       isLoading.value = true;
 
-      String phoneInput = phoneController.text.trim();
-      dynamic phoneValue = (phoneInput == '-' || phoneInput.isEmpty) ? null : phoneInput;
+      final formData = dio_lib.FormData.fromMap({
+        'name'       : nameController.text.trim(),
+        'no_telepon' : phoneController.text.trim() == '-' ? '' : phoneController.text.trim(),
+        if (newPasswordController.text.isNotEmpty) ...{
+          'password_lama' : oldPasswordController.text,
+          'password_baru' : newPasswordController.text,
+          'konfirmasi'    : confirmPasswordController.text,
+        },
+        if (selectedImage.value != null)
+          'foto': await dio_lib.MultipartFile.fromFile(
+            selectedImage.value!.path,
+            filename: 'foto_profil.jpg',
+          ),
+      });
 
-      var data = {
-        'nama': nameController.text,
-        'email': emailController.text,
-        'telepon': phoneValue,
-      };
-
-      final response = await _apiService.updateProfile(data);
+         final response = await _apiService.postFormData('/profile/update', formData);
 
       if (response.statusCode == 200) {
-        final authController = Get.find<AuthController>();
-        authController.user['nama'] = nameController.text;
-        authController.user['email'] = emailController.text;
-        authController.user['telepon'] = phoneValue;
+        final authC = Get.find<AuthController>();
+        final userData = response.data['user'];
 
-        authController.user.refresh();
+        authC.user['name']              = userData['name'];
+        authC.user['no_telepon']        = userData['no_telepon'];
+        authC.user['profile_photo_url'] = userData['profile_photo_url'];
+        authC.user.refresh();
 
-        if (phoneValue == null) phoneController.text = '-';
+        authC.box.write('user', authC.user.value);
+
+        oldPasswordController.clear();
+        newPasswordController.clear();
+        confirmPasswordController.clear();
+        selectedImage.value = null;
 
         Get.snackbar(
-          "Sukses", 
-          "Profil berhasil diperbarui", 
-          backgroundColor: Colors.green, 
-          colorText: Colors.white,
+          'Berhasil',
+          'Profil berhasil diperbarui',
+          backgroundColor: Colors.green.shade50,
+          colorText: Colors.green.shade800,
           snackPosition: SnackPosition.TOP,
         );
       }
     } catch (e) {
-      Get.snackbar("Gagal", "Terjadi kesalahan saat menyimpan data");
+      Get.snackbar('Gagal', 'Terjadi kesalahan: $e',
+          backgroundColor: Colors.red.shade50,
+          colorText: Colors.red.shade800);
     } finally {
       isLoading.value = false;
     }
@@ -84,6 +218,9 @@ class ProfileController extends GetxController {
     nameController.dispose();
     emailController.dispose();
     phoneController.dispose();
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     super.onClose();
   }
 }

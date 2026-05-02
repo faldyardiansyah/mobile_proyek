@@ -71,4 +71,15 @@ class ApiService extends GetxService {
   Future<dio_lib.Response<dynamic>> getProperties() async {
     return await get('/all-properties');
   }
+
+  Future<dio_lib.Response<dynamic>> postFormData(
+    String endpoint, dio_lib.FormData formData) async {
+  return await _dio.post(
+    endpoint,
+    data: formData,
+    options: dio_lib.Options(
+      headers: {'Content-Type': 'multipart/form-data'},
+    ),
+  );
+}
 }
