@@ -18,16 +18,22 @@ class HomeController extends GetxController {
     "Kontrakan",
   ].obs;
 
-  final RxInt selectedCategoryIndex = 0.obs;
+  final RxList<String> genderOptions = <String>[
+    "Semua",
+    "Putra",
+    "Putri",
+    "Campur",
+  ].obs;
 
+  final RxInt selectedCategoryIndex = 0.obs;
   final RxString selectedSort = ''.obs;
   final RxDouble minRating = 0.0.obs;
   final RxString selectedLocation = 'Semua'.obs;
   final RxDouble maxPrice = 10000000.0.obs;
+  final RxString selectedGender = ''.obs;
 
   final box = GetStorage();
   var wishlist = <Property>[].obs;
-
   var selectedType = ''.obs;
   var tabIndex = 0.obs;
 
@@ -38,7 +44,6 @@ class HomeController extends GetxController {
     final user = box.read('user');
     if (user != null) {
       final userId = user['id'];
-
       final data = box.read('wishlist_$userId');
       if (data != null) {
         wishlist.value = (data as List)
@@ -51,13 +56,9 @@ class HomeController extends GetxController {
   Future<void> loadProperties() async {
     try {
       final response = await apiService.get('/all-properties');
-
       print("DATA API: ${response.data}");
-
       final List data = response.data['data'] ?? [];
-
       final result = data.map((e) => Property.fromJson(e)).toList();
-
       allProperties.assignAll(result);
       properties.assignAll(result);
     } catch (e) {
@@ -94,6 +95,11 @@ class HomeController extends GetxController {
     applyFilter();
   }
 
+  void setGender(String gender) {
+    selectedGender.value = (gender == "Semua") ? "" : gender;
+    applyFilter();
+  }
+
   void changeCategory(int index) {
     selectedCategoryIndex.value = index;
     applyFilter();
@@ -110,8 +116,7 @@ class HomeController extends GetxController {
 
     var filtered = allProperties.where((property) {
       double price =
-          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ??
-          0;
+          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
 
       bool matchesCategory =
           selectedCategory == "Semua" ||
@@ -135,12 +140,19 @@ class HomeController extends GetxController {
       bool matchesType =
           selectedType.value.isEmpty || property.type == selectedType.value;
 
+      // filter gender hanya berlaku untuk kosan
+      bool matchesGender =
+          selectedGender.value.isEmpty ||
+          property.type != "Kosan" ||
+          property.gender.toLowerCase() == selectedGender.value.toLowerCase();
+
       return matchesCategory &&
           matchesSearch &&
           matchesRating &&
           matchesLocation &&
           matchesPrice &&
-          matchesType;
+          matchesType &&
+          matchesGender;
     }).toList();
 
     if (selectedSort.value == "low") {

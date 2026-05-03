@@ -26,6 +26,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // FAB tidak ikut naik saat keyboard
       extendBody: true,
       backgroundColor: const Color(0xFFF8FAFC),
       body: Obx(
@@ -40,7 +41,6 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-
       floatingActionButton: Container(
         height: 68,
         width: 68,
@@ -73,68 +73,94 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(24, 0, 24, 30),
-        height: 70,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(35),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 20,
-              spreadRadius: 0,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      bottomNavigationBar: SafeArea(
+  child: Container(
+    margin: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+    height: 70,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(35),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.06),
+          blurRadius: 20,
+          spreadRadius: 0,
+          offset: const Offset(0, 4),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(35),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem("assets/image/search.png", "Cari", 0),
-                  _buildNavItem("assets/image/wishlist.png", "Simpan", 1),
-                  const SizedBox(width: 40),
-                  _buildNavItem(
-                    "assets/image/riwayat.png",
-                    "Riwayat",
-                    3,
-                    hasNotification: true,
-                  ),
-                  _buildNavItem("assets/image/profile.png", "Profil", 4),
-                ],
+      ],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(35),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Obx(
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem("assets/image/search.png", "Cari", 0),
+              _buildNavItem("assets/image/wishlist.png", "Simpan", 1),
+              const SizedBox(width: 40),
+              _buildNavItem(
+                "assets/image/riwayat.png",
+                "Riwayat",
+                3,
+                hasNotification: true,
               ),
-            ),
+              _buildNavItem("assets/image/profile.png", "Profil", 4),
+            ],
           ),
         ),
       ),
+    ),
+  ),
+),
     );
   }
 
   Widget _buildHomeContent() {
-    return RefreshIndicator(
-      onRefresh: () => controller.loadProperties(),
-      child: SafeArea(
-        child: SingleChildScrollView(
+    return SafeArea(
+      child: RefreshIndicator(
+        onRefresh: () => controller.loadProperties(),
+        child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeaderFancy(),
-              _buildSearchWithFilter(),
-              _buildCategoryScroll(),
-              _buildSectionTitle("Properti Terdekat"),
+          slivers: [
+            // Header + Search + Category sticky di atas
+            SliverAppBar(
+              pinned: true,
+              floating: false,
+              backgroundColor: const Color(0xFFF8FAFC),
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              expandedHeight: 0,
+              flexibleSpace: const SizedBox.shrink(),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(165),
+                child: Container(
+                  color: const Color(0xFFF8FAFC),
+                  child: Column(
+                    children: [
+                      _buildHeaderFancy(),
+                      _buildSearchWithFilter(),
+                      _buildCategoryScroll(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-              Obx(() {
-                if (controller.properties.isEmpty &&
-                    controller.searchQuery.value.isEmpty) {
-                  return Center(
+            // Section title
+            SliverToBoxAdapter(
+              child: _buildSectionTitle("Properti Terdekat"),
+            ),
+
+            // List properti
+            Obx(() {
+              if (controller.properties.isEmpty &&
+                  controller.searchQuery.value.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Center(
                     child: Padding(
-                      padding: EdgeInsets.all(60),
+                      padding: const EdgeInsets.all(60),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -144,7 +170,7 @@ class HomeScreen extends StatelessWidget {
                             height: 200,
                             repeat: true,
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           const Text(
                             "Data tidak ditemukan",
                             style: TextStyle(color: Colors.grey),
@@ -152,12 +178,14 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                  );
-                }
+                  ),
+                );
+              }
 
-                if (controller.properties.isEmpty &&
-                    controller.searchQuery.value.isNotEmpty) {
-                  return const Center(
+              if (controller.properties.isEmpty &&
+                  controller.searchQuery.value.isNotEmpty) {
+                return const SliverToBoxAdapter(
+                  child: Center(
                     child: Padding(
                       padding: EdgeInsets.all(50),
                       child: Text(
@@ -166,19 +194,24 @@ class HomeScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  );
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.properties.length,
-                  itemBuilder: (context, index) =>
-                      _buildPropertyCard(controller.properties[index], index),
+                  ),
                 );
-              }),
-              const SizedBox(height: 100),
-            ],
-          ),
+              }
+
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == controller.properties.length) {
+                      return const SizedBox(height: 100);
+                    }
+                    return _buildPropertyCard(
+                        controller.properties[index], index);
+                  },
+                  childCount: controller.properties.length + 1,
+                ),
+              );
+            }),
+          ],
         ),
       ),
     );
@@ -230,7 +263,6 @@ class HomeScreen extends StatelessWidget {
                         ? AppColor.primary
                         : const Color(0xFF94A3B8),
                   ),
-
                   if (hasNotification)
                     Positioned(
                       right: 0,
@@ -248,9 +280,7 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 4),
-
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
               style: TextStyle(
@@ -268,7 +298,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildHeaderFancy() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -289,7 +319,6 @@ class HomeScreen extends StatelessWidget {
                 if (authC.user.isEmpty) {
                   return const Text("Loading...");
                 }
-
                 return Text(
                   "Halo, Selamat datang, ${authC.user['name']}",
                   style: const TextStyle(
@@ -340,7 +369,7 @@ class HomeScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColor.primary, // Sesuaikan warna primary kamu
+                color: AppColor.primary,
                 borderRadius: BorderRadius.circular(15),
               ),
               child: const Icon(
@@ -402,7 +431,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // buat rentang harga
   String _formatHarga(String angka) {
     final number = int.tryParse(angka) ?? 0;
     return number.toString().replaceAllMapped(
@@ -450,21 +478,22 @@ class HomeScreen extends StatelessWidget {
                       child: Row(
                         children: [
                           _badge("TERSEDIA", AppColor.primary, Colors.white),
+                          const SizedBox(width: 8),
+                          // badge gender huruf besar
                           if ((data.type ?? "").toLowerCase() == "kosan" &&
                               (data.gender ?? "").isNotEmpty) ...[
-                            const SizedBox(width: 8),
                             _badge(
-                              data.gender ?? "-",
+                              (data.gender as String).toUpperCase(),
                               Colors.orange.shade100,
                               Colors.orange.shade800,
                             ),
-                          const SizedBox(width: 8),
+                            const SizedBox(width: 8),
+                          ],
                           _badge(
-                            data.type ?? "-",
+                            (data.type ?? "-").toUpperCase(),
                             Colors.white,
                             AppColor.primary,
                           ),
-                          ],
                         ],
                       ),
                     ),
@@ -473,7 +502,6 @@ class HomeScreen extends StatelessWidget {
                       right: 12,
                       child: Obx(() {
                         bool isFav = controller.isFavorite(data);
-
                         return GestureDetector(
                           onTap: () {
                             controller.toggleFavorite(data);
@@ -519,7 +547,6 @@ class HomeScreen extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -551,7 +578,6 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 5),
                       Row(
                         children: [
@@ -569,7 +595,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -582,8 +608,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                               children: [
                                 TextSpan(
-                                  text:
-                                      data.price == data.priceMax ||
+                                  text: data.price == data.priceMax ||
                                           data.priceMax == '0'
                                       ? "Rp ${_formatHarga(data.price)}"
                                       : "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
@@ -638,7 +663,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _badge(String text, Color bg, Color textColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(8),
@@ -712,6 +737,7 @@ class HomeScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
 
+              // Tipe Hunian
               const SizedBox(height: 25),
               const Text(
                 "Tipe Hunian",
@@ -740,6 +766,29 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 25),
+              const Text(
+                "Tipe Penghuni",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Obx(
+                () => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: controller.genderOptions.map((gender) {
+                    return _filterChip(
+                      gender,
+                      gender == "Semua"
+                          ? controller.selectedGender.value == ""
+                          : controller.selectedGender.value == gender,
+                      () => controller.setGender(gender),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+              // Urutan Harga
               const SizedBox(height: 25),
               const Text(
                 "Urutan Harga",
@@ -764,6 +813,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
+              // Minimal Rating
               const SizedBox(height: 25),
               const Text(
                 "Minimal Rating",
@@ -780,6 +830,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
+              // Maksimal Harga
               const SizedBox(height: 25),
               const Text(
                 "Maksimal Harga",
