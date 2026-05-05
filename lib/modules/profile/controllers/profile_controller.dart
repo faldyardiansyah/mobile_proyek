@@ -10,14 +10,22 @@ class ProfileController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   var isLoading = false.obs;
-  var selectedImage = Rxn<File>(); 
+  var selectedImage = Rxn<File>();
 
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
+  late TextEditingController noWaController;       
+  late TextEditingController domisiliController;   
   late TextEditingController oldPasswordController;
   late TextEditingController newPasswordController;
   late TextEditingController confirmPasswordController;
+
+  final selectedJenisKelamin = RxnString();        
+  final selectedPekerjaan = RxnString();           
+
+  final listJenisKelamin = ['Laki-laki', 'Perempuan'];
+  final listPekerjaan = ['Mahasiswa', 'Karyawan', 'Lainnya'];
 
   final isOldPassHidden = true.obs;
   final isNewPassHidden = true.obs;
@@ -29,6 +37,8 @@ class ProfileController extends GetxController {
     nameController = TextEditingController();
     emailController = TextEditingController();
     phoneController = TextEditingController();
+    noWaController = TextEditingController();
+    domisiliController = TextEditingController();
     oldPasswordController = TextEditingController();
     newPasswordController = TextEditingController();
     confirmPasswordController = TextEditingController();
@@ -43,11 +53,20 @@ class ProfileController extends GetxController {
         var userData = response.data['user'];
         nameController.text = userData['name'] ?? '';
         emailController.text = userData['email'] ?? '';
-        String telp = userData['no_telepon'] ?? '';
-        phoneController.text = telp.isEmpty ? '-' : telp;
+        phoneController.text = userData['no_telepon'] ?? '-';
+        noWaController.text = userData['no_wa'] ?? '';
+        domisiliController.text = userData['domisili'] ?? '';
+
+        // Set dropdown
+        selectedJenisKelamin.value = userData['jenis_kelamin'];
+        selectedPekerjaan.value = userData['pekerjaan'];
 
         final authC = Get.find<AuthController>();
         authC.user['profile_photo_url'] = userData['profile_photo_url'];
+        authC.user['no_wa'] = userData['no_wa'];
+        authC.user['jenis_kelamin'] = userData['jenis_kelamin'];
+        authC.user['pekerjaan'] = userData['pekerjaan'];
+        authC.user['domisili'] = userData['domisili'];
         authC.user.refresh();
       }
     } catch (e) {
@@ -137,8 +156,64 @@ class ProfileController extends GetxController {
     );
   }
 
+Future<void> changePassword() async {
+  if (oldPasswordController.text.isEmpty ||
+      newPasswordController.text.isEmpty ||
+      confirmPasswordController.text.isEmpty) {
+    Get.snackbar('Perhatian', 'Semua field wajib diisi',
+        backgroundColor: Colors.orange.shade50,
+        colorText: Colors.orange.shade800);
+    return;
+  }
+
+  if (newPasswordController.text.length < 8) {
+    Get.snackbar('Perhatian', 'Password baru minimal 8 karakter',
+        backgroundColor: Colors.orange.shade50,
+        colorText: Colors.orange.shade800);
+    return;
+  }
+
+  if (newPasswordController.text != confirmPasswordController.text) {
+    Get.snackbar('Perhatian', 'Konfirmasi password tidak cocok',
+        backgroundColor: Colors.orange.shade50,
+        colorText: Colors.orange.shade800);
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+
+    final formData = dio_lib.FormData.fromMap({
+      'password_lama' : oldPasswordController.text,
+      'password_baru' : newPasswordController.text,
+      'konfirmasi'    : confirmPasswordController.text,
+    });
+
+    final response = await _apiService.postFormData('/profile/update', formData);
+
+    if (response.statusCode == 200) {
+      oldPasswordController.clear();
+      newPasswordController.clear();
+      confirmPasswordController.clear();
+
+      Get.back();
+      Get.snackbar(
+        'Berhasil',
+        'Password berhasil diubah',
+        backgroundColor: Colors.green.shade50,
+        colorText: Colors.green.shade800,
+        snackPosition: SnackPosition.TOP,
+      );
+    }
+  } catch (e) {
+    Get.snackbar('Gagal', 'Password lama tidak sesuai',
+        backgroundColor: Colors.red.shade50,
+        colorText: Colors.red.shade800);
+  } finally {
+    isLoading.value = false;
+  }
+}
   Future<void> updateProfile() async {
-    // Validasi password kalau diisi
     if (newPasswordController.text.isNotEmpty) {
       if (oldPasswordController.text.isEmpty) {
         Get.snackbar('Perhatian', 'Masukkan password lama',
@@ -164,8 +239,14 @@ class ProfileController extends GetxController {
       isLoading.value = true;
 
       final formData = dio_lib.FormData.fromMap({
-        'name'       : nameController.text.trim(),
-        'no_telepon' : phoneController.text.trim() == '-' ? '' : phoneController.text.trim(),
+        'name'          : nameController.text.trim(),
+        'no_telepon'    : phoneController.text.trim() == '-' ? '' : phoneController.text.trim(),
+        'no_wa'         : noWaController.text.trim(),
+        'domisili'      : domisiliController.text.trim(),
+        if (selectedJenisKelamin.value != null)
+          'jenis_kelamin' : selectedJenisKelamin.value!,
+        if (selectedPekerjaan.value != null)
+          'pekerjaan'     : selectedPekerjaan.value!,
         if (newPasswordController.text.isNotEmpty) ...{
           'password_lama' : oldPasswordController.text,
           'password_baru' : newPasswordController.text,
@@ -178,7 +259,7 @@ class ProfileController extends GetxController {
           ),
       });
 
-         final response = await _apiService.postFormData('/profile/update', formData);
+      final response = await _apiService.postFormData('/profile/update', formData);
 
       if (response.statusCode == 200) {
         final authC = Get.find<AuthController>();
@@ -186,6 +267,10 @@ class ProfileController extends GetxController {
 
         authC.user['name']              = userData['name'];
         authC.user['no_telepon']        = userData['no_telepon'];
+        authC.user['no_wa']             = userData['no_wa'];
+        authC.user['jenis_kelamin']     = userData['jenis_kelamin'];
+        authC.user['pekerjaan']         = userData['pekerjaan'];
+        authC.user['domisili']          = userData['domisili'];
         authC.user['profile_photo_url'] = userData['profile_photo_url'];
         authC.user.refresh();
 
@@ -218,6 +303,8 @@ class ProfileController extends GetxController {
     nameController.dispose();
     emailController.dispose();
     phoneController.dispose();
+    noWaController.dispose();
+    domisiliController.dispose();
     oldPasswordController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();

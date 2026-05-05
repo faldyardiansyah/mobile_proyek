@@ -1,10 +1,11 @@
+import 'package:appkonkos_mobile/modules/profile/password_screen.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import './personal_info_screen.dart';
 import './payment_screen.dart';
 import './help_screen.dart';
-import '../../auth/controller/auth_controller.dart';
+import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import '../profile/controllers/profile_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -128,6 +129,14 @@ class ProfileScreen extends StatelessWidget {
                     title: "Informasi Pribadi",
                     onTap: () {
                       Get.to(() => PersonalInfoScreen());
+                    },
+                  ),
+                  const SizedBox(height: 5),
+                  _menu(
+                    icon: Icons.lock_outline,
+                    title: "Ubah Password",
+                    onTap: () {
+                      Get.to(() => const PasswordScreen());
                     },
                   ),
                   const SizedBox(height: 5),

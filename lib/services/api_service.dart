@@ -10,6 +10,7 @@ class ApiService extends GetxService {
  static String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://192.168.1.9:8000/api';
 
   @override
+
   void onInit() {
     super.onInit();
 

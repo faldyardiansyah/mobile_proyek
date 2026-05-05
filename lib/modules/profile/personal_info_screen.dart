@@ -49,44 +49,35 @@ class PersonalInfoScreen extends StatelessWidget {
                     enabled: false,
                   ),
                   _buildField(
-                    label: 'Nomor Telepon',
+                    label: 'Nomor Telepon/Whatsapp',
                     controller: controller.phoneController,
                     icon: Icons.phone_outlined,
                     isPhone: true,
                     keyboardType: TextInputType.phone,
                   ),
-                ],
-              ),
+                  _buildField(
+                    label: 'Domisili',
+                    controller: controller.domisiliController,
+                    icon: Icons.location_on_outlined,
+                  ),
+                   _buildDropdown(
+                    label: 'Jenis Kelamin',
+                    icon: Icons.wc_outlined,
+                    value: controller.selectedJenisKelamin,
+                    items: controller.listJenisKelamin,
+                    hint: 'Pilih jenis kelamin',
+                  ),
 
-              const SizedBox(height: 16),
-              _buildSection(
-                title: 'GANTI PASSWORD',
-                children: [
-                  const Text(
-                    'Kosongkan jika tidak ingin mengubah password',
-                    style: TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildPasswordField(
-                    label: 'Password Lama',
-                    controller: controller.oldPasswordController,
-                    isHidden: controller.isOldPassHidden,
-                  ),
-                  _buildPasswordField(
-                    label: 'Password Baru',
-                    controller: controller.newPasswordController,
-                    isHidden: controller.isNewPassHidden,
-                    hint: 'Minimal 8 karakter',
-                  ),
-                  _buildPasswordField(
-                    label: 'Konfirmasi Password Baru',
-                    controller: controller.confirmPasswordController,
-                    isHidden: controller.isConfirmPassHidden,
-                    hint: 'Ulangi password baru',
+                  // ── Pekerjaan Dropdown ──
+                  _buildDropdown(
+                    label: 'Pekerjaan',
+                    icon: Icons.work_outline,
+                    value: controller.selectedPekerjaan,
+                    items: controller.listPekerjaan,
+                    hint: 'Pilih pekerjaan',
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
               Obx(() => SizedBox(
                 width: double.infinity,
@@ -230,52 +221,34 @@ class PersonalInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPasswordField({
+Widget _buildDropdown({
     required String label,
-    required TextEditingController controller,
-    required RxBool isHidden,
-    String hint = 'Masukkan password',
+    required IconData icon,
+    required RxnString value,
+    required List<String> items,
+    required String hint,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF94A3B8),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w500)),
           const SizedBox(height: 6),
-          Obx(() => TextField(
-            controller: controller,
-            obscureText: isHidden.value,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
+          Obx(() => DropdownButtonFormField<String>(
+            value: value.value,
+            hint: Text(hint,
+                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14)),
             decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-              prefixIcon: const Icon(
-                Icons.lock_outline,
-                color: AppColor.primary,
-                size: 18,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  isHidden.value ? Icons.visibility_off : Icons.visibility,
-                  color: const Color(0xFF94A3B8),
-                  size: 18,
-                ),
-                onPressed: () => isHidden.value = !isHidden.value,
-              ),
+              prefixIcon: Icon(icon, color: AppColor.primary, size: 18),
               filled: true,
               fillColor: const Color(0xFFF8FAFC),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 12,
-                horizontal: 12,
-              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -289,6 +262,14 @@ class PersonalInfoScreen extends StatelessWidget {
                 borderSide: BorderSide(color: AppColor.primary),
               ),
             ),
+            items: items
+                .map((item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(item,
+                          style: const TextStyle(fontSize: 14)),
+                    ))
+                .toList(),
+            onChanged: (val) => value.value = val,
           )),
         ],
       ),

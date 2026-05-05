@@ -1,4 +1,4 @@
-import 'package:appkonkos_mobile/modules/home/detail_screen.dart';
+import 'package:appkonkos_mobile/modules/home/screens/detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../home/controllers/home_controller.dart';
