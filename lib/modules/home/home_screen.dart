@@ -117,14 +117,14 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHomeContent() {
-    return SafeArea(
-      child: RefreshIndicator(
-        onRefresh: () => controller.loadProperties(),
-        child: CustomScrollView(
+ Widget _buildHomeContent() {
+  return SafeArea(
+    child: RefreshIndicator(
+      onRefresh: () => controller.loadProperties(),
+      child: Obx(() {  // ← pindah Obx ke sini
+        return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Header + Search + Category sticky di atas
             SliverAppBar(
               pinned: true,
               floating: false,
@@ -147,58 +147,50 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Section title
             SliverToBoxAdapter(
               child: _buildSectionTitle("Properti Terdekat"),
             ),
-
-            // List properti
-            Obx(() {
-              if (controller.properties.isEmpty &&
-                  controller.searchQuery.value.isEmpty) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(60),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Lottie.asset(
-                            'assets/lottie/404.json',
-                            width: 200,
-                            height: 200,
-                            repeat: true,
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "Data tidak ditemukan",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
+            if (controller.properties.isEmpty &&
+                controller.searchQuery.value.isEmpty)
+              SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(60),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Lottie.asset(
+                          'assets/lottie/404.json',
+                          width: 200,
+                          height: 200,
+                          repeat: true,
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          "Data tidak ditemukan",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              }
-
-              if (controller.properties.isEmpty &&
-                  controller.searchQuery.value.isNotEmpty) {
-                return const SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(50),
-                      child: Text(
-                        "Tidak ada properti yang cocok dengan pencarianmu.",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                        textAlign: TextAlign.center,
-                      ),
+                ),
+              )
+            else if (controller.properties.isEmpty &&
+                controller.searchQuery.value.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(50),
+                    child: Text(
+                      "Tidak ada properti yang cocok dengan pencarianmu.",
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                );
-              }
-
-              return SliverList(
+                ),
+              )
+            else
+              SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     if (index == controller.properties.length) {
@@ -209,13 +201,13 @@ class HomeScreen extends StatelessWidget {
                   },
                   childCount: controller.properties.length + 1,
                 ),
-              );
-            }),
+              ),
           ],
-        ),
-      ),
-    );
-  }
+        );
+      }),
+    ),
+  );
+}
 
   Widget _buildNavItem(
     String imagePath,
@@ -626,10 +618,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              Get.to(
-                                () => const DetailScreen(),
-                                arguments: data,
-                              );
+                            Get.to(() => const DetailScreen(), arguments: data);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColor.primary,
@@ -723,154 +712,156 @@ class HomeScreen extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Center(
-                child: SizedBox(width: 40, child: Divider(thickness: 4)),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Filter",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-
-              // Tipe Hunian
-              const SizedBox(height: 25),
-              const Text(
-                "Tipe Hunian",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Obx(
-                () => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _filterChip(
-                      "Semua",
-                      controller.selectedType.value == "",
-                      () => controller.setType(""),
-                    ),
-                    _filterChip(
-                      "Kosan",
-                      controller.selectedType.value == "Kosan",
-                      () => controller.setType("Kosan"),
-                    ),
-                    _filterChip(
-                      "Kontrakan",
-                      controller.selectedType.value == "Kontrakan",
-                      () => controller.setType("Kontrakan"),
-                    ),
-                  ],
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Center(
+                  child: SizedBox(width: 40, child: Divider(thickness: 4)),
                 ),
-              ),
-
-              const SizedBox(height: 25),
-              const Text(
-                "Tipe Penghuni",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Obx(
-                () => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: controller.genderOptions.map((gender) {
-                    return _filterChip(
-                      gender,
-                      gender == "Semua"
-                          ? controller.selectedGender.value == ""
-                          : controller.selectedGender.value == gender,
-                      () => controller.setGender(gender),
-                    );
-                  }).toList(),
+                const SizedBox(height: 20),
+                const Text(
+                  "Filter",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-              ),
-
-              // Urutan Harga
-              const SizedBox(height: 25),
-              const Text(
-                "Urutan Harga",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Obx(
-                () => Row(
-                  children: [
-                    _filterChip(
-                      "Termurah",
-                      controller.selectedSort.value == "low",
-                      () => controller.setSort("low"),
-                    ),
-                    const SizedBox(width: 10),
-                    _filterChip(
-                      "Termahal",
-                      controller.selectedSort.value == "high",
-                      () => controller.setSort("high"),
-                    ),
-                  ],
+          
+                // Tipe Hunian
+                const SizedBox(height: 25),
+                const Text(
+                  "Tipe Hunian",
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ),
-
-              // Minimal Rating
-              const SizedBox(height: 25),
-              const Text(
-                "Minimal Rating",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Obx(
-                () => Slider(
-                  value: controller.minRating.value,
-                  min: 0,
-                  max: 5,
-                  divisions: 5,
-                  label: controller.minRating.value.toString(),
-                  onChanged: (val) => controller.setRating(val),
-                ),
-              ),
-
-              // Maksimal Harga
-              const SizedBox(height: 25),
-              const Text(
-                "Maksimal Harga",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Obx(
-                () => Column(
-                  children: [
-                    Slider(
-                      value: controller.maxPrice.value,
-                      min: 500000,
-                      max: 10000000,
-                      onChanged: (val) => controller.setMaxPrice(val),
-                    ),
-                    Text(
-                      "Di bawah Rp ${controller.maxPrice.value.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}",
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3F51B5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  onPressed: () => Get.back(),
-                  child: const Text(
-                    "Terapkan",
-                    style: TextStyle(color: Colors.white),
+                const SizedBox(height: 10),
+                Obx(
+                  () => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _filterChip(
+                        "Semua",
+                        controller.selectedType.value == "",
+                        () => controller.setType(""),
+                      ),
+                      _filterChip(
+                        "Kosan",
+                        controller.selectedType.value == "Kosan",
+                        () => controller.setType("Kosan"),
+                      ),
+                      _filterChip(
+                        "Kontrakan",
+                        controller.selectedType.value == "Kontrakan",
+                        () => controller.setType("Kontrakan"),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+          
+                const SizedBox(height: 25),
+                const Text(
+                  "Tipe Penghuni",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Obx(
+                  () => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: controller.genderOptions.map((gender) {
+                      return _filterChip(
+                        gender,
+                        gender == "Semua"
+                            ? controller.selectedGender.value == ""
+                            : controller.selectedGender.value == gender,
+                        () => controller.setGender(gender),
+                      );
+                    }).toList(),
+                  ),
+                ),
+          
+                // Urutan Harga
+                const SizedBox(height: 25),
+                const Text(
+                  "Urutan Harga",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Obx(
+                  () => Row(
+                    children: [
+                      _filterChip(
+                        "Termurah",
+                        controller.selectedSort.value == "low",
+                        () => controller.setSort("low"),
+                      ),
+                      const SizedBox(width: 10),
+                      _filterChip(
+                        "Termahal",
+                        controller.selectedSort.value == "high",
+                        () => controller.setSort("high"),
+                      ),
+                    ],
+                  ),
+                ),
+          
+                // Minimal Rating
+                const SizedBox(height: 25),
+                const Text(
+                  "Minimal Rating",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Obx(
+                  () => Slider(
+                    value: controller.minRating.value,
+                    min: 0,
+                    max: 5,
+                    divisions: 5,
+                    label: controller.minRating.value.toString(),
+                    onChanged: (val) => controller.setRating(val),
+                  ),
+                ),
+          
+                // Maksimal Harga
+                const SizedBox(height: 25),
+                const Text(
+                  "Maksimal Harga",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Obx(
+                  () => Column(
+                    children: [
+                      Slider(
+                        value: controller.maxPrice.value,
+                        min: 500000,
+                        max: 10000000,
+                        onChanged: (val) => controller.setMaxPrice(val),
+                      ),
+                      Text(
+                        "Di bawah Rp ${controller.maxPrice.value.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}",
+                      ),
+                    ],
+                  ),
+                ),
+          
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3F51B5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: () => Get.back(),
+                    child: const Text(
+                      "Terapkan",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -218,7 +218,6 @@ class WishlistScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Tampil rentang harga sama seperti homescreen
                       RichText(
                         text: TextSpan(
                           style: const TextStyle(

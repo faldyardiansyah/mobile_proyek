@@ -47,7 +47,7 @@ class RiwayatScreen extends StatelessWidget {
 
 Widget _buildHeader() {
   return Padding(
-    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12), 
+    padding: const EdgeInsets.fromLTRB(20, 50, 20, 12), 
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

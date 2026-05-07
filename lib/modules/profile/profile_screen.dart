@@ -11,6 +11,12 @@ import '../profile/controllers/profile_controller.dart';
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
   final authC = Get.find<AuthController>();
+   ProfileController get profileCtrl {
+    if (!Get.isRegistered<ProfileController>()) {
+      Get.put(ProfileController());
+    }
+    return Get.find<ProfileController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +38,10 @@ class ProfileScreen extends StatelessWidget {
       body: Column(
         children: [
           const SizedBox(height: 20),
-
           Obx(() {
-            final photoUrl = authC.user['profile_photo_url'];
-
+            final photoUrl = authC.user.value['profile_photo_url'];
             return GestureDetector(
-              onTap: () => Get.to(
-                () => PersonalInfoScreen(),
-              ), // ← tap foto ke personal info
+              onTap: ()=> profileCtrl.showImagePicker(), 
               child: Stack(
                 children: [
                   CircleAvatar(
@@ -52,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
                     child: (photoUrl == null || photoUrl.toString().isEmpty)
                         ? Text(
                             (authC.user['name'] ?? 'U').toString().isNotEmpty
-                                ? (authC.user['name'] ?? 'U')
+                                ? (authC.user.value['name'] ?? 'U')
                                       .toString()[0]
                                       .toUpperCase()
                                 : 'U',
@@ -67,16 +69,19 @@ class ProfileScreen extends StatelessWidget {
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColor.primary,
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt_outlined,
-                        size: 16,
-                        color: Colors.white,
+                    child: GestureDetector(
+                      onTap: () => profileCtrl.showImagePicker(),
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColor.primary,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_outlined,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -109,10 +114,10 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 5),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+               padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
               child: ListView(
                 children: [
                   const Text(
@@ -147,7 +152,7 @@ class ProfileScreen extends StatelessWidget {
                       Get.to(() => const PaymentScreen());
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 5),
                   const Text(
                     "Dukungan",
                     style: TextStyle(

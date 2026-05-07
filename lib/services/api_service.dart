@@ -7,8 +7,7 @@ class ApiService extends GetxService {
   late dio_lib.Dio _dio;
   final _storage = GetStorage();
 
- static String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://192.168.1.9:8000/api';
-
+ static String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://192.168.1.10:8000/api';
   @override
 
   void onInit() {
@@ -82,5 +81,12 @@ class ApiService extends GetxService {
       headers: {'Content-Type': 'multipart/form-data'},
     ),
   );
+}
+Future<dio_lib.Response<dynamic>> getDetailKosan(int id) async {
+  return await get('/properties/kosan/$id/detail');
+}
+
+Future<dio_lib.Response<dynamic>> getDetailKontrakan(int id) async {
+  return await get('/properties/kontrakan/$id/detail');
 }
 }

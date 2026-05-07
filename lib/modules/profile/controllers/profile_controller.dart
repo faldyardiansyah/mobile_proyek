@@ -45,6 +45,45 @@ class ProfileController extends GetxController {
     loadUserData();
   }
 
+Future<void> uploadFotoSaja() async {
+  if (selectedImage.value == null) return;
+  
+  try {
+    isLoading.value = true;
+    final formData = dio_lib.FormData.fromMap({
+      'foto': await dio_lib.MultipartFile.fromFile(
+        selectedImage.value!.path,
+        filename: 'foto_profil.jpg',
+      ),
+    });
+
+    final response = await _apiService.postFormData('/profile/update', formData);
+
+    if (response.statusCode == 200) {
+      final authC = Get.find<AuthController>();
+      final userData = response.data['user'];
+      final updatedUser = Map<String, dynamic>.from(authC.user.value);
+      updatedUser['profile_photo_url'] = userData['profile_photo_url'];
+      authC.user.value = updatedUser;
+      authC.box.write('user', authC.user.value);
+      await loadUserData();
+      selectedImage.value = null;
+
+      Get.snackbar(
+        'Berhasil',
+        'Foto profil diperbarui',
+        backgroundColor: Colors.green.shade50,
+        colorText: Colors.green.shade800,
+      );
+    }
+  } catch (e) {
+    Get.snackbar('Gagal', 'Gagal mengupload foto',
+        backgroundColor: Colors.red.shade50,
+        colorText: Colors.red.shade800);
+  } finally {
+    isLoading.value = false;
+  }
+}
   Future<void> loadUserData() async {
     isLoading.value = true;
     try {
@@ -85,6 +124,7 @@ class ProfileController extends GetxController {
     );
     if (picked != null) {
       selectedImage.value = File(picked.path);
+      await uploadFotoSaja();
     }
   }
 
@@ -96,37 +136,39 @@ class ProfileController extends GetxController {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Pilih Foto',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _imageSourceOption(
-                  icon: Icons.camera_alt,
-                  label: 'Kamera',
-                  onTap: () {
-                    Get.back();
-                    pickImage(ImageSource.camera);
-                  },
-                ),
-                _imageSourceOption(
-                  icon: Icons.photo_library,
-                  label: 'Galeri',
-                  onTap: () {
-                    Get.back();
-                    pickImage(ImageSource.gallery);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-          ],
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Pilih Foto',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _imageSourceOption(
+                    icon: Icons.camera_alt,
+                    label: 'Kamera',
+                    onTap: () {
+                      Get.back();
+                      pickImage(ImageSource.camera);
+                    },
+                  ),
+                  _imageSourceOption(
+                    icon: Icons.photo_library,
+                    label: 'Galeri',
+                    onTap: () {
+                      Get.back();
+                      pickImage(ImageSource.gallery);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
     );
@@ -142,7 +184,7 @@ class ProfileController extends GetxController {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
               color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(16),

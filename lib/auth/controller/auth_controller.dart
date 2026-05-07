@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
 
+final user = <String, dynamic>{}.obs;
 class AuthController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
   final box = GetStorage();
