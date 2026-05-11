@@ -8,14 +8,29 @@ import './help_screen.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import '../profile/controllers/profile_controller.dart';
 
-class ProfileScreen extends StatelessWidget {
-  ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   final authC = Get.find<AuthController>();
-   ProfileController get profileCtrl {
+
+  ProfileController get profileCtrl {
     if (!Get.isRegistered<ProfileController>()) {
       Get.put(ProfileController());
     }
     return Get.find<ProfileController>();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      profileCtrl.loadUserData();
+    });
   }
 
   @override
@@ -41,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
           Obx(() {
             final photoUrl = authC.user.value['profile_photo_url'];
             return GestureDetector(
-              onTap: ()=> profileCtrl.showImagePicker(), 
+              onTap: () => profileCtrl.showImagePicker(),
               child: Stack(
                 children: [
                   CircleAvatar(
@@ -49,8 +64,11 @@ class ProfileScreen extends StatelessWidget {
                     backgroundColor: const Color(0xFFD9C3A3),
                     backgroundImage:
                         (photoUrl != null && photoUrl.toString().isNotEmpty)
-                        ? NetworkImage(photoUrl.toString())
+                        ? NetworkImage(
+                            "${photoUrl.toString().replaceAll('http://localhost', 'http://192.168.1.10:8000')}?v=${DateTime.now().millisecondsSinceEpoch}",
+                          )
                         : null,
+                    onBackgroundImageError: (_, __) {},
                     child: (photoUrl == null || photoUrl.toString().isEmpty)
                         ? Text(
                             (authC.user['name'] ?? 'U').toString().isNotEmpty
@@ -117,7 +135,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 5),
           Expanded(
             child: Container(
-               padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
               child: ListView(
                 children: [
                   const Text(

@@ -66,7 +66,6 @@ Future<void> uploadFotoSaja() async {
       updatedUser['profile_photo_url'] = userData['profile_photo_url'];
       authC.user.value = updatedUser;
       authC.box.write('user', authC.user.value);
-      await loadUserData();
       selectedImage.value = null;
 
       Get.snackbar(
@@ -85,35 +84,36 @@ Future<void> uploadFotoSaja() async {
   }
 }
   Future<void> loadUserData() async {
-    isLoading.value = true;
-    try {
-      final response = await _apiService.getProfile();
-      if (response.statusCode == 200) {
-        var userData = response.data['user'];
-        nameController.text = userData['name'] ?? '';
-        emailController.text = userData['email'] ?? '';
-        phoneController.text = userData['no_telepon'] ?? '-';
-        noWaController.text = userData['no_wa'] ?? '';
-        domisiliController.text = userData['domisili'] ?? '';
+  isLoading.value = true;
+  try {
+    final response = await _apiService.getProfile();
+    if (response.statusCode == 200) {
+      var userData = response.data['user'];
+      nameController.text = userData['name'] ?? '';
+      emailController.text = userData['email'] ?? '';
+      phoneController.text = userData['no_telepon'] ?? '-';
+      noWaController.text = userData['no_wa'] ?? '';
+      domisiliController.text = userData['domisili'] ?? '';
+      selectedJenisKelamin.value = userData['jenis_kelamin'];
+      selectedPekerjaan.value = userData['pekerjaan'];
 
-        // Set dropdown
-        selectedJenisKelamin.value = userData['jenis_kelamin'];
-        selectedPekerjaan.value = userData['pekerjaan'];
-
-        final authC = Get.find<AuthController>();
-        authC.user['profile_photo_url'] = userData['profile_photo_url'];
-        authC.user['no_wa'] = userData['no_wa'];
-        authC.user['jenis_kelamin'] = userData['jenis_kelamin'];
-        authC.user['pekerjaan'] = userData['pekerjaan'];
-        authC.user['domisili'] = userData['domisili'];
-        authC.user.refresh();
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Gagal mengambil data profil");
-    } finally {
-      isLoading.value = false;
+      final authC = Get.find<AuthController>();
+      final updatedUser = Map<String, dynamic>.from(authC.user.value);
+      updatedUser['profile_photo_url'] = userData['profile_photo_url'];
+      updatedUser['no_wa']             = userData['no_wa'];
+      updatedUser['jenis_kelamin']     = userData['jenis_kelamin'];
+      updatedUser['pekerjaan']         = userData['pekerjaan'];
+      updatedUser['domisili']          = userData['domisili'];
+      updatedUser['name']              = userData['name'];
+      authC.user.value = updatedUser; 
+      authC.box.write('user', authC.user.value);
     }
+  } catch (e) {
+    Get.snackbar("Error", "Gagal mengambil data profil");
+  } finally {
+    isLoading.value = false;
   }
+}
 
   Future<void> pickImage(ImageSource source) async {
     final picker = ImagePicker();
@@ -306,22 +306,21 @@ Future<void> changePassword() async {
       if (response.statusCode == 200) {
         final authC = Get.find<AuthController>();
         final userData = response.data['user'];
+      final updatedUser = Map<String, dynamic>.from(authC.user.value);
+      updatedUser['name']              = userData['name'];
+      updatedUser['no_telepon']        = userData['no_telepon'];
+      updatedUser['no_wa']             = userData['no_wa'];
+      updatedUser['jenis_kelamin']     = userData['jenis_kelamin'];
+      updatedUser['pekerjaan']         = userData['pekerjaan'];
+      updatedUser['domisili']          = userData['domisili'];
+      updatedUser['profile_photo_url'] = userData['profile_photo_url'];
+      authC.user.value = updatedUser;
+      authC.box.write('user', authC.user.value);
 
-        authC.user['name']              = userData['name'];
-        authC.user['no_telepon']        = userData['no_telepon'];
-        authC.user['no_wa']             = userData['no_wa'];
-        authC.user['jenis_kelamin']     = userData['jenis_kelamin'];
-        authC.user['pekerjaan']         = userData['pekerjaan'];
-        authC.user['domisili']          = userData['domisili'];
-        authC.user['profile_photo_url'] = userData['profile_photo_url'];
-        authC.user.refresh();
-
-        authC.box.write('user', authC.user.value);
-
-        oldPasswordController.clear();
-        newPasswordController.clear();
-        confirmPasswordController.clear();
-        selectedImage.value = null;
+      oldPasswordController.clear();
+      newPasswordController.clear();
+      confirmPasswordController.clear();
+      selectedImage.value = null;
 
         Get.snackbar(
           'Berhasil',

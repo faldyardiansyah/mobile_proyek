@@ -11,6 +11,7 @@ class Property {
   final double? lat;
   final double? lng;
   final String gender; 
+  final int availableCount;
 
   Property({
     required this.id,
@@ -25,6 +26,7 @@ class Property {
     this.lat,
     this.lng,
     this.gender = '', 
+    this.availableCount = 0
   });
 
   factory Property.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class Property {
       lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
       lng: json['lng'] != null ? double.tryParse(json['lng'].toString()) : null,
       gender: json['gender'] ?? '',
+      availableCount: json['available_count'] ?? 0
     );
   }
 }

@@ -117,7 +117,23 @@ class WishlistScreen extends StatelessWidget {
                     children: [
                       _badge("TERSEDIA", AppColor.primary, Colors.white),
                       const SizedBox(width: 8),
-                      _badge(data.type, Colors.white, AppColor.primary),
+
+                      // badge gender khusus kosan
+                      if ((data.type ?? "").toLowerCase() == "kosan" &&
+                          (data.gender ?? "").isNotEmpty) ...[
+                        _badge(
+                          data.gender.toString().toUpperCase(),
+                          Colors.orange.shade100,
+                          Colors.orange.shade800,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+
+                      _badge(
+                        data.type.toString().toUpperCase(),
+                        Colors.white,
+                        AppColor.primary,
+                      ),
                     ],
                   ),
                 ),
@@ -214,41 +230,94 @@ class WishlistScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            data.type.toLowerCase() == "kosan"
+                                ? Icons.home_work_outlined
+                                : Icons.home_work_outlined,
+                            size: 15,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            data.type.toLowerCase() == "kosan"
+                                ? "${data.availableCount} kamar tersedia"
+                                : data.availableCount > 0
+                                ? "Kontrakan tersedia"
+                                : "Tidak tersedia",
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                   const SizedBox(height: 15),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      RichText(
-                        text: TextSpan(
-                          style: const TextStyle(
-                            color: AppColor.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                          children: [
-                            TextSpan(
-                              text:
+                      (data.type ?? "").toLowerCase() == "kosan"
+                          // KOSAN
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
                                   data.price == data.priceMax ||
-                                      data.priceMax == '0'
-                                  ? "Rp ${_formatHarga(data.price)}"
-                                  : "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
-                            ),
-                            TextSpan(
-                              text: "/${data.period}",
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 11,
-                                fontWeight: FontWeight.normal,
+                                          data.priceMax == '0'
+                                      ? "Rp ${_formatHarga(data.price)}"
+                                      : "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
+                                  style: const TextStyle(
+                                    color: AppColor.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+
+                                Text(
+                                  "/${data.period}",
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            )
+                          // KONTRAKAN
+                          : RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  color: AppColor.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        data.price == data.priceMax ||
+                                            data.priceMax == '0'
+                                        ? "Rp ${_formatHarga(data.price)}"
+                                        : "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
+                                  ),
+                                  TextSpan(
+                                    text: "/${data.period}",
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+
                       ElevatedButton(
-                        onPressed: () => Get.to(
-                          () => const DetailScreen(),
-                          arguments: data, // ← kirim data ke detail
-                        ),
+                        onPressed: () =>
+                            Get.to(() => const DetailScreen(), arguments: data),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColor.primary,
                           shape: RoundedRectangleBorder(

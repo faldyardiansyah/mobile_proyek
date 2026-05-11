@@ -53,6 +53,7 @@ class HomeController extends GetxController {
     }
   }
 
+var isLoading = true.obs;
   Future<void> loadProperties() async {
     try {
       final response = await apiService.get('/all-properties');

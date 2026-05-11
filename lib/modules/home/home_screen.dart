@@ -74,140 +74,152 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: SafeArea(
-  child: Container(
-    margin: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-    height: 70,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(35),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 20,
-          spreadRadius: 0,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(35),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Obx(
-          () => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem("assets/image/search.png", "Cari", 0),
-              _buildNavItem("assets/image/wishlist.png", "Simpan", 1),
-              const SizedBox(width: 40),
-              _buildNavItem(
-                "assets/image/riwayat.png",
-                "Riwayat",
-                3,
-                hasNotification: true,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+          height: 70,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(35),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, 4),
               ),
-              _buildNavItem("assets/image/profile.png", "Profil", 4),
             ],
           ),
-        ),
-      ),
-    ),
-  ),
-),
-    );
-  }
-
- Widget _buildHomeContent() {
-  return SafeArea(
-    child: RefreshIndicator(
-      onRefresh: () => controller.loadProperties(),
-      child: Obx(() {  // ← pindah Obx ke sini
-        return CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              floating: false,
-              backgroundColor: const Color(0xFFF8FAFC),
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              expandedHeight: 0,
-              flexibleSpace: const SizedBox.shrink(),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(165),
-                child: Container(
-                  color: const Color(0xFFF8FAFC),
-                  child: Column(
-                    children: [
-                      _buildHeaderFancy(),
-                      _buildSearchWithFilter(),
-                      _buildCategoryScroll(),
-                    ],
-                  ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(35),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Obx(
+                () => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem("assets/image/search.png", "Cari", 0),
+                    _buildNavItem("assets/image/wishlist.png", "Simpan", 1),
+                    const SizedBox(width: 40),
+                    _buildNavItem(
+                      "assets/image/riwayat.png",
+                      "Riwayat",
+                      3,
+                      hasNotification: true,
+                    ),
+                    _buildNavItem("assets/image/profile.png", "Profil", 4),
+                  ],
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: _buildSectionTitle("Properti Terdekat"),
-            ),
-            if (controller.properties.isEmpty &&
-                controller.searchQuery.value.isEmpty)
-              SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(60),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHomeContent() {
+    return SafeArea(
+      child: RefreshIndicator(
+        onRefresh: () => controller.loadProperties(),
+        child: Obx(() {
+          // ← pindah Obx ke sini
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                pinned: true,
+                floating: false,
+                backgroundColor: const Color(0xFFF8FAFC),
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                expandedHeight: 0,
+                flexibleSpace: const SizedBox.shrink(),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(165),
+                  child: Container(
+                    color: const Color(0xFFF8FAFC),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Lottie.asset(
-                          'assets/lottie/404.json',
-                          width: 200,
-                          height: 200,
-                          repeat: true,
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          "Data tidak ditemukan",
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                        _buildHeaderFancy(),
+                        _buildSearchWithFilter(),
+                        _buildCategoryScroll(),
                       ],
                     ),
                   ),
                 ),
-              )
-            else if (controller.properties.isEmpty &&
-                controller.searchQuery.value.isNotEmpty)
-              const SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(50),
-                    child: Text(
-                      "Tidak ada properti yang cocok dengan pencarianmu.",
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                      textAlign: TextAlign.center,
+              ),
+              SliverToBoxAdapter(
+                child: _buildSectionTitle("Properti Terdekat"),
+              ),
+              if (controller.properties.isEmpty &&
+                  controller.searchQuery.value.isEmpty)
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(60),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Lottie.asset(
+                            'assets/lottie/404.json',
+                            width: 200,
+                            height: 200,
+                            repeat: true,
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Data tidak ditemukan",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              )
-            else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+                )
+              else if (controller.properties.isEmpty &&
+                  controller.searchQuery.value.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(60),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Lottie.asset(
+                            'assets/lottie/404.json',
+                            width: 200,
+                            height: 200,
+                            repeat: true,
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Data tidak ada yang cocok dengan pencarianmu",
+                            style: TextStyle(color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
                     if (index == controller.properties.length) {
                       return const SizedBox(height: 100);
                     }
                     return _buildPropertyCard(
-                        controller.properties[index], index);
-                  },
-                  childCount: controller.properties.length + 1,
+                      controller.properties[index],
+                      index,
+                    );
+                  }, childCount: controller.properties.length + 1),
                 ),
-              ),
-          ],
-        );
-      }),
-    ),
-  );
-}
+            ],
+          );
+        }),
+      ),
+    );
+  }
 
   Widget _buildNavItem(
     String imagePath,
@@ -290,7 +302,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildHeaderFancy() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      padding: const EdgeInsets.fromLTRB(20, 31, 20, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -392,29 +404,43 @@ class HomeScreen extends StatelessWidget {
                   controller.changeCategory(index);
                   HapticFeedback.lightImpact();
                 },
-                child: Container(
-                  margin: const EdgeInsets.only(right: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 25),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColor.primary : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected
-                          ? Colors.transparent
-                          : const Color(0xFFE2E8F0),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    alignment: Alignment.center,
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColor.primary : AppColor.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.transparent
+                            : Colors.grey.shade300,
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isSelected
+                              ? AppColor.primary.withOpacity(0.25)
+                              : Colors.black.withOpacity(0.05),
+                          blurRadius: isSelected ? 8 : 4,
+                          offset: Offset(0, isSelected ? 4 : 1),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      controller.categories[index],
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : AppColor.grey,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                  child: Text(
-                    controller.categories[index],
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF64748B),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
               );
             });
           },
@@ -587,6 +613,31 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            data.type.toLowerCase() == "kosan"
+                                ? Icons.home_work_outlined
+                                : Icons.home_work_outlined,
+                            size: 15,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            data.type.toLowerCase() == "kosan"
+                                ? "${data.availableCount} kamar tersedia"
+                                : data.availableCount > 0
+                                ? "Kontrakan tersedia"
+                                : "Tidak tersedia",
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -600,7 +651,8 @@ class HomeScreen extends StatelessWidget {
                               ),
                               children: [
                                 TextSpan(
-                                  text: data.price == data.priceMax ||
+                                  text:
+                                      data.price == data.priceMax ||
                                           data.priceMax == '0'
                                       ? "Rp ${_formatHarga(data.price)}"
                                       : "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
@@ -618,7 +670,10 @@ class HomeScreen extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                            Get.to(() => const DetailScreen(), arguments: data);
+                              Get.to(
+                                () => const DetailScreen(),
+                                arguments: data,
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColor.primary,
@@ -726,7 +781,7 @@ class HomeScreen extends StatelessWidget {
                   "Filter",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-          
+
                 // Tipe Hunian
                 const SizedBox(height: 25),
                 const Text(
@@ -756,7 +811,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-          
+
                 const SizedBox(height: 25),
                 const Text(
                   "Tipe Penghuni",
@@ -777,7 +832,7 @@ class HomeScreen extends StatelessWidget {
                     }).toList(),
                   ),
                 ),
-          
+
                 // Urutan Harga
                 const SizedBox(height: 25),
                 const Text(
@@ -802,7 +857,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-          
+
                 // Minimal Rating
                 const SizedBox(height: 25),
                 const Text(
@@ -819,7 +874,7 @@ class HomeScreen extends StatelessWidget {
                     onChanged: (val) => controller.setRating(val),
                   ),
                 ),
-          
+
                 // Maksimal Harga
                 const SizedBox(height: 25),
                 const Text(
@@ -841,7 +896,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-          
+
                 const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
