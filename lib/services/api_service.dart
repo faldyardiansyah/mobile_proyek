@@ -89,4 +89,8 @@ Future<dio_lib.Response<dynamic>> getDetailKosan(int id) async {
 Future<dio_lib.Response<dynamic>> getDetailKontrakan(int id) async {
   return await get('/properties/kontrakan/$id/detail');
 }
+
+Future<dio_lib.Response<dynamic>> postBooking(Map<String, dynamic> data) async {
+  return await post('/bookings', data);
+}
 }

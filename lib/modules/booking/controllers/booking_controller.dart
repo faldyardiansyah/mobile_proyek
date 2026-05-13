@@ -59,7 +59,6 @@ class BookingController extends GetxController {
     errorMessage.value = '';
 
     try {
-      // Tanggal mulai = hari ini
       final now = DateTime.now();
       final tglMulai =
           '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
@@ -78,7 +77,6 @@ class BookingController extends GetxController {
         return false;
       }
     } catch (e) {
-      // Handle DioException
       final dynamic err = e;
       if (err?.response != null) {
         final data = err.response?.data;

@@ -12,6 +12,7 @@ import '../models/property_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:appkonkos_mobile/modules/booking/widgets/booking_bottom_sheet.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key});
@@ -961,7 +962,32 @@ Temukan hunian impianmu di AppKonkos!
                           borderRadius: BorderRadius.circular(28),
                         ),
                       ),
-                      onPressed: ctrl.canBook ? () {} : null,
+                      onPressed: ctrl.canBook ? () {
+                        final roomTypes = ctrl.roomTypes;
+                        final selectedTypeId = ctrl.selectedRoomTypeId.value;
+                        final selectedRoomId = ctrl.selectedRoomId.value;
+                        final selectedType = roomTypes.firstWhereOrNull(
+                          (t) => t['id'] == selectedTypeId,
+                        );
+                
+                        final kamarNama = ctrl
+                            .roomsForType(selectedTypeId!)
+                            .firstWhereOrNull((r) => r['id'] == selectedRoomId)?['number']
+                            ?.toString() ?? '';
+                
+                        final harga = int.tryParse(
+                          selectedType?['price']?.toString() ?? '0',
+                        ) ?? 0;
+                
+                        final tipeNama = selectedType?['name']?.toString() ?? '';
+                
+                        BookingBottomSheet.show(
+                          kamarId: selectedRoomId.toString(),
+                          kamarNama: kamarNama,
+                          hargaPerBulan: harga,
+                          tipeKamarNama: tipeNama,
+                        );
+                      } : null,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
