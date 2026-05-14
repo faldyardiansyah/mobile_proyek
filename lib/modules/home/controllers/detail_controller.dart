@@ -59,10 +59,15 @@ class DetailController extends GetxController {
   }
 
   bool get canBook {
-    final tipe = detail.value?['tipe'] ?? '';
-    if (tipe == 'Kosan') {
-      return selectedRoomTypeId.value != null && selectedRoomId.value != null;
-    }
-    return true;
+  final tipe = detail.value?['tipe']
+      ?.toString()
+      .toLowerCase() ?? '';
+
+  if (tipe == 'kosan') {
+    return selectedRoomTypeId.value != null &&
+        selectedRoomId.value != null;
   }
+
+  return true;
+}
 }

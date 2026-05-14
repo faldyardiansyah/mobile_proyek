@@ -11,6 +11,7 @@ import '../chat/chat_screen.dart';
 import '../wishlist/wishlist_screen.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});

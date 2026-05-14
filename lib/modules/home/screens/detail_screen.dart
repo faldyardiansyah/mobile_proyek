@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import '../controllers/detail_controller.dart';
 import '../widgets/review_card.dart';
+import '../widgets/full_screen_gallery.dart';
 import '../controllers/home_controller.dart';
 import '../models/property_model.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -107,8 +108,13 @@ class _DetailScreenState extends State<DetailScreen> {
                         child: ValueListenableBuilder<int>(
                           valueListenable: _photoIdx,
                           builder: (_, idx, __) {
-                            final foto = data['foto'];
-                            int total = foto is List ? foto.length : 1;
+                            final foto = data['fotos'];
+                            int total = 1;
+                            if (foto is List) {
+                              total = foto.length;
+                            } else if (foto is String && foto.isNotEmpty) {
+                              total = 1;
+                            }
                             return Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -146,80 +152,119 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildHeaderImage(dynamic foto) {
     List<String> photos = [];
+
     if (foto is List) {
       photos = foto.map((e) => e.toString()).toList();
     } else if (foto is String && foto.isNotEmpty) {
       photos = [foto];
     }
-    if (photos.isEmpty) photos = ['https://via.placeholder.com/400x300'];
+
+    if (photos.isEmpty) {
+      photos = ['https://via.placeholder.com/400x300'];
+    }
 
     return SizedBox(
-      height: 320,
+      height: 340,
       child: Stack(
         children: [
           CarouselSlider.builder(
             itemCount: photos.length,
             options: CarouselOptions(
-              height: 320,
-              viewportFraction: 1.0,
+              height: 340,
+              viewportFraction: 1,
+              enlargeCenterPage: false,
               enableInfiniteScroll: photos.length > 1,
               autoPlay: photos.length > 1,
               autoPlayInterval: const Duration(seconds: 4),
-              autoPlayAnimationDuration: const Duration(milliseconds: 500),
-              onPageChanged: (index, _) => _photoIdx.value = index,
+              autoPlayAnimationDuration: const Duration(milliseconds: 800),
+              onPageChanged: (index, reason) {
+                _photoIdx.value = index;
+              },
             ),
-            itemBuilder: (_, index, __) => Image.network(
-              photos[index],
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.image, size: 60, color: Colors.grey),
-              ),
-            ),
+            itemBuilder: (context, index, realIndex) {
+              return GestureDetector(
+                onTap: () {
+                  Get.to(
+                    () =>
+                        FullscreenGallery(images: photos, initialIndex: index),
+                  );
+                },
+                child: Hero(
+                  tag: photos[index],
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(color: Colors.grey.shade200),
+                    child: Image.network(
+                      photos[index],
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                      errorBuilder: (_, __, ___) {
+                        return Container(
+                          color: Colors.grey.shade200,
+                          child: const Icon(
+                            Icons.broken_image,
+                            size: 60,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
 
+          // gradient bawah
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
-              height: 80,
+              height: 120,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [Colors.black45, Colors.transparent],
+                  colors: [Colors.black54, Colors.transparent],
                 ),
               ),
             ),
           ),
 
-          if (photos.length > 1)
-            Positioned(
-              bottom: 36,
-              left: 0,
-              right: 0,
-              child: ValueListenableBuilder<int>(
-                valueListenable: _photoIdx,
-                builder: (_, idx, __) => Row(
+          // indicator
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<int>(
+              valueListenable: _photoIdx,
+              builder: (_, idx, __) {
+                return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
                     photos.length,
                     (i) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: i == idx ? 20 : 6,
-                      height: 6,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: i == idx ? 22 : 7,
+                      height: 7,
                       decoration: BoxDecoration(
-                        color: i == idx ? Colors.white : Colors.white54,
-                        borderRadius: BorderRadius.circular(10),
+                        color: i == idx
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
+          ),
         ],
       ),
     );
@@ -962,32 +1007,62 @@ Temukan hunian impianmu di AppKonkos!
                           borderRadius: BorderRadius.circular(28),
                         ),
                       ),
-                      onPressed: ctrl.canBook ? () {
-                        final roomTypes = ctrl.roomTypes;
-                        final selectedTypeId = ctrl.selectedRoomTypeId.value;
-                        final selectedRoomId = ctrl.selectedRoomId.value;
-                        final selectedType = roomTypes.firstWhereOrNull(
-                          (t) => t['id'] == selectedTypeId,
-                        );
-                
-                        final kamarNama = ctrl
-                            .roomsForType(selectedTypeId!)
-                            .firstWhereOrNull((r) => r['id'] == selectedRoomId)?['number']
-                            ?.toString() ?? '';
-                
-                        final harga = int.tryParse(
-                          selectedType?['price']?.toString() ?? '0',
-                        ) ?? 0;
-                
-                        final tipeNama = selectedType?['name']?.toString() ?? '';
-                
-                        BookingBottomSheet.show(
-                          kamarId: selectedRoomId.toString(),
-                          kamarNama: kamarNama,
-                          hargaPerBulan: harga,
-                          tipeKamarNama: tipeNama,
-                        );
-                      } : null,
+                      onPressed: ctrl.canBook
+                          ? () {
+                              final tipe =
+                                  data['tipe']?.toString().toLowerCase() ?? '';
+                              if (tipe == 'kontrakan') {
+                                final harga =
+                                    int.tryParse(
+                                      data['harga']?.toString() ?? '0',
+                                    ) ??
+                                    0;
+
+                                BookingBottomSheet.show(
+                                  kamarId: '0',
+                                  kamarNama: 'Kontrakan',
+                                  hargaPerBulan: harga,
+                                  tipeKamarNama: 'Kontrakan',
+                                  tipeProperty: data['tipe'],
+                                );
+
+                                return;
+                              }
+                              final roomTypes = ctrl.roomTypes;
+                              final selectedTypeId =
+                                  ctrl.selectedRoomTypeId.value;
+                              final selectedRoomId = ctrl.selectedRoomId.value;
+                              final selectedType = roomTypes.firstWhereOrNull(
+                                (t) => t['id'] == selectedTypeId,
+                              );
+
+                              final kamarNama =
+                                  ctrl
+                                      .roomsForType(selectedTypeId!)
+                                      .firstWhereOrNull(
+                                        (r) => r['id'] == selectedRoomId,
+                                      )?['number']
+                                      ?.toString() ??
+                                  '';
+
+                              final harga =
+                                  int.tryParse(
+                                    selectedType?['price']?.toString() ?? '0',
+                                  ) ??
+                                  0;
+
+                              final tipeNama =
+                                  selectedType?['name']?.toString() ?? '';
+
+                              BookingBottomSheet.show(
+                                kamarId: selectedRoomId.toString(),
+                                kamarNama: kamarNama,
+                                hargaPerBulan: harga,
+                                tipeKamarNama: tipeNama,
+                                tipeProperty: data['tipe'],
+                              );
+                            }
+                          : null,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

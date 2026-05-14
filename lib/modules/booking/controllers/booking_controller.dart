@@ -1,15 +1,17 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
 
 class BookingController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
   final _storage = GetStorage();
-
+  final durasiController = TextEditingController(text: '1');
   // State
   final RxInt selectedDurasi = 1.obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
+  final tipeProperty = ''.obs;
 
   String? kamarId;
   String? kamarNama;
@@ -93,4 +95,7 @@ class BookingController extends GetxController {
       isLoading.value = false;
     }
   }
+  void setTipeProperty(String tipe) {
+  tipeProperty.value = tipe;
+}
 }

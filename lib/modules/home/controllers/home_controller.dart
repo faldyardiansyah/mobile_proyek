@@ -54,18 +54,25 @@ class HomeController extends GetxController {
   }
 
 var isLoading = true.obs;
-  Future<void> loadProperties() async {
-    try {
-      final response = await apiService.get('/all-properties');
-      print("DATA API: ${response.data}");
-      final List data = response.data['data'] ?? [];
-      final result = data.map((e) => Property.fromJson(e)).toList();
-      allProperties.assignAll(result);
-      properties.assignAll(result);
-    } catch (e) {
-      print("ERROR LOAD PROPERTY: $e");
-    }
+
+Future<void> loadProperties() async {
+  try {
+    isLoading.value = true;
+    final response = await apiService.get('/all-properties');
+    print("DATA API: ${response.data}");
+    final List data = response.data['data'] ?? [];
+    final result = data
+        .map((e) => Property.fromJson(e))
+        .toList();
+    allProperties.assignAll(result);
+    properties.assignAll(result);
+
+  } catch (e) {
+    print("ERROR LOAD PROPERTY: $e");
+  } finally {
+    isLoading.value = false;
   }
+}
 
   void changeTab(int index) {
     tabIndex.value = index;

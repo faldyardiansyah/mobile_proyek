@@ -11,6 +11,7 @@ class BookingBottomSheet extends StatelessWidget {
     required String kamarNama,
     required int hargaPerBulan,
     required String tipeKamarNama,
+    required String tipeProperty,
   }) {
     final ctrl = Get.isRegistered<BookingController>()
         ? Get.find<BookingController>()
@@ -22,6 +23,8 @@ class BookingBottomSheet extends StatelessWidget {
       harga: hargaPerBulan,
       tipeNama: tipeKamarNama,
     );
+
+    ctrl.tipeProperty.value = tipeProperty;
 
     Get.bottomSheet(
       const BookingBottomSheet(),
@@ -37,166 +40,284 @@ class BookingBottomSheet extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
       ),
       child: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 20,
+              left: 24,
+              right: 24,
+              top: 14,
               bottom: MediaQuery.of(context).viewInsets.bottom + 20,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 50,
-                  height: 5,
+                  width: 55,
+                  height: 6,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 28),
 
                 const Text(
                   'Konfirmasi Booking',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ctrl.kamarNama ?? '',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      Text(
-                        ctrl.tipeKamarNama ?? '',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Durasi Sewa',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    color: Color(0xFF1A1A1A),
                   ),
                 ),
 
                 const SizedBox(height: 10),
 
-                Obx(
-                  () => Row(
-                    children: ctrl.opsiDurasi.map((bulan) {
-                      final isSelected =
-                          ctrl.selectedDurasi.value == bulan;
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.meeting_room_outlined,
+                      size: 18,
+                      color: AppColor.blue,
+                    ),
 
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            ctrl.selectDurasi(bulan);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColor.blue
-                                  : Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '$bulan Bulan',
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
+                    const SizedBox(width: 6),
+
+                    Flexible(
+                      child: Text(
+                        '${ctrl.kamarNama} • ${ctrl.tipeKamarNama}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColor.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
-                      );
-                    }).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 34),
+
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Pilih Durasi Sewa',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
+
+                Obx(() {
+                  final isKontrakan = ctrl.tipeProperty.value == 'Kontrakan';
+
+                  return Column(
+                    children: [
+                      Row(
+                        children: ctrl.opsiDurasi.map((durasi) {
+                          final isSelected =
+                              ctrl.selectedDurasi.value == durasi;
+
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                ctrl.selectDurasi(durasi);
+
+                                ctrl.durasiController.text = durasi.toString();
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColor.blue
+                                      : const Color(0xFFF3F3F3),
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: AppColor.blue.withOpacity(
+                                              0.25,
+                                            ),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'OPSI',
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white70
+                                            : Colors.grey,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 6),
+
+                                    Text(
+                                      isKontrakan
+                                          ? '$durasi Tahun'
+                                          : '$durasi Bulan',
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      TextField(
+                        controller: ctrl.durasiController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: isKontrakan
+                              ? 'Input durasi tahun sendiri'
+                              : 'Input durasi bulan sendiri',
+                          prefixIcon: const Icon(
+                            Icons.edit_calendar,
+                            color: AppColor.blue,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF5F5F5),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: const BorderSide(
+                              color: AppColor.blue,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        onChanged: (v) {
+                          ctrl.selectDurasi(int.tryParse(v) ?? 1);
+                        },
+                      ),
+                    ],
+                  );
+                }),
+
+                const SizedBox(height: 28),
 
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.grey.shade100,
+                    color: const Color(0xFFF7F7F7),
+                    borderRadius: BorderRadius.circular(28),
                   ),
                   child: Obx(
                     () => Column(
                       children: [
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Harga per bulan'),
+                            Text(
+                              ctrl.tipeProperty.value == 'Kontrakan'
+                               ? 'Harga per tahun' : 'Harga per bulan',
+                                 style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey,
+                              ),
+                            ),
+
                             Text(
                               'Rp ${ctrl.formattedHargaPerBulan}',
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
 
-                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 18),
+                          child: Divider(),
+                        ),
 
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Total',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Total\nPembayaran',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.1,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      size: 14,
+                                      color: AppColor.blue.withOpacity(0.8),
+                                    ),
+
+                                    const SizedBox(width: 4),
+                                    const Text(
+                                      'TERMASUK DEPOSIT\nAWAL',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppColor.blue,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            Text(
-                              'Rp ${ctrl.formattedTotal}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColor.blue,
-                                fontSize: 18,
+
+                            Flexible(
+                              child: Text(
+                                'Rp${ctrl.formattedTotal}',
+                                textAlign: TextAlign.right,
+                                style: const TextStyle(
+                                  color: AppColor.blue,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.2,
+                                ),
                               ),
                             ),
                           ],
@@ -206,47 +327,25 @@ class BookingBottomSheet extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 20),
-
-                Obx(() {
-                  if (ctrl.errorMessage.value.isEmpty) {
-                    return const SizedBox();
-                  }
-
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      ctrl.errorMessage.value,
-                      style: const TextStyle(
-                        color: Colors.red,
-                      ),
-                    ),
-                  );
-                }),
+                const SizedBox(height: 32),
 
                 Obx(
                   () => SizedBox(
                     width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
+                    height: 58,
+                    child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.blue,
+                        elevation: 6,
+                        shadowColor: AppColor.blue.withOpacity(0.4),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
                       onPressed: ctrl.isLoading.value
                           ? null
                           : () async {
-                              final success =
-                                  await ctrl.submitBooking();
+                              final success = await ctrl.submitBooking();
 
                               if (success) {
                                 Get.back();
@@ -259,18 +358,40 @@ class BookingBottomSheet extends StatelessWidget {
                                 );
                               }
                             },
-                      child: ctrl.isLoading.value
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                          : const Text(
-                              'Ajukan Booking',
-                              style: TextStyle(
+                      icon: ctrl.isLoading.value
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                strokeWidth: 2.5,
                               ),
+                            )
+                          : const Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.white,
                             ),
+                      label: const Text(
+                        'Ajukan Booking Sekarang',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                const Text(
+                  'Dengan menekan tombol di atas, Anda menyetujui\nSyarat & Ketentuan yang berlaku.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    height: 1.5,
                   ),
                 ),
               ],
