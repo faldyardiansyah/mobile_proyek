@@ -1019,13 +1019,13 @@ Temukan hunian impianmu di AppKonkos!
                                     0;
 
                                 BookingBottomSheet.show(
-                                  kamarId: '0',
-                                  kamarNama: 'Kontrakan',
+                                  kamarId: null,
+                                  kontrakanId: data['id']?.toString(),
+                                  kamarNama: data['nama'] ?? 'Kontrakan',
                                   hargaPerBulan: harga,
                                   tipeKamarNama: 'Kontrakan',
                                   tipeProperty: data['tipe'],
                                 );
-
                                 return;
                               }
                               final roomTypes = ctrl.roomTypes;

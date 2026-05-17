@@ -51,11 +51,7 @@ class AuthController extends GetxController {
   Future<void> login() async {
     if (emailLoginController.text.isEmpty ||
         passwordLoginController.text.isEmpty) {
-      _showSnackbar(
-        'Perhatian',
-        'Email dan password wajib diisi',
-        Colors.orange,
-      );
+      _showSnackbar('Perhatian', 'Email dan password wajib diisi', Colors.orange);
       return;
     }
 
@@ -71,32 +67,33 @@ class AuthController extends GetxController {
         final data = response.data;
 
         if (data != null && data['token'] != null && data['user'] != null) {
-            box.write('token', data['token']);
-            box.write('user', data['user']);
+          // Simpan token dan data login dulu
+          box.write('token', data['token']);
+          box.write('user', data['user']);
           user.value = Map<String, dynamic>.from(data['user']);
 
+          // Ambil profil lengkap (jenis_kelamin, pekerjaan, domisili, dll)
+          try {
+            final profileResponse = await _api.get('/profile');
+            if (profileResponse.statusCode == 200) {
+              final userData = profileResponse.data['user'];
+              user.value = Map<String, dynamic>.from(userData);
+              box.write('user', userData);
+            }
+          } catch (e) {
+            // kalau gagal tidak apa-apa, pakai data login saja
+          }
+
           Get.offAllNamed('/home');
-          _showSnackbar(
-            'Berhasil',
-            'Selamat datang ${user.value['name']}',
-            Colors.green,
-          );
+          _showSnackbar('Berhasil', 'Selamat datang ${user.value['name']}', Colors.green);
         } else {
-          _showSnackbar(
-            'Login Gagal',
-            'Data dari server tidak lengkap',
-            Colors.red,
-          );
+          _showSnackbar('Login Gagal', 'Data dari server tidak lengkap', Colors.red);
         }
       } else {
         _showSnackbar('Login Gagal', 'Email atau password salah', Colors.red);
       }
     } on DioException catch (e) {
-      _showSnackbar(
-        'Login Gagal',
-        e.response?.data?['message'] ?? 'Terjadi kesalahan server',
-        Colors.red,
-      );
+      _showSnackbar('Login Gagal', e.response?.data?['message'] ?? 'Terjadi kesalahan server', Colors.red);
     } catch (e) {
       _showSnackbar('Error', 'Terjadi error: $e', Colors.red);
     } finally {
@@ -105,82 +102,69 @@ class AuthController extends GetxController {
   }
 
   Future<void> register() async {
-  if (namaRegisterController.text.isEmpty ||
-      registerEmailController.text.isEmpty ||
-      registerPasswordController.text.isEmpty ||
-      registerphoneController.text.isEmpty ||
-      !isAgreeTerms.value) {
-    _showSnackbar('Perhatian', 'Lengkapi data dan setujui syarat ketentuan', Colors.orange);
-    return;
-  }
+    if (namaRegisterController.text.isEmpty ||
+        registerEmailController.text.isEmpty ||
+        registerPasswordController.text.isEmpty ||
+        registerphoneController.text.isEmpty ||
+        !isAgreeTerms.value) {
+      _showSnackbar('Perhatian', 'Lengkapi data dan setujui syarat ketentuan', Colors.orange);
+      return;
+    }
 
-  try {
-    isLoading.value = true;
+    try {
+      isLoading.value = true;
 
-    final response = await _api.post('/auth/register', {
-      'name': namaRegisterController.text.trim(),
-      'email': registerEmailController.text.trim(),
-      'no_telepon': registerphoneController.text.trim(),
-      'password': registerPasswordController.text,
-      'password_confirmation': registerPasswordController.text,
-    });
+      final response = await _api.post('/auth/register', {
+        'name': namaRegisterController.text.trim(),
+        'email': registerEmailController.text.trim(),
+        'no_telepon': registerphoneController.text.trim(),
+        'password': registerPasswordController.text,
+        'password_confirmation': registerPasswordController.text,
+      });
 
-    if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
-      final data = response.data;
+      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+        final data = response.data;
 
-      if (data != null && data['token'] != null) {
-        
-        namaRegisterController.clear();
-        registerEmailController.clear();
-        registerPasswordController.clear();
-        registerphoneController.clear();
-        isAgreeTerms.value = false;
+        if (data != null && data['token'] != null) {
+          namaRegisterController.clear();
+          registerEmailController.clear();
+          registerPasswordController.clear();
+          registerphoneController.clear();
+          isAgreeTerms.value = false;
 
-        Get.offAllNamed('/login');
-        
-        _showSnackbar(
-          'Berhasil',
-          'Registrasi berhasil, silakan login',
-          Colors.green,
-        );
-      } else {
-        print("DEBUG: Response data tidak lengkap: $data");
-        _showSnackbar('Gagal', 'Respon server tidak sesuai format', Colors.red);
+          Get.offAllNamed('/login');
+          _showSnackbar('Berhasil', 'Registrasi berhasil, silakan login', Colors.green);
+        } else {
+          _showSnackbar('Gagal', 'Respon server tidak sesuai format', Colors.red);
+        }
       }
-    }
-  } on DioException catch (e) {
-  String errorMessage = 'Terjadi kesalahan';
-
-  if (e.response != null && e.response?.data != null) {
-    var errors = e.response?.data['errors'];
-    if (errors != null && errors is Map) {
-      errorMessage = errors.values.first[0].toString();
-    } else {
-      errorMessage = e.response?.data['message'] ?? 'Registrasi gagal';
+    } on DioException catch (e) {
+      String errorMessage = 'Terjadi kesalahan';
+      if (e.response != null && e.response?.data != null) {
+        var errors = e.response?.data['errors'];
+        if (errors != null && errors is Map) {
+          errorMessage = errors.values.first[0].toString();
+        } else {
+          errorMessage = e.response?.data['message'] ?? 'Registrasi gagal';
+        }
+      }
+      _showSnackbar('Gagal', errorMessage, Colors.red);
+    } finally {
+      isLoading.value = false;
     }
   }
-  _showSnackbar('Gagal', errorMessage, Colors.red);
-} finally {
-  isLoading.value = false;
-}
-}
 
   Future<void> logout() async {
     String namaUser = user.value['name'] ?? 'Pengguna';
-
     try {
       await _api.post('/auth/logout', {}).timeout(const Duration(seconds: 2));
     } catch (_) {
     } finally {
-     box.remove('token');
+      box.remove('token');
       box.remove('user');
       user.value = {};
       Get.offAllNamed('/login');
-      _showSnackbar(
-        'Berhasil',
-        'Berhasil Logout dari akun $namaUser',
-        Colors.green,
-      );
+      _showSnackbar('Berhasil', 'Berhasil Logout dari akun $namaUser', Colors.green);
     }
   }
 

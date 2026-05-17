@@ -7,9 +7,9 @@ class ApiService extends GetxService {
   late dio_lib.Dio _dio;
   final _storage = GetStorage();
 
- static String get baseUrl => dotenv.env['BASE_URL'] ?? 'http://192.168.1.10:8000/api';
+  static String get baseUrl =>
+      dotenv.env['BASE_URL'] ?? 'http://192.168.1.8:8000/api';
   @override
-
   void onInit() {
     super.onInit();
 
@@ -48,15 +48,24 @@ class ApiService extends GetxService {
     );
   }
 
-  Future<dio_lib.Response<dynamic>> post(String endpoint, Map<String, dynamic> data) async {
+  Future<dio_lib.Response<dynamic>> post(
+    String endpoint,
+    Map<String, dynamic> data,
+  ) async {
     return await _dio.post(endpoint, data: data);
   }
 
-  Future<dio_lib.Response<dynamic>> get(String endpoint, {Map<String, dynamic>? params}) async {
+  Future<dio_lib.Response<dynamic>> get(
+    String endpoint, {
+    Map<String, dynamic>? params,
+  }) async {
     return await _dio.get(endpoint, queryParameters: params);
   }
 
-  Future<dio_lib.Response<dynamic>> put(String endpoint, Map<String, dynamic> data) async {
+  Future<dio_lib.Response<dynamic>> put(
+    String endpoint,
+    Map<String, dynamic> data,
+  ) async {
     return await _dio.put(endpoint, data: data);
   }
 
@@ -64,7 +73,9 @@ class ApiService extends GetxService {
     return await get('/profile');
   }
 
-  Future<dio_lib.Response<dynamic>> updateProfile(Map<String, dynamic> data) async {
+  Future<dio_lib.Response<dynamic>> updateProfile(
+    Map<String, dynamic> data,
+  ) async {
     return await put('/profile/update', data);
   }
 
@@ -73,24 +84,39 @@ class ApiService extends GetxService {
   }
 
   Future<dio_lib.Response<dynamic>> postFormData(
-    String endpoint, dio_lib.FormData formData) async {
-  return await _dio.post(
-    endpoint,
-    data: formData,
-    options: dio_lib.Options(
-      headers: {'Content-Type': 'multipart/form-data'},
-    ),
-  );
-}
-Future<dio_lib.Response<dynamic>> getDetailKosan(int id) async {
-  return await get('/properties/kosan/$id/detail');
-}
+    String endpoint,
+    dio_lib.FormData formData,
+  ) async {
+    return await _dio.post(
+      endpoint,
+      data: formData,
+      options: dio_lib.Options(
+        headers: {'Content-Type': 'multipart/form-data'},
+      ),
+    );
+  }
 
-Future<dio_lib.Response<dynamic>> getDetailKontrakan(int id) async {
-  return await get('/properties/kontrakan/$id/detail');
-}
+  Future<dio_lib.Response<dynamic>> getDetailKosan(int id) async {
+    return await get('/properties/kosan/$id/detail');
+  }
 
-Future<dio_lib.Response<dynamic>> postBooking(Map<String, dynamic> data) async {
-  return await post('/bookings', data);
-}
+  Future<dio_lib.Response<dynamic>> getDetailKontrakan(int id) async {
+    return await get('/properties/kontrakan/$id/detail');
+  }
+
+  Future<dio_lib.Response<dynamic>> postBooking(
+    Map<String, dynamic> data,
+  ) async {
+    return await post('/bookings', data);
+  }
+
+  Future<dio_lib.Response<dynamic>> createBooking(
+    Map<String, dynamic> data,
+  ) async {
+    return await post('/bookings', data);
+  }
+
+  Future<dio_lib.Response<dynamic>> getSnapToken(String bookingId) async {
+    return await get('/bookings/$bookingId/snap-token');
+  }
 }

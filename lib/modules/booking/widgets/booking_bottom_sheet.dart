@@ -7,31 +7,33 @@ class BookingBottomSheet extends StatelessWidget {
   const BookingBottomSheet({super.key});
 
   static void show({
-    required String kamarId,
-    required String kamarNama,
-    required int hargaPerBulan,
-    required String tipeKamarNama,
-    required String tipeProperty,
-  }) {
-    final ctrl = Get.isRegistered<BookingController>()
-        ? Get.find<BookingController>()
-        : Get.put(BookingController());
+  String? kamarId,
+  String? kontrakanId,
+  required String kamarNama,
+  required int hargaPerBulan,
+  required String tipeKamarNama,
+  required String tipeProperty,
+}) {
+  final ctrl = Get.isRegistered<BookingController>()
+      ? Get.find<BookingController>()
+      : Get.put(BookingController());
 
-    ctrl.setKamar(
-      id: kamarId,
-      nama: kamarNama,
-      harga: hargaPerBulan,
-      tipeNama: tipeKamarNama,
-    );
+  ctrl.setKamar(
+    id: kamarId,
+    kId: kontrakanId,
+    nama: kamarNama,
+    harga: hargaPerBulan,
+    tipeNama: tipeKamarNama,
+  );
 
-    ctrl.tipeProperty.value = tipeProperty;
+  ctrl.tipeProperty.value = tipeProperty;
 
-    Get.bottomSheet(
-      const BookingBottomSheet(),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-    );
-  }
+  Get.bottomSheet(
+    const BookingBottomSheet(),
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +86,7 @@ class BookingBottomSheet extends StatelessWidget {
                       size: 18,
                       color: AppColor.blue,
                     ),
-
                     const SizedBox(width: 6),
-
                     Flexible(
                       child: Text(
                         '${ctrl.kamarNama} • ${ctrl.tipeKamarNama}',

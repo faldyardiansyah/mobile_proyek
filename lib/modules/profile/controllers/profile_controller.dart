@@ -83,8 +83,19 @@ Future<void> uploadFotoSaja() async {
     isLoading.value = false;
   }
 }
-  Future<void> loadUserData() async {
+Future<void> loadUserData() async {
   isLoading.value = true;
+  final authC = Get.find<AuthController>();
+  final cachedUser = authC.user.value;
+  if (cachedUser.isNotEmpty) {
+    nameController.text = cachedUser['name'] ?? '';
+    emailController.text = cachedUser['email'] ?? '';
+    phoneController.text = cachedUser['no_telepon'] ?? '-';
+    noWaController.text = cachedUser['no_wa'] ?? '';
+    domisiliController.text = cachedUser['domisili'] ?? '';
+    selectedJenisKelamin.value = cachedUser['jenis_kelamin'];
+    selectedPekerjaan.value = cachedUser['pekerjaan'];
+  }
   try {
     final response = await _apiService.getProfile();
     if (response.statusCode == 200) {
@@ -97,15 +108,14 @@ Future<void> uploadFotoSaja() async {
       selectedJenisKelamin.value = userData['jenis_kelamin'];
       selectedPekerjaan.value = userData['pekerjaan'];
 
-      final authC = Get.find<AuthController>();
-      final updatedUser = Map<String, dynamic>.from(authC.user.value);
+      final updatedUser = Map<String, dynamic>.from(cachedUser);
       updatedUser['profile_photo_url'] = userData['profile_photo_url'];
       updatedUser['no_wa']             = userData['no_wa'];
       updatedUser['jenis_kelamin']     = userData['jenis_kelamin'];
       updatedUser['pekerjaan']         = userData['pekerjaan'];
       updatedUser['domisili']          = userData['domisili'];
       updatedUser['name']              = userData['name'];
-      authC.user.value = updatedUser; 
+      authC.user.value = updatedUser;
       authC.box.write('user', authC.user.value);
     }
   } catch (e) {
