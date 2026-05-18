@@ -10,7 +10,7 @@ import './controllers/home_controller.dart';
 import '../chat/chat_screen.dart';
 import '../wishlist/wishlist_screen.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_animate/flutter_animate.dart' hide ShimmerEffect;
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -118,13 +118,16 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHomeContent() {
-    return SafeArea(
-      child: RefreshIndicator(
-        onRefresh: () => controller.loadProperties(),
-        child: Obx(() {
-          // ← pindah Obx ke sini
-          return CustomScrollView(
+Widget _buildHomeContent() {
+  return SafeArea(
+    child: Obx(() {
+      final isSkeleton = controller.isSkeleton.value;
+      return Skeletonizer(
+        enabled: isSkeleton,
+        effect: const ShimmerEffect(duration: Duration(milliseconds: 1000)),
+        child: RefreshIndicator(
+          onRefresh: () => controller.loadProperties(),
+          child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverAppBar(
@@ -152,7 +155,14 @@ class HomeScreen extends StatelessWidget {
               SliverToBoxAdapter(
                 child: _buildSectionTitle("Properti Terdekat"),
               ),
-              if (controller.properties.isEmpty &&
+              if (isSkeleton)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildSkeletonCard(),
+                    childCount: 3,
+                  ),
+                )
+              else if (controller.properties.isEmpty &&
                   controller.searchQuery.value.isEmpty)
                 SliverToBoxAdapter(
                   child: Center(
@@ -205,22 +215,77 @@ class HomeScreen extends StatelessWidget {
                 )
               else
                 SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    if (index == controller.properties.length) {
-                      return const SizedBox(height: 100);
-                    }
-                    return _buildPropertyCard(
-                      controller.properties[index],
-                      index,
-                    );
-                  }, childCount: controller.properties.length + 1),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index == controller.properties.length) {
+                        return const SizedBox(height: 100);
+                      }
+                      return _buildPropertyCard(
+                        controller.properties[index],
+                        index,
+                      );
+                    },
+                    childCount: controller.properties.length + 1,
+                  ),
                 ),
             ],
-          );
-        }),
-      ),
-    );
-  }
+          ),
+        ),
+      );
+    }),
+  );
+}
+
+Widget _buildSkeletonCard() {
+  return Container(
+    margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 180,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(height: 16, width: 200, color: Colors.grey[300]),
+              const SizedBox(height: 8),
+              Container(height: 12, width: 150, color: Colors.grey[300]),
+              const SizedBox(height: 8),
+              Container(height: 12, width: 120, color: Colors.grey[300]),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(height: 16, width: 130, color: Colors.grey[300]),
+                  Container(
+                    height: 36,
+                    width: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildNavItem(
     String imagePath,

@@ -54,196 +54,199 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: Obx(() {
         final isLoading = profileCtrl.isLoading.value;
 
-        return Skeletonizer(
-          enabled: isLoading,
-          effect: const ShimmerEffect(duration: Duration(milliseconds: 1200)),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-
-              GestureDetector(
-                onTap: () => profileCtrl.showImagePicker(),
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 45,
-                      backgroundColor: const Color(0xFFD9C3A3),
-
-                      backgroundImage:
-                          (!isLoading &&
-                              authC.user.value['profile_photo_url'] != null &&
-                              authC.user.value['profile_photo_url']
-                                  .toString()
-                                  .isNotEmpty)
-                          ? NetworkImage(
-                              "${authC.user.value['profile_photo_url'].toString().replaceAll('http://localhost', 'http://192.168.1.10:8000')}?t=${DateTime.now().millisecondsSinceEpoch}",
-                            )
-                          : null,
-
-                      child:
-                          authC.user.value['profile_photo_url'] == null ||
-                              authC.user.value['profile_photo_url']
-                                  .toString()
-                                  .isEmpty
-                          ? Text(
-                              (authC.user.value['name'] ?? 'U')
-                                  .toString()[0]
-                                  .toUpperCase(),
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            )
-                          : null,
-                    ),
-
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColor.primary,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_outlined,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              Text(
-                authC.user.value['name'] ?? 'User',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 5),
-
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: const Text(
-                  "VERIFIED ACCOUNT",
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppColor.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 5),
-
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-                  child: ListView(
+        return RefreshIndicator(
+          onRefresh: () => profileCtrl.loadUserData(),
+          child: Skeletonizer(
+            enabled: isLoading,
+            effect: const ShimmerEffect(duration: Duration(milliseconds: 2000)),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+          
+                GestureDetector(
+                  onTap: () => profileCtrl.showImagePicker(),
+                  child: Stack(
                     children: [
-                      const Text(
-                        "AKUN & KEAMANAN",
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF94A3B8),
-                        ),
+                      CircleAvatar(
+                        radius: 45,
+                        backgroundColor: const Color(0xFFD9C3A3),
+          
+                        backgroundImage:
+                            (!isLoading &&
+                                authC.user.value['profile_photo_url'] != null &&
+                                authC.user.value['profile_photo_url']
+                                    .toString()
+                                    .isNotEmpty)
+                            ? NetworkImage(
+                                "${authC.user.value['profile_photo_url'].toString().replaceAll('http://localhost', 'http://192.168.1.10:8000')}?t=${DateTime.now().millisecondsSinceEpoch}",
+                              )
+                            : null,
+          
+                        child:
+                            authC.user.value['profile_photo_url'] == null ||
+                                authC.user.value['profile_photo_url']
+                                    .toString()
+                                    .isEmpty
+                            ? Text(
+                                (authC.user.value['name'] ?? 'U')
+                                    .toString()[0]
+                                    .toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : null,
                       ),
-
-                      const SizedBox(height: 10),
-
-                      _menu(
-                        icon: Icons.person_outline,
-                        title: "Informasi Pribadi",
-                        onTap: () {
-                          Get.to(() => PersonalInfoScreen());
-                        },
-                      ),
-
-                      _menu(
-                        icon: Icons.lock_outline,
-                        title: "Ubah Password",
-                        onTap: () {
-                          Get.to(() => const PasswordScreen());
-                        },
-                      ),
-
-                      _menu(
-                        icon: Icons.credit_card,
-                        title: "Metode Pembayaran",
-                        onTap: () {
-                          Get.to(() => const PaymentScreen());
-                        },
-                      ),
-
-                      const SizedBox(height: 5),
-
-                      const Text(
-                        "Dukungan",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      _menu(
-                        icon: Icons.help_outline,
-                        title: "Pusat Bantuan",
-                        onTap: () {
-                          Get.to(() => const HelpScreen());
-                        },
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Get.defaultDialog(
-                            title: "Logout",
-                            middleText: "Yakin mau keluar?",
-                            textConfirm: "Ya",
-                            textCancel: "Batal",
-                            onConfirm: () {
-                              Get.back();
-                              authC.logout();
-                            },
-                          );
-                        },
-                        label: const Text("Keluar Sesi"),
-                        icon: const Icon(Icons.logout, size: 18),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppColor.primary,
-                          elevation: 0,
-                          side: const BorderSide(color: AppColor.primary),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+          
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColor.primary,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_outlined,
+                            size: 16,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+          
+                const SizedBox(height: 10),
+          
+                Text(
+                  authC.user.value['name'] ?? 'User',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+          
+                const SizedBox(height: 5),
+          
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Text(
+                    "VERIFIED ACCOUNT",
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppColor.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+          
+                const SizedBox(height: 5),
+          
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                    child: ListView(
+                      children: [
+                        const Text(
+                          "AKUN & KEAMANAN",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF94A3B8),
+                          ),
+                        ),
+          
+                        const SizedBox(height: 10),
+          
+                        _menu(
+                          icon: Icons.person_outline,
+                          title: "Informasi Pribadi",
+                          onTap: () {
+                            Get.to(() => PersonalInfoScreen());
+                          },
+                        ),
+          
+                        _menu(
+                          icon: Icons.lock_outline,
+                          title: "Ubah Password",
+                          onTap: () {
+                            Get.to(() => const PasswordScreen());
+                          },
+                        ),
+          
+                        _menu(
+                          icon: Icons.credit_card,
+                          title: "Metode Pembayaran",
+                          onTap: () {
+                            Get.to(() => const PaymentScreen());
+                          },
+                        ),
+          
+                        const SizedBox(height: 5),
+          
+                        const Text(
+                          "Dukungan",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+          
+                        const SizedBox(height: 10),
+          
+                        _menu(
+                          icon: Icons.help_outline,
+                          title: "Pusat Bantuan",
+                          onTap: () {
+                            Get.to(() => const HelpScreen());
+                          },
+                        ),
+          
+                        const SizedBox(height: 20),
+          
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Get.defaultDialog(
+                              title: "Logout",
+                              middleText: "Yakin mau keluar?",
+                              textConfirm: "Ya",
+                              textCancel: "Batal",
+                              onConfirm: () {
+                                Get.back();
+                                authC.logout();
+                              },
+                            );
+                          },
+                          label: const Text("Keluar Sesi"),
+                          icon: const Icon(Icons.logout, size: 18),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColor.primary,
+                            elevation: 0,
+                            side: const BorderSide(color: AppColor.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }),

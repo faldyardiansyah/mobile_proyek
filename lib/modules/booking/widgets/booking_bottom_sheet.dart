@@ -7,33 +7,33 @@ class BookingBottomSheet extends StatelessWidget {
   const BookingBottomSheet({super.key});
 
   static void show({
-  String? kamarId,
-  String? kontrakanId,
-  required String kamarNama,
-  required int hargaPerBulan,
-  required String tipeKamarNama,
-  required String tipeProperty,
-}) {
-  final ctrl = Get.isRegistered<BookingController>()
-      ? Get.find<BookingController>()
-      : Get.put(BookingController());
+    String? kamarId,
+    String? kontrakanId,
+    required String kamarNama,
+    required int hargaPerBulan,
+    required String tipeKamarNama,
+    required String tipeProperty,
+  }) {
+    final ctrl = Get.isRegistered<BookingController>()
+        ? Get.find<BookingController>()
+        : Get.put(BookingController());
 
-  ctrl.setKamar(
-    id: kamarId,
-    kId: kontrakanId,
-    nama: kamarNama,
-    harga: hargaPerBulan,
-    tipeNama: tipeKamarNama,
-  );
+    ctrl.setKamar(
+      id: kamarId,
+      kId: kontrakanId,
+      nama: kamarNama,
+      harga: hargaPerBulan,
+      tipeNama: tipeKamarNama,
+    );
 
-  ctrl.tipeProperty.value = tipeProperty;
+    ctrl.tipeProperty.value = tipeProperty;
 
-  Get.bottomSheet(
-    const BookingBottomSheet(),
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-  );
-}
+    Get.bottomSheet(
+      const BookingBottomSheet(),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -246,8 +246,9 @@ class BookingBottomSheet extends StatelessWidget {
                           children: [
                             Text(
                               ctrl.tipeProperty.value == 'Kontrakan'
-                               ? 'Harga per tahun' : 'Harga per bulan',
-                                 style: const TextStyle(
+                                  ? 'Harga per tahun'
+                                  : 'Harga per bulan',
+                              style: const TextStyle(
                                 fontSize: 15,
                                 color: Colors.grey,
                               ),
@@ -345,18 +346,7 @@ class BookingBottomSheet extends StatelessWidget {
                       onPressed: ctrl.isLoading.value
                           ? null
                           : () async {
-                              final success = await ctrl.submitBooking();
-
-                              if (success) {
-                                Get.back();
-
-                                Get.snackbar(
-                                  'Berhasil',
-                                  'Booking berhasil diajukan',
-                                  backgroundColor: Colors.green,
-                                  colorText: Colors.white,
-                                );
-                              }
+                              await ctrl.submitBooking();
                             },
                       icon: ctrl.isLoading.value
                           ? const SizedBox(

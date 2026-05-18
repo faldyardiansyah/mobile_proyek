@@ -225,7 +225,7 @@ Widget _buildDropdown({
     required String label,
     required IconData icon,
     required RxnString value,
-    required List<String> items,
+    required Map<String, String> items,
     required String hint,
   }) {
     return Padding(
@@ -263,11 +263,15 @@ Widget _buildDropdown({
               ),
             ),
             items: items
-                .map((item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(item,
-                          style: const TextStyle(fontSize: 14)),
+                .map((key, value) => MapEntry(
+                      key,
+                      DropdownMenuItem(
+                        value: key,
+                        child: Text(value,
+                            style: const TextStyle(fontSize: 14)),
+                      ),
                     ))
+                .values
                 .toList(),
             onChanged: (val) => value.value = val,
           )),

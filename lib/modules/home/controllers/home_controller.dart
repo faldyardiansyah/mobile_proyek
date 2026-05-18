@@ -53,26 +53,27 @@ class HomeController extends GetxController {
     }
   }
 
-var isLoading = true.obs;
+  var isLoading = true.obs;
+  var isSkeleton = true.obs;
 
-Future<void> loadProperties() async {
-  try {
-    isLoading.value = true;
-    final response = await apiService.get('/all-properties');
-    print("DATA API: ${response.data}");
-    final List data = response.data['data'] ?? [];
-    final result = data
-        .map((e) => Property.fromJson(e))
-        .toList();
-    allProperties.assignAll(result);
-    properties.assignAll(result);
-
-  } catch (e) {
-    print("ERROR LOAD PROPERTY: $e");
-  } finally {
-    isLoading.value = false;
+  Future<void> loadProperties() async {
+    try {
+      isSkeleton.value = true;
+      isLoading.value = true;
+      final response = await apiService.get('/all-properties');
+      print("DATA API: ${response.data}");
+      final List data = response.data['data'] ?? [];
+      final result = data.map((e) => Property.fromJson(e)).toList();
+      allProperties.assignAll(result);
+      properties.assignAll(result);
+      await Future.delayed(const Duration(seconds: 2));
+      isSkeleton.value = false;
+    } catch (e) {
+      print("ERROR LOAD PROPERTY: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
-}
 
   void changeTab(int index) {
     tabIndex.value = index;
@@ -124,7 +125,8 @@ Future<void> loadProperties() async {
 
     var filtered = allProperties.where((property) {
       double price =
-          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          double.tryParse(property.price.replaceAll(RegExp(r'[^0-9]'), '')) ??
+          0;
 
       bool matchesCategory =
           selectedCategory == "Semua" ||

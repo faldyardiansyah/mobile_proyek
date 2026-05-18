@@ -1,9 +1,9 @@
 import 'package:appkonkos_mobile/modules/profile/personal_info_screen.dart';
+import 'package:appkonkos_mobile/modules/booking/screens/booking_confirm_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class BookingController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
@@ -20,26 +20,29 @@ class BookingController extends GetxController {
   int? hargaPerBulan;
   String? tipeKamarNama;
   String? kontrakanId;
+  String? peraturan;
 
   final List<int> opsiDurasi = [1, 2, 3];
 
   int get totalBiaya => (hargaPerBulan ?? 0) * selectedDurasi.value;
 
   void setKamar({
-  String? id,
-  String? kId,
-  required String nama,
-  required int harga,
-  required String tipeNama,
-}) {
-  kamarId = id;
-  kontrakanId = kId;
-  kamarNama = nama;
-  hargaPerBulan = harga;
-  tipeKamarNama = tipeNama;
-  selectedDurasi.value = 1;
-  errorMessage.value = '';
-}
+    String? id,
+    String? kId,
+    required String nama,
+    required int harga,
+    required String tipeNama,
+    String? peraturanProperti,
+  }) {
+    kamarId = id;
+    kontrakanId = kId;
+    kamarNama = nama;
+    hargaPerBulan = harga;
+    tipeKamarNama = tipeNama;
+    peraturan = peraturanProperti ?? '';
+    selectedDurasi.value = 1;
+    errorMessage.value = '';
+  }
 
   void selectDurasi(int bulan) {
     selectedDurasi.value = bulan;
@@ -82,26 +85,59 @@ class BookingController extends GetxController {
       if (kamarId != null) body['kamar_id'] = kamarId;
       if (kontrakanId != null) body['kontrakan_id'] = kontrakanId;
 
+      print('>>> REQUEST BODY: $body');
+
       final response = await _api.post('/bookings', body);
+
+      print('>>> STATUS CODE: ${response.statusCode}');
+      print('>>> FULL RESPONSE: ${response.data}');
 
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           response.data['success'] == true) {
-        final snapToken = response.data['snap_token'];
-        final redirectUrl = response.data['redirect_url'];
-        print('>>> SNAP TOKEN: $snapToken');
-        print('>>> REDIRECT URL: $redirectUrl');
+        final redirectUrl = response.data['redirect_url']?.toString() ?? '';
+        final snapToken = response.data['snap_token']?.toString() ?? '';
+        final bookingId = response.data['booking_id']?.toString() ?? '';
 
-        // Buka halaman pembayaran Midtrans
-        if (redirectUrl != null) {
-          Get.back();
-          await Future.delayed(const Duration(milliseconds: 300));
-          _openMidtransPayment(redirectUrl);
+        print('>>> REDIRECT URL: $redirectUrl');
+        print('>>> SNAP TOKEN: $snapToken');
+
+        isLoading.value = false;
+        Get.back(); // tutup bottom sheet
+        await Future.delayed(const Duration(milliseconds: 400));
+
+        final url = redirectUrl.isNotEmpty
+            ? redirectUrl
+            : snapToken.isNotEmpty
+                ? 'https://app.sandbox.midtrans.com/snap/v2/vtweb/$snapToken'
+                : '';
+
+        if (url.isNotEmpty) {
+          // ← ke BookingConfirmScreen dulu, bukan langsung Midtrans
+          Get.to(() => BookingConfirmScreen(
+            redirectUrl: url,
+            bookingId: bookingId,
+            totalHarga: totalBiaya,
+            kamarNama: kamarNama ?? '',
+            tipeKamarNama: tipeKamarNama ?? '',
+            durasi: selectedDurasi.value,
+            hargaPerBulan: hargaPerBulan ?? 0,
+            tipeProperty: tipeProperty.value,
+            peraturan: peraturan ?? '',
+          ));
           return true;
         }
+
+        Get.snackbar(
+          'Booking Berhasil',
+          'Silakan cek riwayat booking kamu.',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
         return true;
+
       } else if (response.data['message'] == 'profil_tidak_lengkap') {
-        // Profil tidak lengkap — arahkan ke halaman profil
         Get.back();
+        await Future.delayed(const Duration(milliseconds: 300));
         _showProfilTidakLengkap(response.data['field_kosong'] ?? []);
         return false;
       } else {
@@ -110,13 +146,16 @@ class BookingController extends GetxController {
         return false;
       }
     } catch (e) {
+      print('>>> ERROR: $e');
       final dynamic err = e;
+
       if (err?.response != null) {
         final data = err.response?.data;
+        print('>>> ERROR RESPONSE: $data');
 
-        // Cek profil tidak lengkap dari exception
         if (data is Map && data['message'] == 'profil_tidak_lengkap') {
           Get.back();
+          await Future.delayed(const Duration(milliseconds: 300));
           _showProfilTidakLengkap(
             List<String>.from(data['field_kosong'] ?? []),
           );
@@ -135,12 +174,6 @@ class BookingController extends GetxController {
     }
   }
 
-  // Buka WebView Midtrans
-  void _openMidtransPayment(String url) {
-    Get.to(() => MidtransWebView(url: url));
-  }
-
-  // Dialog profil tidak lengkap
   void _showProfilTidakLengkap(List fieldKosong) {
     final labelMap = {
       'no_telepon': 'Nomor Telepon',
@@ -179,19 +212,11 @@ class BookingController extends GetxController {
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.cancel_outlined,
-                      color: Colors.red,
-                      size: 16,
-                    ),
+                    const Icon(Icons.cancel_outlined, color: Colors.red, size: 16),
                     const SizedBox(width: 8),
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
+                    Text(label,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -207,12 +232,10 @@ class BookingController extends GetxController {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF007BC2),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () {
               Get.back();
-              // Navigasi ke halaman personal info
               Get.to(() => PersonalInfoScreen())?.then((_) {
                 Get.snackbar(
                   'Profil Diperbarui',
@@ -223,116 +246,9 @@ class BookingController extends GetxController {
                 );
               });
             },
-            child: const Text(
-              'Lengkapi Profil',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Lengkapi Profil',
+                style: TextStyle(color: Colors.white)),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// ===== WebView untuk Midtrans =====
-class MidtransWebView extends StatefulWidget {
-  final String url;
-  const MidtransWebView({super.key, required this.url});
-
-  @override
-  State<MidtransWebView> createState() => _MidtransWebViewState();
-}
-
-class _MidtransWebViewState extends State<MidtransWebView> {
-  late final WebViewController _controller;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) => setState(() => isLoading = true),
-          onPageFinished: (_) => setState(() => isLoading = false),
-          onNavigationRequest: (request) {
-            final url = request.url;
-
-            // Deteksi callback Midtrans
-            if (url.contains('transaction_status=settlement') ||
-                url.contains('transaction_status=capture')) {
-              Get.back();
-              Get.snackbar(
-                '✅ Pembayaran Berhasil',
-                'Booking kamu sudah dikonfirmasi!',
-                backgroundColor: const Color(0xFFE8F5E9),
-                colorText: const Color(0xFF2E7D32),
-                snackPosition: SnackPosition.TOP,
-                duration: const Duration(seconds: 4),
-              );
-              return NavigationDecision.prevent;
-            }
-
-            if (url.contains('transaction_status=pending')) {
-              Get.back();
-              Get.snackbar(
-                '⏳ Menunggu Pembayaran',
-                'Selesaikan pembayaran sebelum batas waktu ya!',
-                snackPosition: SnackPosition.TOP,
-                duration: const Duration(seconds: 4),
-              );
-              return NavigationDecision.prevent;
-            }
-
-            if (url.contains('transaction_status=deny') ||
-                url.contains('transaction_status=cancel') ||
-                url.contains('transaction_status=expire')) {
-              Get.back();
-              Get.snackbar(
-                '❌ Pembayaran Gagal',
-                'Pembayaran dibatalkan atau kadaluarsa.',
-                backgroundColor: const Color(0xFFFFEBEE),
-                colorText: const Color(0xFFC62828),
-                snackPosition: SnackPosition.TOP,
-              );
-              return NavigationDecision.prevent;
-            }
-
-            return NavigationDecision.navigate;
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Pembayaran',
-          style: TextStyle(
-            color: Color(0xFF0B1020),
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xFF0B1020)),
-          onPressed: () => Get.back(),
-        ),
-      ),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (isLoading)
-            const Center(
-              child: CircularProgressIndicator(color: Color(0xFF007BC2)),
-            ),
         ],
       ),
     );
