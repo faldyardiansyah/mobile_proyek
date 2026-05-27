@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/auth/verification_email_screen.dart';
 import "package:flutter/material.dart";
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/splash/splash_screen.dart';
@@ -30,11 +31,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      initialRoute: '/splash',
       getPages: [
-        GetPage(name: '/login',    page: () => const LoginScreen()),
+        GetPage(name: '/splash', page: () => const SplashScreen()),
+        GetPage(name: '/login', page: () => const LoginScreen()),
         GetPage(name: '/register', page: () => const RegisterScreen()),
-        GetPage(name: '/home',     page: () =>  HomeScreen()),
+        GetPage(name: '/home', page: () => HomeScreen()),
+        GetPage(name: '/verify-email', page: () => const VerifyEmailScreen()),
       ],
     );
   }

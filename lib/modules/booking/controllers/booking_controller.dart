@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
+import 'package:appkonkos_mobile/modules/Riwayat/controllers/riwayat_controller.dart';
+import 'package:appkonkos_mobile/modules/Riwayat/models/model_riwayat.dart';
 
 class BookingController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
@@ -21,6 +23,12 @@ class BookingController extends GetxController {
   String? tipeKamarNama;
   String? kontrakanId;
   String? peraturan;
+  String? namaProperti;
+  String? fotoProperti;
+
+  // ← tambahan baru
+  String lastBookingId = '';
+  String noWaPemilik = '';
 
   final List<int> opsiDurasi = [1, 2, 3];
 
@@ -33,6 +41,8 @@ class BookingController extends GetxController {
     required int harga,
     required String tipeNama,
     String? peraturanProperti,
+    String? namaProperti,
+    String? fotoProperti,
   }) {
     kamarId = id;
     kontrakanId = kId;
@@ -40,6 +50,8 @@ class BookingController extends GetxController {
     hargaPerBulan = harga;
     tipeKamarNama = tipeNama;
     peraturan = peraturanProperti ?? '';
+    this.namaProperti = namaProperti ?? tipeNama;
+    this.fotoProperti = fotoProperti ?? '';
     selectedDurasi.value = 1;
     errorMessage.value = '';
   }
@@ -98,32 +110,59 @@ class BookingController extends GetxController {
         final snapToken = response.data['snap_token']?.toString() ?? '';
         final bookingId = response.data['booking_id']?.toString() ?? '';
 
+        // ← simpan ke variabel class
+        lastBookingId = bookingId;
+        noWaPemilik = response.data['no_wa_pemilik']?.toString() ?? '';
+
         print('>>> REDIRECT URL: $redirectUrl');
         print('>>> SNAP TOKEN: $snapToken');
 
         isLoading.value = false;
-        Get.back(); // tutup bottom sheet
+        Get.back();
         await Future.delayed(const Duration(milliseconds: 400));
 
         final url = redirectUrl.isNotEmpty
             ? redirectUrl
             : snapToken.isNotEmpty
-                ? 'https://app.sandbox.midtrans.com/snap/v2/vtweb/$snapToken'
-                : '';
+            ? 'https://app.sandbox.midtrans.com/snap/v2/vtweb/$snapToken'
+            : '';
 
         if (url.isNotEmpty) {
-          // ← ke BookingConfirmScreen dulu, bukan langsung Midtrans
-          Get.to(() => BookingConfirmScreen(
-            redirectUrl: url,
-            bookingId: bookingId,
-            totalHarga: totalBiaya,
-            kamarNama: kamarNama ?? '',
-            tipeKamarNama: tipeKamarNama ?? '',
-            durasi: selectedDurasi.value,
-            hargaPerBulan: hargaPerBulan ?? 0,
-            tipeProperty: tipeProperty.value,
-            peraturan: peraturan ?? '',
-          ));
+          print(
+            '>>> RiwayatController registered: ${Get.isRegistered<RiwayatController>()}',
+          );
+          try {
+            Get.find<RiwayatController>().tambahRiwayat(
+              id: '#BK-$bookingId',
+              rawId: bookingId,
+              title:
+                  '${tipeProperty.value} • ${namaProperti ?? tipeKamarNama ?? "Properti"}',
+              location: '',
+              price: 'Rp ${_formatHarga((totalBiaya + 10000).toString())}',
+              status: BookingStatus.menunggu,
+              imageAsset: fotoProperti ?? '',
+              bookingTime: DateTime.now(),
+              redirectUrl: url,
+              totalHarga: totalBiaya + 10000,
+            );
+            print('>>> RIWAYAT BERHASIL DITAMBAH');
+          } catch (e) {
+            print('>>> ERROR TAMBAH RIWAYAT: $e');
+          }
+
+          Get.to(
+            () => BookingConfirmScreen(
+              redirectUrl: url,
+              bookingId: bookingId,
+              totalHarga: totalBiaya,
+              kamarNama: kamarNama ?? '',
+              tipeKamarNama: tipeKamarNama ?? '',
+              durasi: selectedDurasi.value,
+              hargaPerBulan: hargaPerBulan ?? 0,
+              tipeProperty: tipeProperty.value,
+              peraturan: peraturan ?? '',
+            ),
+          );
           return true;
         }
 
@@ -134,7 +173,6 @@ class BookingController extends GetxController {
           colorText: Colors.white,
         );
         return true;
-
       } else if (response.data['message'] == 'profil_tidak_lengkap') {
         Get.back();
         await Future.delayed(const Duration(milliseconds: 300));
@@ -214,9 +252,13 @@ class BookingController extends GetxController {
                   children: [
                     const Icon(Icons.cancel_outlined, color: Colors.red, size: 16),
                     const SizedBox(width: 8),
-                    Text(label,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -232,7 +274,8 @@ class BookingController extends GetxController {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF007BC2),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () {
               Get.back();
@@ -246,8 +289,10 @@ class BookingController extends GetxController {
                 );
               });
             },
-            child: const Text('Lengkapi Profil',
-                style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Lengkapi Profil',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),

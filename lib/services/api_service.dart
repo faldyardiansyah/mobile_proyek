@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart' as dio_lib;
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_storage/get_storage.dart';
@@ -8,7 +9,7 @@ class ApiService extends GetxService {
   final _storage = GetStorage();
 
   static String get baseUrl =>
-      dotenv.env['BASE_URL'] ?? 'http://192.168.1.8:8000/api';
+      dotenv.env['BASE_URL'] ?? 'http://192.168.1.5:8000/api';
   @override
   void onInit() {
     super.onInit();
@@ -35,8 +36,8 @@ class ApiService extends GetxService {
           handler.next(options);
         },
         onError: (error, handler) {
-          print("ERROR STATUS: ${error.response?.statusCode}");
-          print("ERROR DATA: ${error.response?.data}");
+          debugPrint("ERROR STATUS: ${error.response?.statusCode}");
+          debugPrint("ERROR DATA: ${error.response?.data}");
 
           if (error.response?.statusCode == 401) {
             _storage.erase();
@@ -118,5 +119,13 @@ class ApiService extends GetxService {
 
   Future<dio_lib.Response<dynamic>> getSnapToken(String bookingId) async {
     return await get('/bookings/$bookingId/snap-token');
+  }
+
+  Future<dio_lib.Response<dynamic>> getRiwayatBooking() async {
+    return await get('/bookings');
+  }
+
+  Future<dio_lib.Response<dynamic>> cancelBooking(String bookingId) async {
+    return await _dio.patch('/bookings/$bookingId/cancel');
   }
 }

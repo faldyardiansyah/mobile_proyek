@@ -1,4 +1,5 @@
 import 'package:appkonkos_mobile/modules/home/screens/detail_screen.dart';
+import 'package:appkonkos_mobile/modules/riwayat/models/model_riwayat.dart';
 import '../Riwayat/riwayat_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -12,22 +13,43 @@ import '../wishlist/wishlist_screen.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import 'package:flutter_animate/flutter_animate.dart' hide ShimmerEffect;
 import 'package:skeletonizer/skeletonizer.dart';
+import '../Riwayat/controllers/riwayat_controller.dart';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
-  HomeController get controller {
-    if (!Get.isRegistered<HomeController>()) {
-      Get.put(HomeController());
-    }
-    return Get.find<HomeController>();
-  }
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final HomeController controller;
+  late final RiwayatController riwayatController;
 
   AuthController get authC => Get.find<AuthController>();
 
   @override
+  void initState() {
+    super.initState();
+    if (!Get.isRegistered<HomeController>()) Get.put(HomeController());
+    controller = Get.find<HomeController>();
+
+    if (!Get.isRegistered<RiwayatController>()) {
+      riwayatController = Get.put(RiwayatController(), permanent: true);
+    } else {
+      riwayatController = Get.find<RiwayatController>();
+    }
+
+    // fetch setelah build selesai
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      riwayatController.fetchRiwayat();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // FAB tidak ikut naik saat keyboard
+      resizeToAvoidBottomInset: false,
       extendBody: true,
       backgroundColor: const Color(0xFFF8FAFC),
       body: Obx(
@@ -101,12 +123,18 @@ class HomeScreen extends StatelessWidget {
                     _buildNavItem("assets/image/search.png", "Cari", 0),
                     _buildNavItem("assets/image/wishlist.png", "Simpan", 1),
                     const SizedBox(width: 40),
-                    _buildNavItem(
-                      "assets/image/riwayat.png",
-                      "Riwayat",
-                      3,
-                      hasNotification: true,
-                    ),
+                    Obx(() {
+                      riwayatController;
+                      final punya = riwayatController.listRiwayats.any(
+                        (b) => b.status == BookingStatus.menunggu,
+                      );
+                      return _buildNavItem(
+                        "assets/image/riwayat.png",
+                        "Riwayat",
+                        3,
+                        hasNotification: punya, // ← dinamis
+                      );
+                    }),
                     _buildNavItem("assets/image/profile.png", "Profil", 4),
                   ],
                 ),
@@ -118,105 +146,104 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-Widget _buildHomeContent() {
-  return SafeArea(
-    child: Obx(() {
-      final isSkeleton = controller.isSkeleton.value;
-      return Skeletonizer(
-        enabled: isSkeleton,
-        effect: const ShimmerEffect(duration: Duration(milliseconds: 1000)),
-        child: RefreshIndicator(
-          onRefresh: () => controller.loadProperties(),
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                floating: false,
-                backgroundColor: const Color(0xFFF8FAFC),
-                elevation: 0,
-                automaticallyImplyLeading: false,
-                expandedHeight: 0,
-                flexibleSpace: const SizedBox.shrink(),
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(165),
-                  child: Container(
-                    color: const Color(0xFFF8FAFC),
-                    child: Column(
-                      children: [
-                        _buildHeaderFancy(),
-                        _buildSearchWithFilter(),
-                        _buildCategoryScroll(),
-                      ],
+  Widget _buildHomeContent() {
+    return SafeArea(
+      child: Obx(() {
+        final isSkeleton = controller.isSkeleton.value;
+        return Skeletonizer(
+          enabled: isSkeleton,
+          effect: const ShimmerEffect(duration: Duration(milliseconds: 1000)),
+          child: RefreshIndicator(
+            onRefresh: () => controller.loadProperties(),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  backgroundColor: const Color(0xFFF8FAFC),
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  expandedHeight: 0,
+                  flexibleSpace: const SizedBox.shrink(),
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(165),
+                    child: Container(
+                      color: const Color(0xFFF8FAFC),
+                      child: Column(
+                        children: [
+                          _buildHeaderFancy(),
+                          _buildSearchWithFilter(),
+                          _buildCategoryScroll(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: _buildSectionTitle("Properti Terdekat"),
-              ),
-              if (isSkeleton)
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildSkeletonCard(),
-                    childCount: 3,
-                  ),
-                )
-              else if (controller.properties.isEmpty &&
-                  controller.searchQuery.value.isEmpty)
                 SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(60),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Lottie.asset(
-                            'assets/lottie/404.json',
-                            width: 200,
-                            height: 200,
-                            repeat: true,
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "Data tidak ditemukan",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
+                  child: _buildSectionTitle("Properti Terdekat"),
+                ),
+                if (isSkeleton)
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildSkeletonCard(),
+                      childCount: 3,
+                    ),
+                  )
+                else if (controller.properties.isEmpty &&
+                    controller.searchQuery.value.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(60),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Lottie.asset(
+                              'assets/lottie/404.json',
+                              width: 200,
+                              height: 200,
+                              repeat: true,
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              "Data tidak ditemukan",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )
-              else if (controller.properties.isEmpty &&
-                  controller.searchQuery.value.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(60),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Lottie.asset(
-                            'assets/lottie/404.json',
-                            width: 200,
-                            height: 200,
-                            repeat: true,
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "Data tidak ada yang cocok dengan pencarianmu",
-                            style: TextStyle(color: Colors.grey),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                  )
+                else if (controller.properties.isEmpty &&
+                    controller.searchQuery.value.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(60),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Lottie.asset(
+                              'assets/lottie/404.json',
+                              width: 200,
+                              height: 200,
+                              repeat: true,
+                            ),
+                            const SizedBox(height: 20),
+                            const Text(
+                              "Data tidak ada yang cocok dengan pencarianmu",
+                              style: TextStyle(color: Colors.grey),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )
-              else
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                  )
+                else
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
                       if (index == controller.properties.length) {
                         return const SizedBox(height: 100);
                       }
@@ -224,68 +251,68 @@ Widget _buildHomeContent() {
                         controller.properties[index],
                         index,
                       );
-                    },
-                    childCount: controller.properties.length + 1,
+                    }, childCount: controller.properties.length + 1),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    }),
-  );
-}
+        );
+      }),
+    );
+  }
 
-Widget _buildSkeletonCard() {
-  return Container(
-    margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          height: 180,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(height: 16, width: 200, color: Colors.grey[300]),
-              const SizedBox(height: 8),
-              Container(height: 12, width: 150, color: Colors.grey[300]),
-              const SizedBox(height: 8),
-              Container(height: 12, width: 120, color: Colors.grey[300]),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(height: 16, width: 130, color: Colors.grey[300]),
-                  Container(
-                    height: 36,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ],
+  Widget _buildSkeletonCard() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-            ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 16, width: 200, color: Colors.grey[300]),
+                const SizedBox(height: 8),
+                Container(height: 12, width: 150, color: Colors.grey[300]),
+                const SizedBox(height: 8),
+                Container(height: 12, width: 120, color: Colors.grey[300]),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(height: 16, width: 130, color: Colors.grey[300]),
+                    Container(
+                      height: 36,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildNavItem(
     String imagePath,
@@ -470,43 +497,43 @@ Widget _buildSkeletonCard() {
                   controller.changeCategory(index);
                   HapticFeedback.lightImpact();
                 },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    alignment: Alignment.center,
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 5,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColor.primary : AppColor.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.transparent
+                          : Colors.grey.shade300,
+                      width: 1,
                     ),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColor.primary : AppColor.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
+                    boxShadow: [
+                      BoxShadow(
                         color: isSelected
-                            ? Colors.transparent
-                            : Colors.grey.shade300,
-                        width: 1,
+                            ? AppColor.primary.withOpacity(0.25)
+                            : Colors.black.withOpacity(0.05),
+                        blurRadius: isSelected ? 8 : 4,
+                        offset: Offset(0, isSelected ? 4 : 1),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isSelected
-                              ? AppColor.primary.withOpacity(0.25)
-                              : Colors.black.withOpacity(0.05),
-                          blurRadius: isSelected ? 8 : 4,
-                          offset: Offset(0, isSelected ? 4 : 1),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      controller.categories[index],
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : AppColor.grey,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
+                    ],
+                  ),
+                  child: Text(
+                    controller.categories[index],
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppColor.grey,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
                   ),
+                ),
               );
             });
           },

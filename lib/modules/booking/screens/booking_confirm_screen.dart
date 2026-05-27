@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/modules/booking/controllers/booking_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
@@ -48,7 +49,20 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
   }
 
   String _formatTanggal(DateTime dt) {
-    final bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    final bulan = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agt',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
     return '${dt.day} ${bulan[dt.month - 1]} ${dt.year}';
   }
 
@@ -80,7 +94,11 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
           ),
           title: const Text(
             'Konfirmasi & Bayar',
-            style: TextStyle(color: textDark, fontWeight: FontWeight.w800, fontSize: 18),
+            style: TextStyle(
+              color: textDark,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
@@ -91,7 +109,6 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-      
               // === DATA PENYEWA ===
               _sectionCard(
                 title: 'Data Penyewa',
@@ -110,7 +127,11 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                           Expanded(
                             child: Text(
                               'Data ini diambil dari profil Anda dan digunakan oleh pemilik properti untuk verifikasi.',
-                              style: TextStyle(fontSize: 12, color: blue, height: 1.4),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: blue,
+                                height: 1.4,
+                              ),
                             ),
                           ),
                         ],
@@ -119,16 +140,22 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                     const SizedBox(height: 16),
                     _infoRow('NAMA LENGKAP', user['name']?.toString() ?? '-'),
                     _infoRow('EMAIL', user['email']?.toString() ?? '-'),
-                    _infoRow('NOMOR TELEPON', user['no_telepon']?.toString() ?? '-'),
-                    _infoRow('JENIS KELAMIN', user['jenis_kelamin']?.toString() ?? '-'),
+                    _infoRow(
+                      'NOMOR TELEPON',
+                      user['no_telepon']?.toString() ?? '-',
+                    ),
+                    _infoRow(
+                      'JENIS KELAMIN',
+                      user['jenis_kelamin']?.toString() ?? '-',
+                    ),
                     _infoRow('PEKERJAAN', user['pekerjaan']?.toString() ?? '-'),
                     _infoRow('DOMISILI', user['kota_asal']?.toString() ?? '-'),
                   ],
                 ),
               ),
-      
+
               const SizedBox(height: 12),
-      
+
               // === DETAIL WAKTU SEWA ===
               _sectionCard(
                 title: 'Detail Waktu Sewa',
@@ -151,11 +178,20 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                             children: [
                               Text(
                                 widget.tipeKamarNama,
-                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: textDark),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
+                                  color: textDark,
+                                ),
                               ),
                               Text(
-                                widget.kamarNama.isNotEmpty ? 'Kamar ${widget.kamarNama}' : widget.tipeKamarNama,
-                                style: const TextStyle(fontSize: 13, color: textGrey),
+                                widget.kamarNama.isNotEmpty
+                                    ? 'Kamar ${widget.kamarNama}'
+                                    : widget.tipeKamarNama,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: textGrey,
+                                ),
                               ),
                             ],
                           ),
@@ -169,18 +205,22 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                   ],
                 ),
               ),
-      
+
               const SizedBox(height: 12),
-      
+
               // === CATATAN UNTUK PEMILIK ===
               _sectionCard(
                 title: 'Catatan untuk Pemilik',
-                trailing: const Text('Opsional', style: TextStyle(fontSize: 12, color: textGrey)),
+                trailing: const Text(
+                  'Opsional',
+                  style: TextStyle(fontSize: 12, color: textGrey),
+                ),
                 child: TextField(
                   controller: _catatanCtrl,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: 'Sampaikan pesan tambahan atau pertanyaan ke pemilik...',
+                    hintText:
+                        'Sampaikan pesan tambahan atau pertanyaan ke pemilik...',
                     hintStyle: const TextStyle(fontSize: 13, color: textGrey),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
@@ -200,17 +240,23 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                   ),
                 ),
               ),
-      
+
               const SizedBox(height: 12),
-      
+
               // === RINCIAN HARGA ===
               _sectionCard(
                 title: 'Rincian Harga',
                 child: Column(
                   children: [
-                    _hargaRow('Harga Sewa (${widget.durasi} $satuanDurasi)', 'Rp ${_formatHarga(widget.totalHarga)}'),
+                    _hargaRow(
+                      'Harga Sewa (${widget.durasi} $satuanDurasi)',
+                      'Rp ${_formatHarga(widget.totalHarga)}',
+                    ),
                     const SizedBox(height: 8),
-                    _hargaRow('Biaya Layanan', 'Rp ${_formatHarga(biayaLayanan)}'),
+                    _hargaRow(
+                      'Biaya Layanan',
+                      'Rp ${_formatHarga(biayaLayanan)}',
+                    ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(color: Color(0xFFE2E8F0)),
@@ -218,18 +264,30 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total Pembayaran',
-                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: textDark)),
-                        Text('Rp ${_formatHarga(total)}',
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: blue)),
+                        const Text(
+                          'Total Pembayaran',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            color: textDark,
+                          ),
+                        ),
+                        Text(
+                          'Rp ${_formatHarga(total)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 20,
+                            color: blue,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-      
+
               const SizedBox(height: 12),
-      
+
               // === KEBIJAKAN PROPERTI ===
               _sectionCard(
                 title: 'Kebijakan Properti',
@@ -238,7 +296,11 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                   children: [
                     const Text(
                       'Dengan melanjutkan pembayaran, Anda menyetujui aturan yang telah ditetapkan oleh pemilik. Pelanggaran terhadap aturan dapat dikenakan sanksi sesuai ketentuan pemilik properti.',
-                      style: TextStyle(fontSize: 13, color: textGrey, height: 1.5),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: textGrey,
+                        height: 1.5,
+                      ),
                     ),
                     if (widget.peraturan.isNotEmpty) ...[
                       const SizedBox(height: 12),
@@ -253,12 +315,20 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.rule_rounded, color: Color(0xFFD97706), size: 16),
+                            const Icon(
+                              Icons.rule_rounded,
+                              color: Color(0xFFD97706),
+                              size: 16,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 widget.peraturan,
-                                style: const TextStyle(fontSize: 13, color: Color(0xFF92400E), height: 1.5),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFF92400E),
+                                  height: 1.5,
+                                ),
                               ),
                             ),
                           ],
@@ -271,7 +341,9 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: _setuju ? const Color(0xFFEFF6FF) : Colors.white,
+                          color: _setuju
+                              ? const Color(0xFFEFF6FF)
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: _setuju ? blue : const Color(0xFFE2E8F0),
@@ -288,19 +360,29 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                                 color: _setuju ? blue : Colors.white,
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: _setuju ? blue : const Color(0xFFCBD5E1),
+                                  color: _setuju
+                                      ? blue
+                                      : const Color(0xFFCBD5E1),
                                   width: 1.5,
                                 ),
                               ),
                               child: _setuju
-                                  ? const Icon(Icons.check, color: Colors.white, size: 14)
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 14,
+                                    )
                                   : null,
                             ),
                             const SizedBox(width: 12),
                             const Expanded(
                               child: Text(
                                 'Saya menyetujui Aturan Properti dan Ketentuan Layanan APPKONKOS.',
-                                style: TextStyle(fontSize: 13, color: textDark, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: textDark,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
@@ -310,26 +392,39 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                   ],
                 ),
               ),
-      
+
               const SizedBox(height: 24),
-      
+
               // === TOMBOL BAYAR ===
               SizedBox(
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _setuju ? AppColor.primary : Colors.grey.shade300,
+                    backgroundColor: _setuju
+                        ? AppColor.primary
+                        : Colors.grey.shade300,
                     elevation: _setuju ? 4 : 0,
                     shadowColor: AppColor.primary.withOpacity(0.4),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
                   ),
                   onPressed: _setuju
                       ? () {
-                          Get.to(() => MidtransWebView(
-                            url: widget.redirectUrl,
-                            totalHarga: total,
-                          ));
+                          Get.to(
+                            () => MidtransWebView(
+                              url: widget.redirectUrl,
+                              totalHarga: total,
+                              bookingId: widget.bookingId,
+                              kamarNama: widget.kamarNama,
+                              tipeKamarNama: widget.tipeKamarNama,
+                              durasi: widget.durasi,
+                              tipeProperty: widget.tipeProperty,
+                              noWaPemilik:
+                                  Get.find<BookingController>().noWaPemilik,
+                            ),
+                          );
                         }
                       : null,
                   child: Row(
@@ -353,7 +448,7 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                   ),
                 ),
               ),
-      
+
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -374,14 +469,24 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
     );
   }
 
-  Widget _sectionCard({required String title, required Widget child, Widget? trailing}) {
+  Widget _sectionCard({
+    required String title,
+    required Widget child,
+    Widget? trailing,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +494,14 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: textDark)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: textDark,
+                ),
+              ),
               if (trailing != null) trailing,
             ],
           ),
@@ -406,9 +518,24 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 10, color: textGrey, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              color: textGrey,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 14, color: textDark, fontWeight: FontWeight.w600)),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              color: textDark,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -419,7 +546,14 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(fontSize: 14, color: textGrey)),
-        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textDark)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: textDark,
+          ),
+        ),
       ],
     );
   }

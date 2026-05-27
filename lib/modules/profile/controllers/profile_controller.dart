@@ -15,7 +15,6 @@ class ProfileController extends GetxController {
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
-  late TextEditingController noWaController;
   late TextEditingController domisiliController;
   late TextEditingController oldPasswordController;
   late TextEditingController newPasswordController;
@@ -25,7 +24,7 @@ class ProfileController extends GetxController {
   final selectedPekerjaan = RxnString();
 
   final listJenisKelamin = {'L': 'Laki-laki', 'P': 'Perempuan'};
-  final listPekerjaan = {'Mahasiswa': 'Mahasiswa','Karyawan': 'Karyawan','Lainnya': 'Lainnya'};
+  final listPekerjaan = {'Mahasiswa': 'Mahasiswa', 'Karyawan': 'Karyawan', 'Lainnya': 'Lainnya'};
 
   final isOldPassHidden = true.obs;
   final isNewPassHidden = true.obs;
@@ -37,7 +36,6 @@ class ProfileController extends GetxController {
     nameController = TextEditingController();
     emailController = TextEditingController();
     phoneController = TextEditingController();
-    noWaController = TextEditingController();
     domisiliController = TextEditingController();
     oldPasswordController = TextEditingController();
     newPasswordController = TextEditingController();
@@ -93,7 +91,6 @@ class ProfileController extends GetxController {
       nameController.text = cachedUser['name'] ?? '';
       emailController.text = cachedUser['email'] ?? '';
       phoneController.text = cachedUser['no_telepon'] ?? '-';
-      noWaController.text = cachedUser['no_wa'] ?? '';
       domisiliController.text = cachedUser['kota_asal'] ?? '';
       selectedJenisKelamin.value = cachedUser['jenis_kelamin'];
       selectedPekerjaan.value = cachedUser['pekerjaan'];
@@ -106,7 +103,6 @@ class ProfileController extends GetxController {
         nameController.text = userData['name'] ?? '';
         emailController.text = userData['email'] ?? '';
         phoneController.text = userData['no_telepon'] ?? '-';
-        noWaController.text = userData['no_wa'] ?? '';
         domisiliController.text = userData['kota_asal'] ?? '';
         selectedJenisKelamin.value = userData['jenis_kelamin'];
         selectedPekerjaan.value = userData['pekerjaan'];
@@ -115,7 +111,6 @@ class ProfileController extends GetxController {
         updatedUser['name']              = userData['name'];
         updatedUser['email']             = userData['email'];
         updatedUser['no_telepon']        = userData['no_telepon'];
-        updatedUser['no_wa']             = userData['no_wa'];
         updatedUser['jenis_kelamin']     = userData['jenis_kelamin'];
         updatedUser['pekerjaan']         = userData['pekerjaan'];
         updatedUser['kota_asal']         = userData['kota_asal'];
@@ -297,10 +292,9 @@ class ProfileController extends GetxController {
       isLoading.value = true;
 
       final formData = dio_lib.FormData.fromMap({
-        'name'          : nameController.text.trim(),
-        'no_telepon'    : phoneController.text.trim() == '-' ? '' : phoneController.text.trim(),
-        'no_wa'         : noWaController.text.trim(),
-        'domisili'      : domisiliController.text.trim(),
+        'name'       : nameController.text.trim(),
+        'no_telepon' : phoneController.text.trim() == '-' ? '' : phoneController.text.trim(),
+        'domisili'   : domisiliController.text.trim(),
         if (selectedJenisKelamin.value != null)
           'jenis_kelamin' : selectedJenisKelamin.value!,
         if (selectedPekerjaan.value != null)
@@ -325,7 +319,6 @@ class ProfileController extends GetxController {
         final updatedUser = Map<String, dynamic>.from(authC.user.value);
         updatedUser['name']              = userData['name'];
         updatedUser['no_telepon']        = userData['no_telepon'];
-        updatedUser['no_wa']             = userData['no_wa'];
         updatedUser['jenis_kelamin']     = userData['jenis_kelamin'];
         updatedUser['pekerjaan']         = userData['pekerjaan'];
         updatedUser['kota_asal']         = userData['kota_asal'];
@@ -360,7 +353,6 @@ class ProfileController extends GetxController {
     nameController.dispose();
     emailController.dispose();
     phoneController.dispose();
-    noWaController.dispose();
     domisiliController.dispose();
     oldPasswordController.dispose();
     newPasswordController.dispose();

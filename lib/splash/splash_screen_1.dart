@@ -26,20 +26,19 @@ class SplashScreen1 extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(3),
                         decoration: const BoxDecoration(
-                          color: Colors.blueAccent,
+                          color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.home,
-                          color: Colors.white,
-                          size: 16,
+                        child: const Image(
+                          image: AssetImage("assets/image/transparent_logo.png"),
+                          height: 45,
                         ),
                       ),
                       const SizedBox(width: 12),
                       const Text(
-                        "Apkonkos",
+                        "Appkonkos",
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

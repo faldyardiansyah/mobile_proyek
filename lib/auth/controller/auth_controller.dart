@@ -1,10 +1,10 @@
+import 'package:appkonkos_mobile/modules/riwayat/controllers/riwayat_controller.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
 
-final user = <String, dynamic>{}.obs;
 class AuthController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
   final box = GetStorage();
@@ -67,12 +67,10 @@ class AuthController extends GetxController {
         final data = response.data;
 
         if (data != null && data['token'] != null && data['user'] != null) {
-          // Simpan token dan data login dulu
           box.write('token', data['token']);
           box.write('user', data['user']);
           user.value = Map<String, dynamic>.from(data['user']);
 
-          // Ambil profil lengkap (jenis_kelamin, pekerjaan, domisili, dll)
           try {
             final profileResponse = await _api.get('/profile');
             if (profileResponse.statusCode == 200) {
@@ -80,11 +78,14 @@ class AuthController extends GetxController {
               user.value = Map<String, dynamic>.from(userData);
               box.write('user', userData);
             }
-          } catch (e) {
-            // kalau gagal tidak apa-apa, pakai data login saja
-          }
+          } catch (_) {}
 
           Get.offAllNamed('/home');
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (Get.isRegistered<RiwayatController>()) {
+              Get.find<RiwayatController>().fetchRiwayat();
+            }
+          });
           _showSnackbar('Berhasil', 'Selamat datang ${user.value['name']}', Colors.green);
         } else {
           _showSnackbar('Login Gagal', 'Data dari server tidak lengkap', Colors.red);
@@ -93,9 +94,16 @@ class AuthController extends GetxController {
         _showSnackbar('Login Gagal', 'Email atau password salah', Colors.red);
       }
     } on DioException catch (e) {
-      _showSnackbar('Login Gagal', e.response?.data?['message'] ?? 'Terjadi kesalahan server', Colors.red);
+      if (e.response?.statusCode == 403) {
+        final email = emailLoginController.text.trim();
+        _showSnackbar('Verifikasi Email', 'Email belum diverifikasi. Silakan cek inbox Anda.', Colors.orange);
+        Get.toNamed('/verify-email', arguments: {'email': email});
+      } else {
+        _showSnackbar('Login Gagal', e.response?.data?['message'] ?? 'Terjadi kesalahan server', Colors.red);
+      }
     } catch (e) {
-      _showSnackbar('Error', 'Terjadi error: $e', Colors.red);
+      debugPrint('Login error: $e');
+      _showSnackbar('Error', 'Terjadi kesalahan, silakan coba lagi', Colors.red);
     } finally {
       isLoading.value = false;
     }
@@ -108,6 +116,22 @@ class AuthController extends GetxController {
         registerphoneController.text.isEmpty ||
         !isAgreeTerms.value) {
       _showSnackbar('Perhatian', 'Lengkapi data dan setujui syarat ketentuan', Colors.orange);
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[\w.-]+@[\w.-]+\.\w+$');
+    if (!emailRegex.hasMatch(registerEmailController.text.trim())) {
+      _showSnackbar('Perhatian', 'Format email tidak valid', Colors.orange);
+      return;
+    }
+
+    if (registerphoneController.text.trim().length < 12) {
+      _showSnackbar('Perhatian', 'Nomor telepon minimal 12 digit', Colors.orange);
+      return;
+    }
+
+    if (registerPasswordController.text.length < 8) {
+      _showSnackbar('Perhatian', 'Password minimal 8 karakter', Colors.orange);
       return;
     }
 
@@ -124,38 +148,64 @@ class AuthController extends GetxController {
 
       if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
         final data = response.data;
+        debugPrint('REGISTER RESPONSE: $data');
 
         if (data != null && data['token'] != null) {
+          final email = registerEmailController.text.trim();
+
           namaRegisterController.clear();
           registerEmailController.clear();
           registerPasswordController.clear();
           registerphoneController.clear();
           isAgreeTerms.value = false;
 
-          Get.offAllNamed('/login');
-          _showSnackbar('Berhasil', 'Registrasi berhasil, silakan login', Colors.green);
+          Get.offAllNamed('/verify-email', arguments: {'email': email});
+          _showSnackbar('Berhasil', 'Cek email Anda untuk verifikasi akun', Colors.green);
         } else {
           _showSnackbar('Gagal', 'Respon server tidak sesuai format', Colors.red);
         }
       }
     } on DioException catch (e) {
+      debugPrint('Register DioException: $e');
       String errorMessage = 'Terjadi kesalahan';
       if (e.response != null && e.response?.data != null) {
-        var errors = e.response?.data['errors'];
+        final errors = e.response?.data['errors'];
         if (errors != null && errors is Map) {
-          errorMessage = errors.values.first[0].toString();
+          if (errors.containsKey('email')) {
+            errorMessage = 'Email sudah terdaftar, gunakan email lain';
+          } else {
+            errorMessage = errors.values.first[0].toString();
+          }
         } else {
           errorMessage = e.response?.data['message'] ?? 'Registrasi gagal';
         }
       }
       _showSnackbar('Gagal', errorMessage, Colors.red);
+    } catch (e) {
+      debugPrint('Register error: $e');
+      _showSnackbar('Gagal', 'Terjadi kesalahan, silakan coba lagi', Colors.red);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> resendVerification(String email) async {
+    try {
+      isLoading.value = true;
+      final response = await _api.post('/auth/resend-verification', {'email': email});
+      if (response?.statusCode == 200) {
+        _showSnackbar('Berhasil', 'Email verifikasi telah dikirim ulang', Colors.green);
+      }
+    } on DioException catch (e) {
+      debugPrint('Resend verification error: $e');
+      _showSnackbar('Gagal', e.response?.data?['message'] ?? 'Gagal mengirim ulang', Colors.red);
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> logout() async {
-    String namaUser = user.value['name'] ?? 'Pengguna';
+    final namaUser = user.value['name'] ?? 'Pengguna';
     try {
       await _api.post('/auth/logout', {}).timeout(const Duration(seconds: 2));
     } catch (_) {
@@ -163,6 +213,11 @@ class AuthController extends GetxController {
       box.remove('token');
       box.remove('user');
       user.value = {};
+
+      if (Get.isRegistered<RiwayatController>()) {
+        Get.delete<RiwayatController>(force: true);
+      }
+
       Get.offAllNamed('/login');
       _showSnackbar('Berhasil', 'Berhasil Logout dari akun $namaUser', Colors.green);
     }
@@ -179,7 +234,7 @@ class AuthController extends GetxController {
       snackPosition: SnackPosition.TOP,
       borderRadius: 12,
       margin: const EdgeInsets.all(10),
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 3),
     );
   }
 }

@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/image/logo.png", height: 200)
+            Image.asset("assets/images/logo.png", width: 400)
                 .animate()
                 .fadeIn(duration: const Duration(seconds: 1))
                 .animate()
@@ -50,11 +50,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 .scale()
                 .then(delay: const Duration(seconds: 1))
                 .fadeOut(duration: const Duration(seconds: 1)),
-
             const SizedBox(height: 10),
 
             const Text(
-              "Apkonkos",
+              "Appkonkos",
               style: TextStyle(
                 fontSize: 60,
                 fontWeight: FontWeight.bold,
