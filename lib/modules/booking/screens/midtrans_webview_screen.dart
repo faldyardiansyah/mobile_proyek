@@ -494,7 +494,7 @@ Terima kasih! 🙏''';
                   repeat: true,
                 ),
                 const SizedBox(height: 16),
-            
+
                 const Text(
                   'Pembayaran Berhasil!',
                   style: TextStyle(
@@ -511,9 +511,9 @@ Terima kasih! 🙏''';
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 13, color: textGrey),
                 ),
-            
+
                 const SizedBox(height: 28),
-            
+
                 // Simpan PDF
                 SizedBox(
                   width: double.infinity,
@@ -525,7 +525,10 @@ Terima kasih! 🙏''';
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    icon: const Icon(Icons.download_rounded, color: Colors.white),
+                    icon: const Icon(
+                      Icons.download_rounded,
+                      color: Colors.white,
+                    ),
                     label: const Text(
                       'Simpan Struk PDF',
                       style: TextStyle(
@@ -545,9 +548,9 @@ Terima kasih! 🙏''';
                     },
                   ),
                 ),
-            
+
                 const SizedBox(height: 10),
-            
+
                 // Bagikan struk
                 SizedBox(
                   width: double.infinity,
@@ -562,7 +565,10 @@ Terima kasih! 🙏''';
                     icon: const Icon(Icons.share_rounded, color: blue),
                     label: const Text(
                       'Bagikan Struk',
-                      style: TextStyle(color: blue, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        color: blue,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     onPressed: () async {
                       try {
@@ -578,9 +584,9 @@ Terima kasih! 🙏''';
                     },
                   ),
                 ),
-            
+
                 const SizedBox(height: 10),
-            
+
                 // Kirim WA ke pemilik
                 SizedBox(
                   width: double.infinity,
@@ -607,14 +613,17 @@ Terima kasih! 🙏''';
                     onPressed: _kirimWaKePemilik,
                   ),
                 ),
-            
+
                 const SizedBox(height: 10),
-            
+
                 TextButton(
                   onPressed: () => Get.until((route) => route.isFirst),
                   child: const Text(
                     'Kembali ke Beranda',
-                    style: TextStyle(color: textGrey, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: textGrey,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

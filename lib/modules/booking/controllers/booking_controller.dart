@@ -250,7 +250,11 @@ class BookingController extends GetxController {
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
                   children: [
-                    const Icon(Icons.cancel_outlined, color: Colors.red, size: 16),
+                    const Icon(
+                      Icons.cancel_outlined,
+                      color: Colors.red,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       label,

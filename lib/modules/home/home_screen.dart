@@ -1,5 +1,5 @@
 import 'package:appkonkos_mobile/modules/home/screens/detail_screen.dart';
-import 'package:appkonkos_mobile/modules/riwayat/models/model_riwayat.dart';
+import 'package:appkonkos_mobile/modules/Riwayat/models/model_riwayat.dart';
 import '../Riwayat/riwayat_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';

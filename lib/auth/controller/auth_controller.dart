@@ -1,4 +1,4 @@
-import 'package:appkonkos_mobile/modules/riwayat/controllers/riwayat_controller.dart';
+import 'package:appkonkos_mobile/modules/Riwayat/controllers/riwayat_controller.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +51,11 @@ class AuthController extends GetxController {
   Future<void> login() async {
     if (emailLoginController.text.isEmpty ||
         passwordLoginController.text.isEmpty) {
-      _showSnackbar('Perhatian', 'Email dan password wajib diisi', Colors.orange);
+      _showSnackbar(
+        'Perhatian',
+        'Email dan password wajib diisi',
+        Colors.orange,
+      );
       return;
     }
 
@@ -86,9 +90,17 @@ class AuthController extends GetxController {
               Get.find<RiwayatController>().fetchRiwayat();
             }
           });
-          _showSnackbar('Berhasil', 'Selamat datang ${user.value['name']}', Colors.green);
+          _showSnackbar(
+            'Berhasil',
+            'Selamat datang ${user.value['name']}',
+            Colors.green,
+          );
         } else {
-          _showSnackbar('Login Gagal', 'Data dari server tidak lengkap', Colors.red);
+          _showSnackbar(
+            'Login Gagal',
+            'Data dari server tidak lengkap',
+            Colors.red,
+          );
         }
       } else {
         _showSnackbar('Login Gagal', 'Email atau password salah', Colors.red);
@@ -96,14 +108,26 @@ class AuthController extends GetxController {
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
         final email = emailLoginController.text.trim();
-        _showSnackbar('Verifikasi Email', 'Email belum diverifikasi. Silakan cek inbox Anda.', Colors.orange);
+        _showSnackbar(
+          'Verifikasi Email',
+          'Email belum diverifikasi. Silakan cek inbox Anda.',
+          Colors.orange,
+        );
         Get.toNamed('/verify-email', arguments: {'email': email});
       } else {
-        _showSnackbar('Login Gagal', e.response?.data?['message'] ?? 'Terjadi kesalahan server', Colors.red);
+        _showSnackbar(
+          'Login Gagal',
+          e.response?.data?['message'] ?? 'Terjadi kesalahan server',
+          Colors.red,
+        );
       }
     } catch (e) {
       debugPrint('Login error: $e');
-      _showSnackbar('Error', 'Terjadi kesalahan, silakan coba lagi', Colors.red);
+      _showSnackbar(
+        'Error',
+        'Terjadi kesalahan, silakan coba lagi',
+        Colors.red,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -115,7 +139,11 @@ class AuthController extends GetxController {
         registerPasswordController.text.isEmpty ||
         registerphoneController.text.isEmpty ||
         !isAgreeTerms.value) {
-      _showSnackbar('Perhatian', 'Lengkapi data dan setujui syarat ketentuan', Colors.orange);
+      _showSnackbar(
+        'Perhatian',
+        'Lengkapi data dan setujui syarat ketentuan',
+        Colors.orange,
+      );
       return;
     }
 
@@ -126,7 +154,11 @@ class AuthController extends GetxController {
     }
 
     if (registerphoneController.text.trim().length < 12) {
-      _showSnackbar('Perhatian', 'Nomor telepon minimal 12 digit', Colors.orange);
+      _showSnackbar(
+        'Perhatian',
+        'Nomor telepon minimal 12 digit',
+        Colors.orange,
+      );
       return;
     }
 
@@ -146,7 +178,8 @@ class AuthController extends GetxController {
         'password_confirmation': registerPasswordController.text,
       });
 
-      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+      if (response != null &&
+          (response.statusCode == 200 || response.statusCode == 201)) {
         final data = response.data;
         debugPrint('REGISTER RESPONSE: $data');
 
@@ -160,9 +193,17 @@ class AuthController extends GetxController {
           isAgreeTerms.value = false;
 
           Get.offAllNamed('/verify-email', arguments: {'email': email});
-          _showSnackbar('Berhasil', 'Cek email Anda untuk verifikasi akun', Colors.green);
+          _showSnackbar(
+            'Berhasil',
+            'Cek email Anda untuk verifikasi akun',
+            Colors.green,
+          );
         } else {
-          _showSnackbar('Gagal', 'Respon server tidak sesuai format', Colors.red);
+          _showSnackbar(
+            'Gagal',
+            'Respon server tidak sesuai format',
+            Colors.red,
+          );
         }
       }
     } on DioException catch (e) {
@@ -183,7 +224,11 @@ class AuthController extends GetxController {
       _showSnackbar('Gagal', errorMessage, Colors.red);
     } catch (e) {
       debugPrint('Register error: $e');
-      _showSnackbar('Gagal', 'Terjadi kesalahan, silakan coba lagi', Colors.red);
+      _showSnackbar(
+        'Gagal',
+        'Terjadi kesalahan, silakan coba lagi',
+        Colors.red,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -192,13 +237,23 @@ class AuthController extends GetxController {
   Future<void> resendVerification(String email) async {
     try {
       isLoading.value = true;
-      final response = await _api.post('/auth/resend-verification', {'email': email});
+      final response = await _api.post('/auth/resend-verification', {
+        'email': email,
+      });
       if (response?.statusCode == 200) {
-        _showSnackbar('Berhasil', 'Email verifikasi telah dikirim ulang', Colors.green);
+        _showSnackbar(
+          'Berhasil',
+          'Email verifikasi telah dikirim ulang',
+          Colors.green,
+        );
       }
     } on DioException catch (e) {
       debugPrint('Resend verification error: $e');
-      _showSnackbar('Gagal', e.response?.data?['message'] ?? 'Gagal mengirim ulang', Colors.red);
+      _showSnackbar(
+        'Gagal',
+        e.response?.data?['message'] ?? 'Gagal mengirim ulang',
+        Colors.red,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -219,7 +274,11 @@ class AuthController extends GetxController {
       }
 
       Get.offAllNamed('/login');
-      _showSnackbar('Berhasil', 'Berhasil Logout dari akun $namaUser', Colors.green);
+      _showSnackbar(
+        'Berhasil',
+        'Berhasil Logout dari akun $namaUser',
+        Colors.green,
+      );
     }
   }
 
