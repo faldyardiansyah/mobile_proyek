@@ -78,9 +78,11 @@ class AuthController extends GetxController {
           try {
             final profileResponse = await _api.get('/profile');
             if (profileResponse.statusCode == 200) {
-              final userData = profileResponse.data['user'];
-              user.value = Map<String, dynamic>.from(userData);
-              box.write('user', userData);
+              final data = profileResponse.data;
+              if (data is Map && data['user'] != null) {
+                user.value = Map<String, dynamic>.from(data['user']);
+                box.write('user', data['user']);
+              }
             }
           } catch (_) {}
 
@@ -106,15 +108,16 @@ class AuthController extends GetxController {
         _showSnackbar('Login Gagal', 'Email atau password salah', Colors.red);
       }
     } on DioException catch (e) {
-      if (e.response?.statusCode == 403) {
-        final email = emailLoginController.text.trim();
-        _showSnackbar(
-          'Verifikasi Email',
-          'Email belum diverifikasi. Silakan cek inbox Anda.',
-          Colors.orange,
-        );
-        Get.toNamed('/verify-email', arguments: {'email': email});
-      } else {
+      // if (e.response?.statusCode == 403) {
+      //   final email = emailLoginController.text.trim();
+      //   _showSnackbar(
+      //     'Verifikasi Email',
+      //     'Email belum diverifikasi. Silakan cek inbox Anda.',
+      //     Colors.orange,
+      //   );
+      //   Get.toNamed('/verify-email', arguments: {'email': email});
+      // } else 
+      {
         _showSnackbar(
           'Login Gagal',
           e.response?.data?['message'] ?? 'Terjadi kesalahan server',

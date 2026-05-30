@@ -1,26 +1,101 @@
 import 'package:appkonkos_mobile/services/api_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
+import 'dart:convert';
 import '../models/model_riwayat.dart';
 import 'package:appkonkos_mobile/modules/booking/screens/midtrans_webview_screen.dart';
 
 class RiwayatController extends GetxController {
   final _api = Get.find<ApiService>();
+  final _box = GetStorage();
   final selectedTab = 0.obs;
   final tabs = ["Semua", "Menunggu", "Dibayar", "Dibatalkan", "Refund"];
   final _tick = 0.obs;
   final isLoading = false.obs;
-
   final listRiwayats = <ModelRiwayat>[].obs;
+  final _processingCancel = <String>{};
+
+  String get _cacheKey {
+    final userId = _box.read('user_id') ?? 'guest';
+    return 'riwayat_cache_$userId';
+  }
 
   @override
   void onInit() {
     super.onInit();
+    _box.remove(_cacheKey);
+    _loadCache();
     fetchRiwayat();
-    Stream.periodic(const Duration(seconds: 1)).listen((_) => _tick.value++);
+    Stream.periodic(const Duration(seconds: 5)).listen((_) {
+      _tick.value++;
+      _cekAutoCancel();
+    });
   }
 
   int get tick => _tick.value;
+
+  void _loadCache() {
+    try {
+      final raw = _box.read(_cacheKey);
+      if (raw != null) {
+        final List decoded = jsonDecode(raw);
+        listRiwayats.value = decoded
+            .map((e) => ModelRiwayat.fromJson(e))
+            .toList();
+      }
+    } catch (e) {
+      print('>>> ERROR LOAD CACHE: $e');
+    }
+  }
+
+  void _saveCache() {
+    try {
+      final encoded = jsonEncode(listRiwayats.map((e) => e.toJson()).toList());
+      _box.write(_cacheKey, encoded);
+    } catch (e) {
+      print('>>> ERROR SAVE CACHE: $e');
+    }
+  }
+
+  Future<void> clearCache() async {
+    await _box.remove(_cacheKey);
+    listRiwayats.clear();
+  }
+
+  void _cekAutoCancel() {
+    final expired = listRiwayats
+        .where(
+          (r) =>
+              r.status == BookingStatus.menunggu &&
+              r.bookingTime != null &&
+              r.sisaWaktu == Duration.zero,
+        )
+        .toList();
+
+    for (final item in expired) {
+      final bookingId = item.rawId ?? item.id;
+
+      // cegah request berulang
+      if (_processingCancel.contains(bookingId)) continue;
+
+      _processingCancel.add(bookingId);
+
+      _autoCancelBooking(item, bookingId);
+    }
+  }
+
+  Future<void> _autoCancelBooking(ModelRiwayat item, String bookingId) async {
+    try {
+      updateStatus(item.id, BookingStatus.dibatalkan);
+
+      await _api.cancelBooking(bookingId);
+    } catch (e) {
+      print('ERROR AUTO CANCEL: $e');
+    } finally {
+      _processingCancel.remove(bookingId);
+    }
+  }
 
   Future<void> fetchRiwayat() async {
     try {
@@ -30,20 +105,11 @@ class RiwayatController extends GetxController {
       if (response.data['success'] == true) {
         final List data = response.data['data'];
         listRiwayats.value = data.map((item) {
-          // ambil foto
-          String foto = '';
-          if (item['kamar'] != null) {
-            final fotos = item['kamar']?['tipe_kamar']?['kosan']?['fotos'];
-            if (fotos != null && (fotos as List).isNotEmpty) {
-              foto = fotos[0]['url']?.toString() ?? '';
-            }
-          } else if (item['kontrakan'] != null) {
-            final fotos = item['kontrakan']?['fotos'];
-            if (fotos != null && (fotos as List).isNotEmpty) {
-              foto = fotos[0]['url']?.toString() ?? '';
-            }
-          }
-
+          final String foto = item['foto']?.toString() ?? '';
+          final String namaTitle = item['nama']?.toString() ?? 'Properti';
+          final String alamat = item['alamat']?.toString() ?? '';
+          final int totalBiaya = item['total_biaya'] ?? 0;
+          final String redirectUrl = item['redirect_url']?.toString() ?? '';
           BookingStatus status;
           switch (item['status_booking']?.toString()) {
             case 'settlement':
@@ -62,15 +128,6 @@ class RiwayatController extends GetxController {
           }
 
           final String bookingId = item['id']?.toString() ?? '';
-          final String namaTitle =
-              item['kamar']?['tipe_kamar']?['nama'] ??
-              item['kontrakan']?['nama'] ??
-              'Properti';
-          final String alamat =
-              item['kamar']?['tipe_kamar']?['kosan']?['alamat'] ??
-              item['kontrakan']?['alamat'] ??
-              '';
-          final int totalBiaya = item['total_biaya'] ?? 0;
 
           return ModelRiwayat(
             id: '#BK-${bookingId.length >= 8 ? bookingId.substring(0, 8).toUpperCase() : bookingId.toUpperCase()}',
@@ -84,14 +141,80 @@ class RiwayatController extends GetxController {
                 ? DateTime.tryParse(item['created_at'])
                 : null,
             totalHarga: totalBiaya,
+            redirectUrl: item['redirect_url']?.toString() ?? '',
+            checkIn: item['check_in'] != null
+                ? DateTime.tryParse(item['check_in'])
+                : null,
+
+            checkOut: item['check_out'] != null
+                ? DateTime.tryParse(item['check_out'])
+                : null,
+            refundStatus: item['refund_status'],
+            alasanRefund: item['alasan_refund'],
+            nominalRefund: item['nominal_refund'],
           );
         }).toList();
+
+        _saveCache();
       }
     } catch (e) {
       print('>>> ERROR FETCH RIWAYAT: $e');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> hapusRiwayat(ModelRiwayat item) async {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Hapus Riwayat?',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Hapus riwayat booking ${item.title} dari daftar?',
+          style: const TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () async {
+              Get.back();
+              try {
+                await _api.deleteBooking(item.rawId ?? item.id);
+                listRiwayats.removeWhere((r) => r.id == item.id);
+                _saveCache();
+                Get.snackbar(
+                  'Dihapus',
+                  'Riwayat booking ${item.title} telah dihapus',
+                  backgroundColor: Colors.red.shade50,
+                  colorText: Colors.red.shade800,
+                  snackPosition: SnackPosition.TOP,
+                );
+              } catch (e) {
+                Get.snackbar(
+                  'Error',
+                  'Gagal menghapus riwayat',
+                  backgroundColor: Colors.red.shade50,
+                  colorText: Colors.red.shade800,
+                );
+              }
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> batalkanBooking(ModelRiwayat item) async {
@@ -121,9 +244,8 @@ class RiwayatController extends GetxController {
             onPressed: () async {
               Get.back();
               try {
-                // pakai rawId untuk hit API
                 await _api.cancelBooking(item.rawId ?? item.id);
-                await fetchRiwayat(); // refresh dari server
+                await fetchRiwayat();
                 Get.snackbar(
                   'Dibatalkan',
                   'Booking ${item.title} telah dibatalkan',
@@ -196,6 +318,7 @@ class RiwayatController extends GetxController {
     } else {
       listRiwayats.insert(0, item);
     }
+    _saveCache();
   }
 
   void updateStatus(String id, BookingStatus status) {
@@ -204,7 +327,7 @@ class RiwayatController extends GetxController {
       final old = listRiwayats[index];
       listRiwayats[index] = ModelRiwayat(
         id: old.id,
-        rawId: old.rawId, // ← tambah ini
+        rawId: old.rawId,
         title: old.title,
         location: old.location,
         price: old.price,
@@ -213,7 +336,15 @@ class RiwayatController extends GetxController {
         bookingTime: old.bookingTime,
         redirectUrl: old.redirectUrl,
         totalHarga: old.totalHarga,
+
+        refundStatus: old.refundStatus,
+        alasanRefund: old.alasanRefund,
+        nominalRefund: old.nominalRefund,
+
+        checkIn: old.checkIn,
+        checkOut: old.checkOut,
       );
+      _saveCache();
     }
   }
 

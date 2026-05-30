@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/booking_controller.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
+import 'package:appkonkos_mobile/modules/booking/screens/booking_confirm_screen.dart';
 
 class BookingBottomSheet extends StatelessWidget {
   const BookingBottomSheet({super.key});
@@ -13,6 +14,9 @@ class BookingBottomSheet extends StatelessWidget {
     required int hargaPerBulan,
     required String tipeKamarNama,
     required String tipeProperty,
+    String? peraturan,
+    String? namaProperti,
+    String? fotoProperti,
   }) {
     final ctrl = Get.isRegistered<BookingController>()
         ? Get.find<BookingController>()
@@ -24,6 +28,9 @@ class BookingBottomSheet extends StatelessWidget {
       nama: kamarNama,
       harga: hargaPerBulan,
       tipeNama: tipeKamarNama,
+      peraturanProperti: peraturan,
+      namaProperti: namaProperti,
+      fotoProperti: fotoProperti,
     );
 
     ctrl.tipeProperty.value = tipeProperty;
@@ -120,24 +127,18 @@ class BookingBottomSheet extends StatelessWidget {
                     children: [
                       Row(
                         children: ctrl.opsiDurasi.map((durasi) {
-                          final isSelected =
-                              ctrl.selectedDurasi.value == durasi;
+                          final isSelected = ctrl.selectedDurasi.value == durasi;
 
                           return Expanded(
                             child: GestureDetector(
                               onTap: () {
                                 ctrl.selectDurasi(durasi);
-
                                 ctrl.durasiController.text = durasi.toString();
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 5,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
+                                margin: const EdgeInsets.symmetric(horizontal: 5),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColor.blue
@@ -146,9 +147,7 @@ class BookingBottomSheet extends StatelessWidget {
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: AppColor.blue.withOpacity(
-                                              0.25,
-                                            ),
+                                            color: AppColor.blue.withOpacity(0.25),
                                             blurRadius: 10,
                                             offset: const Offset(0, 4),
                                           ),
@@ -167,9 +166,7 @@ class BookingBottomSheet extends StatelessWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-
                                     const SizedBox(height: 6),
-
                                     Text(
                                       isKontrakan
                                           ? '$durasi Tahun'
@@ -253,7 +250,6 @@ class BookingBottomSheet extends StatelessWidget {
                                 color: Colors.grey,
                               ),
                             ),
-
                             Text(
                               'Rp ${ctrl.formattedHargaPerBulan}',
                               style: const TextStyle(
@@ -263,12 +259,10 @@ class BookingBottomSheet extends StatelessWidget {
                             ),
                           ],
                         ),
-
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 18),
                           child: Divider(),
                         ),
-
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -284,9 +278,7 @@ class BookingBottomSheet extends StatelessWidget {
                                     height: 1.1,
                                   ),
                                 ),
-
                                 const SizedBox(height: 8),
-
                                 Row(
                                   children: [
                                     Icon(
@@ -294,10 +286,9 @@ class BookingBottomSheet extends StatelessWidget {
                                       size: 14,
                                       color: AppColor.blue.withOpacity(0.8),
                                     ),
-
                                     const SizedBox(width: 4),
                                     const Text(
-                                      'TERMASUK DEPOSIT\nAWAL',
+                                      'BELUM TERMASUK\nBIAYA LAYANAN',
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: AppColor.blue,
@@ -308,10 +299,9 @@ class BookingBottomSheet extends StatelessWidget {
                                 ),
                               ],
                             ),
-
                             Flexible(
                               child: Text(
-                                'Rp${ctrl.formattedTotal}',
+                                'Rp ${ctrl.formattedTotal}',
                                 textAlign: TextAlign.right,
                                 style: const TextStyle(
                                   color: AppColor.blue,
@@ -345,24 +335,28 @@ class BookingBottomSheet extends StatelessWidget {
                       ),
                       onPressed: ctrl.isLoading.value
                           ? null
-                          : () async {
-                              await ctrl.submitBooking();
+                          : () {
+                              Get.back(); // tutup bottom sheet
+                              Get.to(
+                                () => BookingConfirmScreen(
+                                  redirectUrl: '',
+                                  bookingId: '',
+                                  totalHarga: ctrl.totalBiaya,
+                                  kamarNama: ctrl.kamarNama ?? '',
+                                  tipeKamarNama: ctrl.tipeKamarNama ?? '',
+                                  durasi: ctrl.selectedDurasi.value,
+                                  hargaPerBulan: ctrl.hargaPerBulan ?? 0,
+                                  tipeProperty: ctrl.tipeProperty.value,
+                                  peraturan: ctrl.peraturan ?? '',
+                                ),
+                              );
                             },
-                      icon: ctrl.isLoading.value
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.check_circle_outline,
-                              color: Colors.white,
-                            ),
+                      icon: const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                      ),
                       label: const Text(
-                        'Ajukan Booking Sekarang',
+                        'Lanjut ke Konfirmasi',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,

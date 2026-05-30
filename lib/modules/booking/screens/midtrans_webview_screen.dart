@@ -21,6 +21,7 @@ class MidtransWebView extends StatefulWidget {
   final int durasi;
   final String tipeProperty;
   final String noWaPemilik;
+  final String tglMulai;
 
   const MidtransWebView({
     super.key,
@@ -32,6 +33,7 @@ class MidtransWebView extends StatefulWidget {
     this.durasi = 1,
     this.tipeProperty = '',
     this.noWaPemilik = '',
+    this.tglMulai = '',
   });
 
   @override
@@ -54,6 +56,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
   String tipeProperty = '';
   String bookingId = '';
   String noWaPemilik = '';
+  String tglMulai = '';
 
   @override
   void initState() {
@@ -65,6 +68,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
     tipeProperty = widget.tipeProperty;
     bookingId = widget.bookingId;
     noWaPemilik = widget.noWaPemilik;
+    tglMulai = widget.tglMulai;
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -136,6 +140,12 @@ class _MidtransWebViewState extends State<MidtransWebView> {
     final pdf = pw.Document();
     final satuanDurasi = tipeProperty == 'Kontrakan' ? 'Tahun' : 'Bulan';
     final now = DateTime.now();
+    final tglCheckin = tglMulai.isNotEmpty
+        ? DateTime.tryParse(tglMulai) ?? now
+        : now;
+    final tglCheckout = tipeProperty == 'Kontrakan'
+        ? DateTime(tglCheckin.year + durasi, tglCheckin.month, tglCheckin.day)
+        : DateTime(tglCheckin.year, tglCheckin.month + durasi, tglCheckin.day);
     final noStruk = bookingId.isNotEmpty
         ? 'BK-${bookingId.substring(0, 8).toUpperCase()}'
         : 'BK-${now.millisecondsSinceEpoch.toString().substring(6)}';
@@ -183,7 +193,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
                         ),
                       ),
                       pw.Text(
-                        _formatTanggal(now),
+                        _formatTanggal(tglCheckin),
                         style: const pw.TextStyle(
                           fontSize: 11,
                           color: PdfColors.grey,
@@ -249,7 +259,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
                         ),
                         pw.SizedBox(height: 4),
                         pw.Text(
-                          _formatTanggal(now),
+                          _formatTanggal(tglCheckin),
                           style: pw.TextStyle(
                             fontSize: 13,
                             fontWeight: pw.FontWeight.bold,
@@ -276,7 +286,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
                         ),
                         pw.SizedBox(height: 4),
                         pw.Text(
-                          _formatTanggal(now.add(Duration(days: durasi * 30))),
+                          _formatTanggal(tglCheckout),
                           style: pw.TextStyle(
                             fontSize: 13,
                             fontWeight: pw.FontWeight.bold,
@@ -387,7 +397,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
                     ),
                   ),
                   child: pw.Text(
-                    '✓ LUNAS / PAID',
+                    ' LUNAS / PAID',
                     style: pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
@@ -461,11 +471,13 @@ Terima kasih! 🙏''';
 
   void _showSuccessSheet() {
     try {
-      Get.find<RiwayatController>().updateStatus(
-        '#BK-$bookingId',
-        BookingStatus.dibayar,
-      );
+      final riwayatController = Get.find<RiwayatController>();
+      final formattedId =
+          '#BK-${bookingId.length >= 8 ? bookingId.substring(0, 8).toUpperCase() : bookingId.toUpperCase()}';
+      riwayatController.updateStatus(formattedId, BookingStatus.dibayar);
+      riwayatController.fetchRiwayat();
     } catch (_) {}
+
     Get.bottomSheet(
       Container(
         decoration: const BoxDecoration(
@@ -494,7 +506,6 @@ Terima kasih! 🙏''';
                   repeat: true,
                 ),
                 const SizedBox(height: 16),
-
                 const Text(
                   'Pembayaran Berhasil!',
                   style: TextStyle(
@@ -511,10 +522,7 @@ Terima kasih! 🙏''';
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 13, color: textGrey),
                 ),
-
                 const SizedBox(height: 28),
-
-                // Simpan PDF
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -548,10 +556,7 @@ Terima kasih! 🙏''';
                     },
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
-                // Bagikan struk
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -584,10 +589,7 @@ Terima kasih! 🙏''';
                     },
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
-                // Kirim WA ke pemilik
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -613,9 +615,7 @@ Terima kasih! 🙏''';
                     onPressed: _kirimWaKePemilik,
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 TextButton(
                   onPressed: () => Get.until((route) => route.isFirst),
                   child: const Text(
@@ -787,27 +787,29 @@ Terima kasih! 🙏''';
           child: Container(color: const Color(0xFFE2E8F0), height: 1),
         ),
       ),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (isLoading)
-            Container(
-              color: Colors.white,
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: blue),
-                    SizedBox(height: 16),
-                    Text(
-                      'Memuat halaman pembayaran...',
-                      style: TextStyle(color: textGrey),
-                    ),
-                  ],
+      body: SafeArea(
+        child: Stack(
+          children: [
+            WebViewWidget(controller: _controller),
+            if (isLoading)
+              Container(
+                color: Colors.white,
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(color: blue),
+                      SizedBox(height: 16),
+                      Text(
+                        'Memuat halaman pembayaran...',
+                        style: TextStyle(color: textGrey),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

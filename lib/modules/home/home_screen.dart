@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         "assets/image/riwayat.png",
                         "Riwayat",
                         3,
-                        hasNotification: punya, // ← dinamis
+                        hasNotification: punya,
                       );
                     }),
                     _buildNavItem("assets/image/profile.png", "Profil", 4),
@@ -180,6 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
+                SliverToBoxAdapter(child: _buildBannerCarousel()),
                 SliverToBoxAdapter(
                   child: _buildSectionTitle("Properti Terdekat"),
                 ),
@@ -473,6 +474,159 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icons.tune_rounded,
                 color: Colors.white,
                 size: 24,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  final _bannerIndex = 0.obs;
+
+  Widget _buildBannerCarousel() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 160,
+            child: PageView.builder(
+              controller: controller.bannerController,
+              itemCount: controller.banners.length,
+              onPageChanged: (i) => controller.bannerIndex.value = i,
+              itemBuilder: (context, i) {
+                final b = controller.banners[i];
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [b['color'] as Color, b['accent'] as Color],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: -20,
+                        top: -20,
+                        child: Container(
+                          width: 130,
+                          height: 130,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 30,
+                        bottom: -30,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                b['tag'] as String,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              b['title'] as String,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                height: 1.2,
+                              ),
+                            ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () {},
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      b['btn'] as String,
+                                      style: TextStyle(
+                                        color: b['color'] as Color,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.arrow_forward_rounded,
+                                      size: 14,
+                                      color: b['color'] as Color,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+          Obx(
+            () => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                controller.banners.length,
+                (i) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: controller.bannerIndex.value == i ? 20 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: controller.bannerIndex.value == i
+                        ? AppColor.primary
+                        : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
               ),
             ),
           ),
@@ -855,161 +1009,320 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showFilterBottomSheet() {
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.all(25),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Center(
-                  child: SizedBox(width: 40, child: Divider(thickness: 4)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Filter",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Filter Pencarian",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A2E),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        controller.setType('');
+                        controller.setGender('Semua');
+                        controller.setSort('');
+                        controller.setRating(0);
+                        controller.setMaxPrice(10000000);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColor.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Reset",
+                          style: TextStyle(
+                            color: AppColor.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
 
-                // Tipe Hunian
-                const SizedBox(height: 25),
-                const Text(
-                  "Tipe Hunian",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const SizedBox(height: 4),
+              Divider(color: Colors.grey.shade100, height: 24),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _filterChip(
-                        "Semua",
-                        controller.selectedType.value == "",
-                        () => controller.setType(""),
+                      _filterSectionTitle("Tipe Hunian", Icons.home_outlined),
+                      const SizedBox(height: 12),
+                      Obx(
+                        () => Row(
+                          children: [
+                            _filterChip(
+                              "Semua",
+                              controller.selectedType.value == "",
+                              () => controller.setType(""),
+                            ),
+                            const SizedBox(width: 8),
+                            _filterChip(
+                              "Kosan",
+                              controller.selectedType.value == "Kosan",
+                              () => controller.setType("Kosan"),
+                            ),
+                            const SizedBox(width: 8),
+                            _filterChip(
+                              "Kontrakan",
+                              controller.selectedType.value == "Kontrakan",
+                              () => controller.setType("Kontrakan"),
+                            ),
+                          ],
+                        ),
                       ),
-                      _filterChip(
-                        "Kosan",
-                        controller.selectedType.value == "Kosan",
-                        () => controller.setType("Kosan"),
+                      const SizedBox(height: 24),
+                      _filterSectionTitle(
+                        "Tipe Penghuni",
+                        Icons.people_outline,
                       ),
-                      _filterChip(
-                        "Kontrakan",
-                        controller.selectedType.value == "Kontrakan",
-                        () => controller.setType("Kontrakan"),
+                      const SizedBox(height: 12),
+                      Obx(
+                        () => Wrap(
+                          spacing: 8,
+                          children: controller.genderOptions.map((gender) {
+                            return _filterChip(
+                              gender,
+                              gender == "Semua"
+                                  ? controller.selectedGender.value == ""
+                                  : controller.selectedGender.value == gender,
+                              () => controller.setGender(gender),
+                            );
+                          }).toList(),
+                        ),
                       ),
+                      const SizedBox(height: 24),
+                      _filterSectionTitle("Urutan Harga", Icons.sort_rounded),
+                      const SizedBox(height: 12),
+                      Obx(
+                        () => Row(
+                          children: [
+                            _filterChip(
+                              "💰 Termurah",
+                              controller.selectedSort.value == "low",
+                              () => controller.setSort("low"),
+                            ),
+                            const SizedBox(width: 8),
+                            _filterChip(
+                              "💎 Termahal",
+                              controller.selectedSort.value == "high",
+                              () => controller.setSort("high"),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _filterSectionTitle(
+                        "Minimal Rating",
+                        Icons.star_outline_rounded,
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(
+                        () => Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "⭐ ${controller.minRating.value.toStringAsFixed(1)}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Color(0xFF1A1A2E),
+                                  ),
+                                ),
+                                Text(
+                                  controller.minRating.value == 0
+                                      ? "Semua rating"
+                                      : "Min. ${controller.minRating.value.toStringAsFixed(1)} bintang",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SliderTheme(
+                              data: SliderTheme.of(Get.context!).copyWith(
+                                activeTrackColor: AppColor.primary,
+                                inactiveTrackColor: Colors.grey.shade200,
+                                thumbColor: AppColor.primary,
+                                overlayColor: AppColor.primary.withOpacity(0.1),
+                                trackHeight: 4,
+                              ),
+                              child: Slider(
+                                value: controller.minRating.value,
+                                min: 0,
+                                max: 5,
+                                divisions: 5,
+                                onChanged: (val) => controller.setRating(val),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List.generate(
+                                6,
+                                (i) => Text(
+                                  '$i',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _filterSectionTitle(
+                        "Maksimal Harga",
+                        Icons.payments_outlined,
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(() {
+                        final harga = controller.maxPrice.value.toInt();
+                        final formatted = harga.toString().replaceAllMapped(
+                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                          (m) => '${m[1]}.',
+                        );
+                        return Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Rp $formatted",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Color(0xFF1A1A2E),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.primary.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    harga >= 10000000 ? "Semua harga" : "Maks.",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColor.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SliderTheme(
+                              data: SliderTheme.of(Get.context!).copyWith(
+                                activeTrackColor: AppColor.primary,
+                                inactiveTrackColor: Colors.grey.shade200,
+                                thumbColor: AppColor.primary,
+                                overlayColor: AppColor.primary.withOpacity(0.1),
+                                trackHeight: 4,
+                              ),
+                              child: Slider(
+                                value: controller.maxPrice.value,
+                                min: 500000,
+                                max: 10000000,
+                                divisions: 19,
+                                onChanged: (val) => controller.setMaxPrice(val),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "500rb",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                                Text(
+                                  "10jt",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      }),
+
+                      const SizedBox(height: 28),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 25),
-                const Text(
-                  "Tipe Penghuni",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: controller.genderOptions.map((gender) {
-                      return _filterChip(
-                        gender,
-                        gender == "Semua"
-                            ? controller.selectedGender.value == ""
-                            : controller.selectedGender.value == gender,
-                        () => controller.setGender(gender),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                // Urutan Harga
-                const SizedBox(height: 25),
-                const Text(
-                  "Urutan Harga",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Obx(
-                  () => Row(
-                    children: [
-                      _filterChip(
-                        "Termurah",
-                        controller.selectedSort.value == "low",
-                        () => controller.setSort("low"),
-                      ),
-                      const SizedBox(width: 10),
-                      _filterChip(
-                        "Termahal",
-                        controller.selectedSort.value == "high",
-                        () => controller.setSort("high"),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Minimal Rating
-                const SizedBox(height: 25),
-                const Text(
-                  "Minimal Rating",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Obx(
-                  () => Slider(
-                    value: controller.minRating.value,
-                    min: 0,
-                    max: 5,
-                    divisions: 5,
-                    label: controller.minRating.value.toString(),
-                    onChanged: (val) => controller.setRating(val),
-                  ),
-                ),
-
-                // Maksimal Harga
-                const SizedBox(height: 25),
-                const Text(
-                  "Maksimal Harga",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Obx(
-                  () => Column(
-                    children: [
-                      Slider(
-                        value: controller.maxPrice.value,
-                        min: 500000,
-                        max: 10000000,
-                        onChanged: (val) => controller.setMaxPrice(val),
-                      ),
-                      Text(
-                        "Di bawah Rp ${controller.maxPrice.value.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}",
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-                SizedBox(
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 52,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3F51B5),
+                      backgroundColor: AppColor.primary,
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     onPressed: () => Get.back(),
                     child: const Text(
-                      "Terapkan",
-                      style: TextStyle(color: Colors.white),
+                      "Terapkan Filter",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1017,18 +1330,59 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _filterSectionTitle(String title, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColor.primary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: AppColor.primary),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: Color(0xFF1A1A2E),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _filterChip(String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF3F51B5) : Colors.grey[200],
-          borderRadius: BorderRadius.circular(10),
+          color: isSelected ? AppColor.primary : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColor.primary : Colors.transparent,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColor.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [],
         ),
         child: Text(
           label,
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey.shade700,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 13,
+          ),
         ),
       ),
     );

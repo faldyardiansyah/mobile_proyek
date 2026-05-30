@@ -9,7 +9,7 @@ class ApiService extends GetxService {
   final _storage = GetStorage();
 
   static String get baseUrl =>
-      dotenv.env['BASE_URL'] ?? 'http://192.168.1.5:8000/api';
+      dotenv.env['BASE_URL'] ?? 'http://192.168.1.8/api';
   @override
   void onInit() {
     super.onInit();
@@ -127,5 +127,9 @@ class ApiService extends GetxService {
 
   Future<dio_lib.Response<dynamic>> cancelBooking(String bookingId) async {
     return await _dio.patch('/bookings/$bookingId/cancel');
+  }
+
+  Future<dio_lib.Response<dynamic>> deleteBooking(String bookingId) async {
+    return await _dio.delete('/bookings/$bookingId');
   }
 }

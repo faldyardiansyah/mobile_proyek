@@ -29,90 +29,92 @@ class PaymentScreen extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Metode Tersimpan',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF94A3B8), letterSpacing: 0.5)),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.separated(
-                itemCount: _methods.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (context, index) {
-                  final method = _methods[index];
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: method['active'] ? AppColor.primary : Colors.transparent,
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEAF3FB),
-                            borderRadius: BorderRadius.circular(10),
+      body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Metode Tersimpan',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF94A3B8), letterSpacing: 0.5)),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: _methods.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final method = _methods[index];
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: method['active'] ? AppColor.primary : Colors.transparent,
+                            width: 1.5,
                           ),
-                          child: Icon(method['icon'] as IconData, color: AppColor.primary, size: 22),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
+                          ],
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(method['name'] as String,
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                              const SizedBox(height: 2),
-                              Text(method['number'] as String,
-                                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
-                            ],
-                          ),
-                        ),
-                        if (method['active'] as bool)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE3F2FD),
-                              borderRadius: BorderRadius.circular(6),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEAF3FB),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(method['icon'] as IconData, color: AppColor.primary, size: 22),
                             ),
-                            child: Text('Utama',
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColor.primary)),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: Icon(Icons.add, color: AppColor.primary),
-                label: Text('Tambah Metode Pembayaran',
-                    style: TextStyle(color: AppColor.primary, fontWeight: FontWeight.w600)),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppColor.primary),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(method['name'] as String,
+                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                                  const SizedBox(height: 2),
+                                  Text(method['number'] as String,
+                                      style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                                ],
+                              ),
+                            ),
+                            if (method['active'] as bool)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE3F2FD),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text('Utama',
+                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColor.primary)),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.add, color: AppColor.primary),
+                    label: Text('Tambah Metode Pembayaran',
+                        style: TextStyle(color: AppColor.primary, fontWeight: FontWeight.w600)),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: AppColor.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
       ),
     );
   }

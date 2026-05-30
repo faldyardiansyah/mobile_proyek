@@ -24,11 +24,23 @@ class ProfileController extends GetxController {
   final selectedPekerjaan = RxnString();
 
   final listJenisKelamin = {'L': 'Laki-laki', 'P': 'Perempuan'};
-  final listPekerjaan = {'Mahasiswa': 'Mahasiswa', 'Karyawan': 'Karyawan', 'Lainnya': 'Lainnya'};
+  final listPekerjaan = {
+    'Mahasiswa': 'Mahasiswa',
+    'Karyawan': 'Karyawan',
+    'Lainnya': 'Lainnya',
+  };
 
   final isOldPassHidden = true.obs;
   final isNewPassHidden = true.obs;
   final isConfirmPassHidden = true.obs;
+
+  // ← helper fix URL
+  String _fixUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    return url
+        .replaceAll('http://localhost', 'http://192.168.1.8:8000')
+        .replaceAll('https://localhost', 'http://192.168.1.8:8000');
+  }
 
   @override
   void onInit() {
@@ -55,13 +67,18 @@ class ProfileController extends GetxController {
         ),
       });
 
-      final response = await _apiService.postFormData('/profile/update', formData);
+      final response = await _apiService.postFormData(
+        '/profile/update',
+        formData,
+      );
 
       if (response.statusCode == 200) {
         final authC = Get.find<AuthController>();
         final userData = response.data['user'];
         final updatedUser = Map<String, dynamic>.from(authC.user.value);
-        updatedUser['profile_photo_url'] = userData['profile_photo_url'];
+        updatedUser['profile_photo_url'] = _fixUrl(
+          userData['profile_photo_url'],
+        ); // ← fix URL
         authC.user.value = updatedUser;
         authC.box.write('user', authC.user.value);
         selectedImage.value = null;
@@ -74,9 +91,12 @@ class ProfileController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar('Gagal', 'Gagal mengupload foto',
-          backgroundColor: Colors.red.shade50,
-          colorText: Colors.red.shade800);
+      Get.snackbar(
+        'Gagal',
+        'Gagal mengupload foto',
+        backgroundColor: Colors.red.shade50,
+        colorText: Colors.red.shade800,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -108,13 +128,15 @@ class ProfileController extends GetxController {
         selectedPekerjaan.value = userData['pekerjaan'];
 
         final updatedUser = Map<String, dynamic>.from(cachedUser);
-        updatedUser['name']              = userData['name'];
-        updatedUser['email']             = userData['email'];
-        updatedUser['no_telepon']        = userData['no_telepon'];
-        updatedUser['jenis_kelamin']     = userData['jenis_kelamin'];
-        updatedUser['pekerjaan']         = userData['pekerjaan'];
-        updatedUser['kota_asal']         = userData['kota_asal'];
-        updatedUser['profile_photo_url'] = userData['profile_photo_url'];
+        updatedUser['name'] = userData['name'];
+        updatedUser['email'] = userData['email'];
+        updatedUser['no_telepon'] = userData['no_telepon'];
+        updatedUser['jenis_kelamin'] = userData['jenis_kelamin'];
+        updatedUser['pekerjaan'] = userData['pekerjaan'];
+        updatedUser['kota_asal'] = userData['kota_asal'];
+        updatedUser['profile_photo_url'] = _fixUrl(
+          userData['profile_photo_url'],
+        ); // ← fix URL
         authC.user.value = updatedUser;
         authC.box.write('user', authC.user.value);
       }
@@ -212,23 +234,32 @@ class ProfileController extends GetxController {
     if (oldPasswordController.text.isEmpty ||
         newPasswordController.text.isEmpty ||
         confirmPasswordController.text.isEmpty) {
-      Get.snackbar('Perhatian', 'Semua field wajib diisi',
-          backgroundColor: Colors.orange.shade50,
-          colorText: Colors.orange.shade800);
+      Get.snackbar(
+        'Perhatian',
+        'Semua field wajib diisi',
+        backgroundColor: Colors.orange.shade50,
+        colorText: Colors.orange.shade800,
+      );
       return;
     }
 
     if (newPasswordController.text.length < 8) {
-      Get.snackbar('Perhatian', 'Password baru minimal 8 karakter',
-          backgroundColor: Colors.orange.shade50,
-          colorText: Colors.orange.shade800);
+      Get.snackbar(
+        'Perhatian',
+        'Password baru minimal 8 karakter',
+        backgroundColor: Colors.orange.shade50,
+        colorText: Colors.orange.shade800,
+      );
       return;
     }
 
     if (newPasswordController.text != confirmPasswordController.text) {
-      Get.snackbar('Perhatian', 'Konfirmasi password tidak cocok',
-          backgroundColor: Colors.orange.shade50,
-          colorText: Colors.orange.shade800);
+      Get.snackbar(
+        'Perhatian',
+        'Konfirmasi password tidak cocok',
+        backgroundColor: Colors.orange.shade50,
+        colorText: Colors.orange.shade800,
+      );
       return;
     }
 
@@ -238,10 +269,13 @@ class ProfileController extends GetxController {
       final formData = dio_lib.FormData.fromMap({
         'password_lama': oldPasswordController.text,
         'password_baru': newPasswordController.text,
-        'konfirmasi':    confirmPasswordController.text,
+        'konfirmasi': confirmPasswordController.text,
       });
 
-      final response = await _apiService.postFormData('/profile/update', formData);
+      final response = await _apiService.postFormData(
+        '/profile/update',
+        formData,
+      );
 
       if (response.statusCode == 200) {
         oldPasswordController.clear();
@@ -258,9 +292,12 @@ class ProfileController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar('Gagal', 'Password lama tidak sesuai',
-          backgroundColor: Colors.red.shade50,
-          colorText: Colors.red.shade800);
+      Get.snackbar(
+        'Gagal',
+        'Password lama tidak sesuai',
+        backgroundColor: Colors.red.shade50,
+        colorText: Colors.red.shade800,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -269,21 +306,30 @@ class ProfileController extends GetxController {
   Future<void> updateProfile() async {
     if (newPasswordController.text.isNotEmpty) {
       if (oldPasswordController.text.isEmpty) {
-        Get.snackbar('Perhatian', 'Masukkan password lama',
-            backgroundColor: Colors.orange.shade50,
-            colorText: Colors.orange.shade800);
+        Get.snackbar(
+          'Perhatian',
+          'Masukkan password lama',
+          backgroundColor: Colors.orange.shade50,
+          colorText: Colors.orange.shade800,
+        );
         return;
       }
       if (newPasswordController.text.length < 8) {
-        Get.snackbar('Perhatian', 'Password baru minimal 8 karakter',
-            backgroundColor: Colors.orange.shade50,
-            colorText: Colors.orange.shade800);
+        Get.snackbar(
+          'Perhatian',
+          'Password baru minimal 8 karakter',
+          backgroundColor: Colors.orange.shade50,
+          colorText: Colors.orange.shade800,
+        );
         return;
       }
       if (newPasswordController.text != confirmPasswordController.text) {
-        Get.snackbar('Perhatian', 'Konfirmasi password tidak cocok',
-            backgroundColor: Colors.orange.shade50,
-            colorText: Colors.orange.shade800);
+        Get.snackbar(
+          'Perhatian',
+          'Konfirmasi password tidak cocok',
+          backgroundColor: Colors.orange.shade50,
+          colorText: Colors.orange.shade800,
+        );
         return;
       }
     }
@@ -292,17 +338,20 @@ class ProfileController extends GetxController {
       isLoading.value = true;
 
       final formData = dio_lib.FormData.fromMap({
-        'name'       : nameController.text.trim(),
-        'no_telepon' : phoneController.text.trim() == '-' ? '' : phoneController.text.trim(),
-        'domisili'   : domisiliController.text.trim(),
+        'name': nameController.text.trim(),
+        'no_telepon':
+            phoneController.text.trim() == '-'
+                ? ''
+                : phoneController.text.trim(),
+        'domisili': domisiliController.text.trim(),
         if (selectedJenisKelamin.value != null)
-          'jenis_kelamin' : selectedJenisKelamin.value!,
+          'jenis_kelamin': selectedJenisKelamin.value!,
         if (selectedPekerjaan.value != null)
-          'pekerjaan'     : selectedPekerjaan.value!,
+          'pekerjaan': selectedPekerjaan.value!,
         if (newPasswordController.text.isNotEmpty) ...{
-          'password_lama' : oldPasswordController.text,
-          'password_baru' : newPasswordController.text,
-          'konfirmasi'    : confirmPasswordController.text,
+          'password_lama': oldPasswordController.text,
+          'password_baru': newPasswordController.text,
+          'konfirmasi': confirmPasswordController.text,
         },
         if (selectedImage.value != null)
           'foto': await dio_lib.MultipartFile.fromFile(
@@ -311,18 +360,23 @@ class ProfileController extends GetxController {
           ),
       });
 
-      final response = await _apiService.postFormData('/profile/update', formData);
+      final response = await _apiService.postFormData(
+        '/profile/update',
+        formData,
+      );
 
       if (response.statusCode == 200) {
         final authC = Get.find<AuthController>();
         final userData = response.data['user'];
         final updatedUser = Map<String, dynamic>.from(authC.user.value);
-        updatedUser['name']              = userData['name'];
-        updatedUser['no_telepon']        = userData['no_telepon'];
-        updatedUser['jenis_kelamin']     = userData['jenis_kelamin'];
-        updatedUser['pekerjaan']         = userData['pekerjaan'];
-        updatedUser['kota_asal']         = userData['kota_asal'];
-        updatedUser['profile_photo_url'] = userData['profile_photo_url'];
+        updatedUser['name'] = userData['name'];
+        updatedUser['no_telepon'] = userData['no_telepon'];
+        updatedUser['jenis_kelamin'] = userData['jenis_kelamin'];
+        updatedUser['pekerjaan'] = userData['pekerjaan'];
+        updatedUser['kota_asal'] = userData['kota_asal'];
+        updatedUser['profile_photo_url'] = _fixUrl(
+          userData['profile_photo_url'],
+        ); // ← fix URL
         authC.user.value = updatedUser;
         authC.box.write('user', authC.user.value);
 
@@ -340,9 +394,12 @@ class ProfileController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar('Gagal', 'Terjadi kesalahan: $e',
-          backgroundColor: Colors.red.shade50,
-          colorText: Colors.red.shade800);
+      Get.snackbar(
+        'Gagal',
+        'Terjadi kesalahan: $e',
+        backgroundColor: Colors.red.shade50,
+        colorText: Colors.red.shade800,
+      );
     } finally {
       isLoading.value = false;
     }

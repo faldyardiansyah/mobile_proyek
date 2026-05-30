@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
-import '../screens/midtrans_webview_screen.dart';
 
 class BookingConfirmScreen extends StatefulWidget {
   final String redirectUrl;
@@ -39,6 +38,7 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
   static const Color textGrey = Color(0xFF7B8794);
 
   bool _setuju = false;
+  DateTime _tglMulai = DateTime.now();
   final _catatanCtrl = TextEditingController();
 
   String _formatHarga(int angka) {
@@ -50,20 +50,43 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
 
   String _formatTanggal(DateTime dt) {
     final bulan = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agt',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
     ];
     return '${dt.day} ${bulan[dt.month - 1]} ${dt.year}';
+  }
+
+  String _formatJenisKelamin(String raw) {
+    switch (raw.toUpperCase()) {
+      case 'L': return 'Laki-laki';
+      case 'P': return 'Perempuan';
+      default:  return raw.isEmpty ? '-' : raw;
+    }
+  }
+
+  Future<void> _pilihTanggal() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _tglMulai,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: blue,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: textDark,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _tglMulai = picked);
+    }
   }
 
   @override
@@ -77,10 +100,12 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
     final authC = Get.find<AuthController>();
     final user = authC.user;
     final satuanDurasi = widget.tipeProperty == 'Kontrakan' ? 'Tahun' : 'Bulan';
-    final biayaLayanan = 10000;
+    const biayaLayanan = 10000;
     final total = widget.totalHarga + biayaLayanan;
-    final tglMulai = DateTime.now();
-    final tglSelesai = tglMulai.add(Duration(days: widget.durasi * 30));
+
+    final tglSelesai = widget.tipeProperty == 'Kontrakan'
+        ? DateTime(_tglMulai.year + widget.durasi, _tglMulai.month, _tglMulai.day)
+        : DateTime(_tglMulai.year, _tglMulai.month + widget.durasi, _tglMulai.day);
 
     return SafeArea(
       child: Scaffold(
@@ -140,13 +165,10 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                     const SizedBox(height: 16),
                     _infoRow('NAMA LENGKAP', user['name']?.toString() ?? '-'),
                     _infoRow('EMAIL', user['email']?.toString() ?? '-'),
-                    _infoRow(
-                      'NOMOR TELEPON',
-                      user['no_telepon']?.toString() ?? '-',
-                    ),
+                    _infoRow('NOMOR TELEPON', user['no_telepon']?.toString() ?? '-'),
                     _infoRow(
                       'JENIS KELAMIN',
-                      user['jenis_kelamin']?.toString() ?? '-',
+                      _formatJenisKelamin(user['jenis_kelamin']?.toString() ?? ''),
                     ),
                     _infoRow('PEKERJAAN', user['pekerjaan']?.toString() ?? '-'),
                     _infoRow('DOMISILI', user['kota_asal']?.toString() ?? '-'),
@@ -200,8 +222,120 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                     ),
                     const SizedBox(height: 16),
                     _infoRow('DURASI SEWA', '${widget.durasi} $satuanDurasi'),
-                    _infoRow('TANGGAL CHECK-IN', _formatTanggal(tglMulai)),
-                    _infoRow('PERKIRAAN CHECK-OUT', _formatTanggal(tglSelesai)),
+                    const SizedBox(height: 4),
+
+                    // Tanggal check-in
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'TANGGAL CHECK-IN',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: textGrey,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        GestureDetector(
+                          onTap: _pilihTanggal,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: blue.withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.calendar_today_outlined,
+                                  color: blue,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  _formatTanggal(_tglMulai),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: textDark,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Text(
+                                  'Ubah',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: blue,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
+
+                    // Perkiraan check-out
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'PERKIRAAN CHECK-OUT',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: textGrey,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.event_outlined,
+                                color: textGrey,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                _formatTanggal(tglSelesai),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: textGrey,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              const Text(
+                                'Otomatis',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: textGrey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -219,8 +353,7 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                   controller: _catatanCtrl,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText:
-                        'Sampaikan pesan tambahan atau pertanyaan ke pemilik...',
+                    hintText: 'Sampaikan pesan tambahan atau pertanyaan ke pemilik...',
                     hintStyle: const TextStyle(fontSize: 13, color: textGrey),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
@@ -341,9 +474,7 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: _setuju
-                              ? const Color(0xFFEFF6FF)
-                              : Colors.white,
+                          color: _setuju ? const Color(0xFFEFF6FF) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: _setuju ? blue : const Color(0xFFE2E8F0),
@@ -360,18 +491,12 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                                 color: _setuju ? blue : Colors.white,
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: _setuju
-                                      ? blue
-                                      : const Color(0xFFCBD5E1),
+                                  color: _setuju ? blue : const Color(0xFFCBD5E1),
                                   width: 1.5,
                                 ),
                               ),
                               child: _setuju
-                                  ? const Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 14,
-                                    )
+                                  ? const Icon(Icons.check, color: Colors.white, size: 14)
                                   : null,
                             ),
                             const SizedBox(width: 12),
@@ -395,59 +520,63 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
 
               const SizedBox(height: 24),
 
-              // === TOMBOL BAYAR ===
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _setuju
-                        ? AppColor.primary
-                        : Colors.grey.shade300,
-                    elevation: _setuju ? 4 : 0,
-                    shadowColor: AppColor.primary.withOpacity(0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
+              Obx(() {
+                final bookingC = Get.find<BookingController>();
+                return SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _setuju
+                          ? AppColor.primary
+                          : Colors.grey.shade300,
+                      elevation: _setuju ? 4 : 0,
+                      shadowColor: AppColor.primary.withOpacity(0.4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
                     ),
-                  ),
-                  onPressed: _setuju
-                      ? () {
-                          Get.to(
-                            () => MidtransWebView(
-                              url: widget.redirectUrl,
-                              totalHarga: total,
-                              bookingId: widget.bookingId,
-                              kamarNama: widget.kamarNama,
-                              tipeKamarNama: widget.tipeKamarNama,
-                              durasi: widget.durasi,
-                              tipeProperty: widget.tipeProperty,
-                              noWaPemilik:
-                                  Get.find<BookingController>().noWaPemilik,
+                    onPressed: (_setuju && !bookingC.isLoading.value)
+                        ? () async {
+                            final tglStr =
+                                '${_tglMulai.year}-${_tglMulai.month.toString().padLeft(2, '0')}-${_tglMulai.day.toString().padLeft(2, '0')}';
+                            await bookingC.submitBookingFinal(
+                              tglMulai: tglStr,
+                              catatan: _catatanCtrl.text.trim(),
+                            );
+                          }
+                        : null,
+                    child: bookingC.isLoading.value
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
                             ),
-                          );
-                        }
-                      : null,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.lock_outline_rounded,
-                        color: _setuju ? Colors.white : Colors.grey,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Konfirmasi & Bayar',
-                        style: TextStyle(
-                          color: _setuju ? Colors.white : Colors.grey,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.lock_outline_rounded,
+                                color: _setuju ? Colors.white : Colors.grey,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Konfirmasi & Bayar',
+                                style: TextStyle(
+                                  color: _setuju ? Colors.white : Colors.grey,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
-                ),
-              ),
+                );
+              }),
 
               const SizedBox(height: 12),
               Row(

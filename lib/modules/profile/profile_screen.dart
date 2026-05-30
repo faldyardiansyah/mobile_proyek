@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     .toString()
                                     .isNotEmpty)
                             ? NetworkImage(
-                                "${authC.user.value['profile_photo_url'].toString().replaceAll('http://localhost', 'http://192.168.1.10:8000')}?t=${DateTime.now().millisecondsSinceEpoch}",
+                                "${authC.user.value['profile_photo_url'].toString().replaceAll('http://localhost', 'http://192.168.1.8:8000')}?t=${DateTime.now().millisecondsSinceEpoch}",
                               )
                             : null,
           
@@ -166,9 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Color(0xFF94A3B8),
                           ),
                         ),
-          
                         const SizedBox(height: 10),
-          
                         _menu(
                           icon: Icons.person_outline,
                           title: "Informasi Pribadi",

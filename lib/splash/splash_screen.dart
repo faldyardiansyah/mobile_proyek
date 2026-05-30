@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/images/logo.png", width: 400)
+            Image.asset("assets/image/logo.png", width: 400)
                 .animate()
                 .fadeIn(duration: const Duration(seconds: 1))
                 .animate()

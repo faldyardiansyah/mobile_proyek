@@ -2,9 +2,10 @@ import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'controllers/riwayat_controller.dart';
 import 'models/model_riwayat.dart';
-
+import 'screens/booking_detail_screen.dart';
 class RiwayatScreen extends StatefulWidget {
   const RiwayatScreen({super.key});
 
@@ -35,49 +36,177 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
           _buildTabBar(controller),
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF1565C0)),
-                );
-              }
+              final isLoading = controller.isLoading.value;
               final list = controller.filteredList;
-              if (list.isEmpty) {
-                if (list.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(80),
-                      child: Column(
+
+              if (isLoading) {
+                return _buildSkeletonList();
+              }
+
+              return RefreshIndicator(
+                color: const Color(0xFF1565C0),
+                onRefresh: () => controller.fetchRiwayat(),
+                child: list.isEmpty
+                    ? ListView(
+                        // ← pakai ListView bukan SingleChildScrollView
+                        // supaya RefreshIndicator bisa ditarik walau kosong
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 110),
                         children: [
-                          Lottie.asset(
-                            'assets/lottie/nothing.json',
-                            width: 250,
-                            height: 250,
-                            repeat: true,
-                          ),
-                          const Text(
-                            'Tidak ada riwayat booking',
-                            style: TextStyle(color: AppColor.grey),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Lottie.asset(
+                                    'assets/lottie/nothing.json',
+                                    width: 250,
+                                    height: 250,
+                                    repeat: true,
+                                  ),
+                                  const Text(
+                                    'Tidak ada riwayat booking',
+                                    style: TextStyle(color: AppColor.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: 110,
+                          top: 8,
+                        ),
+                        itemCount: list.length,
+                        itemBuilder: (context, index) => _BookingCard(
+                          item: list[index],
+                          controller: controller,
+                        ),
                       ),
-                    ),
-                  );
-                }
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  bottom: 110,
-                  top: 8,
-                ),
-                itemCount: list.length,
-                itemBuilder: (context, index) =>
-                    _BookingCard(item: list[index], controller: controller),
               );
             }),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonList() {
+    return Skeletonizer(
+      enabled: true,
+      effect: const ShimmerEffect(duration: Duration(milliseconds: 1000)),
+      child: ListView.builder(
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 110,
+          top: 8,
+        ),
+        itemCount: 4,
+        itemBuilder: (context, index) => _buildSkeletonCard(),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonCard() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Placeholder gambar
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Placeholder badge status
+                      Container(
+                        width: 70,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Placeholder judul
+                      Container(
+                        width: double.infinity,
+                        height: 14,
+                        color: Colors.grey[300],
+                      ),
+                      const SizedBox(height: 6),
+                      // Placeholder lokasi
+                      Container(
+                        width: 150,
+                        height: 11,
+                        color: Colors.grey[300],
+                      ),
+                    ],
+                  ),
+                ),
+                // Placeholder ID/countdown
+                Container(width: 60, height: 14, color: Colors.grey[300]),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColor.grey300),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(width: 40, height: 11, color: Colors.grey[300]),
+                    const SizedBox(height: 4),
+                    Container(width: 100, height: 16, color: Colors.grey[300]),
+                  ],
+                ),
+                // Placeholder tombol
+                Container(
+                  width: 100,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -185,133 +314,160 @@ class _BookingCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => Get.to(() => BookingDetailScreen(item: item)),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: item.imageAsset.isNotEmpty
-                      ? Image.network(
-                          item.imageAsset,
-                          width: 72,
-                          height: 72,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _placeholderImage(),
-                        )
-                      : _placeholderImage(),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _StatusBadge(status: item.status),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A2E),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: item.imageAsset.isNotEmpty
+                          ? Image.network(
+                              item.imageAsset,
+                              width: 72,
+                              height: 72,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _placeholderImage(),
+                            )
+                          : _placeholderImage(),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 12,
-                            color: AppColor.grey,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _StatusBadge(status: item.status),
+                              const Spacer(),
+                              if (item.status == BookingStatus.menunggu &&
+                                  item.canceldate != null)
+                                Obx(() {
+                                  controller.tick;
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: item.sisaWaktu == Duration.zero
+                                          ? Colors.red.shade400
+                                          : const Color(0xFFE65100),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      item.counttime,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  );
+                                })
+                              else
+                                Flexible(
+                                  child: Text(
+                                    item.id,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: AppColor.grey,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                            ],
                           ),
-                          const SizedBox(width: 2),
-                          Expanded(
-                            child: Text(
-                              item.location.isNotEmpty ? item.location : '-',
-                              style: const TextStyle(
-                                fontSize: 11,
+                          const SizedBox(height: 4),
+                          Text(
+                            item.title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A1A2E),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 12,
                                 color: AppColor.grey,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                              const SizedBox(width: 2),
+                              Expanded(
+                                child: Text(
+                                  item.location.isNotEmpty
+                                      ? item.location
+                                      : '-',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColor.grey,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                // countdown atau id
-                if (item.status == BookingStatus.menunggu &&
-                    item.canceldate != null)
-                  Obx(() {
-                    controller.tick; // subscribe ticker
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: item.sisaWaktu == Duration.zero
-                            ? Colors.red.shade400
-                            : const Color(0xFFE65100),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        item.counttime,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    );
-                  })
-                else
-                  Text(
-                    item.id,
-                    style: const TextStyle(fontSize: 11, color: AppColor.grey),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const Divider(height: 1, color: AppColor.grey300),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.status == BookingStatus.refund
-                          ? (item.canceldate ?? ' ')
-                          : 'TOTAL',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColor.grey,
-                        letterSpacing: 0.5,
-                      ),
                     ),
-                    if (item.status != BookingStatus.refund)
-                      Text(
-                        item.price,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A2E),
-                        ),
-                      ),
                   ],
                 ),
-                _buildActionButton(),
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: AppColor.grey300),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.status == BookingStatus.refund
+                                ? (item.canceldate ?? ' ')
+                                : 'TOTAL',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColor.grey,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          if (item.status != BookingStatus.refund)
+                            Text(
+                              item.price,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1A1A2E),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    _buildActionButton(),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -400,9 +556,32 @@ class _BookingCard extends StatelessWidget {
         );
 
       case BookingStatus.refund:
-        return const SizedBox.shrink();
       case BookingStatus.dibatalkan:
-        return const SizedBox.shrink();
+        return OutlinedButton(
+          onPressed: () => controller.hapusRiwayat(item),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.red),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.delete_outline, size: 14, color: Colors.red),
+              SizedBox(width: 4),
+              Text(
+                'Hapus',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        );
     }
   }
 }

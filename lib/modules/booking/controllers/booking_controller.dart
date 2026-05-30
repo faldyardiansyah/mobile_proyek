@@ -1,3 +1,4 @@
+import 'package:appkonkos_mobile/modules/booking/screens/midtrans_webview_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/personal_info_screen.dart';
 import 'package:appkonkos_mobile/modules/booking/screens/booking_confirm_screen.dart';
 import 'package:get/get.dart';
@@ -76,7 +77,10 @@ class BookingController extends GetxController {
     tipeProperty.value = tipe;
   }
 
-  Future<bool> submitBooking() async {
+  Future<bool> submitBookingFinal({
+    required String tglMulai,
+    String catatan = '',
+  }) async {
     if (kamarId == null && kontrakanId == null) {
       errorMessage.value = 'Kamar tidak valid.';
       return false;
@@ -86,23 +90,15 @@ class BookingController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final now = DateTime.now();
-      final tglMulai =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-
       final body = <String, dynamic>{
         'tgl_mulai_sewa': tglMulai,
         'durasi_bulan': selectedDurasi.value,
+        if (catatan.isNotEmpty) 'catatan': catatan,
       };
       if (kamarId != null) body['kamar_id'] = kamarId;
       if (kontrakanId != null) body['kontrakan_id'] = kontrakanId;
 
-      print('>>> REQUEST BODY: $body');
-
       final response = await _api.post('/bookings', body);
-
-      print('>>> STATUS CODE: ${response.statusCode}');
-      print('>>> FULL RESPONSE: ${response.data}');
 
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           response.data['success'] == true) {
@@ -110,16 +106,8 @@ class BookingController extends GetxController {
         final snapToken = response.data['snap_token']?.toString() ?? '';
         final bookingId = response.data['booking_id']?.toString() ?? '';
 
-        // ← simpan ke variabel class
         lastBookingId = bookingId;
         noWaPemilik = response.data['no_wa_pemilik']?.toString() ?? '';
-
-        print('>>> REDIRECT URL: $redirectUrl');
-        print('>>> SNAP TOKEN: $snapToken');
-
-        isLoading.value = false;
-        Get.back();
-        await Future.delayed(const Duration(milliseconds: 400));
 
         final url = redirectUrl.isNotEmpty
             ? redirectUrl
@@ -128,9 +116,6 @@ class BookingController extends GetxController {
             : '';
 
         if (url.isNotEmpty) {
-          print(
-            '>>> RiwayatController registered: ${Get.isRegistered<RiwayatController>()}',
-          );
           try {
             Get.find<RiwayatController>().tambahRiwayat(
               id: '#BK-$bookingId',
@@ -145,37 +130,27 @@ class BookingController extends GetxController {
               redirectUrl: url,
               totalHarga: totalBiaya + 10000,
             );
-            print('>>> RIWAYAT BERHASIL DITAMBAH');
           } catch (e) {
             print('>>> ERROR TAMBAH RIWAYAT: $e');
           }
 
+          isLoading.value = false;
           Get.to(
-            () => BookingConfirmScreen(
-              redirectUrl: url,
+            () => MidtransWebView(
+              url: url,
+              totalHarga: totalBiaya + 10000,
               bookingId: bookingId,
-              totalHarga: totalBiaya,
               kamarNama: kamarNama ?? '',
               tipeKamarNama: tipeKamarNama ?? '',
               durasi: selectedDurasi.value,
-              hargaPerBulan: hargaPerBulan ?? 0,
               tipeProperty: tipeProperty.value,
-              peraturan: peraturan ?? '',
+              noWaPemilik: noWaPemilik,
+              tglMulai: tglMulai,
             ),
           );
           return true;
         }
-
-        Get.snackbar(
-          'Booking Berhasil',
-          'Silakan cek riwayat booking kamu.',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-        return true;
       } else if (response.data['message'] == 'profil_tidak_lengkap') {
-        Get.back();
-        await Future.delayed(const Duration(milliseconds: 300));
         _showProfilTidakLengkap(response.data['field_kosong'] ?? []);
         return false;
       } else {
@@ -186,20 +161,14 @@ class BookingController extends GetxController {
     } catch (e) {
       print('>>> ERROR: $e');
       final dynamic err = e;
-
       if (err?.response != null) {
         final data = err.response?.data;
-        print('>>> ERROR RESPONSE: $data');
-
         if (data is Map && data['message'] == 'profil_tidak_lengkap') {
-          Get.back();
-          await Future.delayed(const Duration(milliseconds: 300));
           _showProfilTidakLengkap(
             List<String>.from(data['field_kosong'] ?? []),
           );
           return false;
         }
-
         errorMessage.value = data is Map && data['message'] != null
             ? data['message']
             : 'Terjadi kesalahan. Coba lagi.';
@@ -210,6 +179,7 @@ class BookingController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+    return false;
   }
 
   void _showProfilTidakLengkap(List fieldKosong) {

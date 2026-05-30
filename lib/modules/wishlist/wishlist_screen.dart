@@ -96,7 +96,7 @@ class WishlistScreen extends StatelessWidget {
                     top: Radius.circular(20),
                   ),
                   child: Image.network(
-                    data.foto, // ← pakai foto dari data
+                    data.foto,
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -231,31 +231,31 @@ class WishlistScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            data.type.toLowerCase() == "kosan"
-                                ? Icons.home_work_outlined
-                                : Icons.home_work_outlined,
-                            size: 15,
-                            color: Colors.green,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            data.type.toLowerCase() == "kosan"
-                                ? "${data.availableCount} kamar tersedia"
-                                : data.availableCount > 0
-                                ? "Kontrakan tersedia"
-                                : "Tidak tersedia",
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                  Row(
+                    children: [
+                      Icon(
+                        data.type.toLowerCase() == "kosan"
+                            ? Icons.home_work_outlined
+                            : Icons.home_work_outlined,
+                        size: 15,
+                        color: Colors.green,
                       ),
-                  const SizedBox(height: 15),
+                      const SizedBox(width: 5),
+                      Text(
+                        data.type.toLowerCase() == "kosan"
+                            ? "${data.availableCount} kamar tersedia"
+                            : data.availableCount > 0
+                            ? "Kontrakan tersedia"
+                            : "Tidak tersedia",
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -263,30 +263,51 @@ class WishlistScreen extends StatelessWidget {
                     children: [
                       (data.type ?? "").toLowerCase() == "kosan"
                           // KOSAN
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  data.price == data.priceMax ||
-                                          data.priceMax == '0'
-                                      ? "Rp ${_formatHarga(data.price)}"
-                                      : "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
-                                  style: const TextStyle(
-                                    color: AppColor.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-
-                                Text(
-                                  "/${data.period}",
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            )
+                          ? data.price == data.priceMax || data.priceMax == '0'
+                                ? RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              "Rp ${_formatHarga(data.price)}",
+                                          style: const TextStyle(
+                                            color: AppColor.primary,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: "/${data.period}",
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Rp ${_formatHarga(data.price)} - Rp ${_formatHarga(data.priceMax)}",
+                                        style: const TextStyle(
+                                          color: AppColor.primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      Text(
+                                        "/${data.period}",
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  )
                           // KONTRAKAN
                           : RichText(
                               text: TextSpan(

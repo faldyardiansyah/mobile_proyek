@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import '../models/property_model.dart';
 import '../../../services/api_service.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:flutter/material.dart';
 
 class HomeController extends GetxController {
   final RxList<Property> allProperties = <Property>[].obs;
@@ -9,7 +11,36 @@ class HomeController extends GetxController {
   final RxString searchQuery = ''.obs;
 
   final ApiService apiService = Get.find<ApiService>();
+  final bannerIndex = 0.obs;
+  late final PageController bannerController;
+  Timer? _bannerTimer;
 
+  final banners = [
+    {
+      'tag': 'PROMO SPESIAL',
+      'title': 'Cashback hingga\nRp 500.000!',
+      'desc': 'Untuk booking pertama kamu di appkonkos.',
+      'btn': 'Klaim Sekarang',
+      'color': const Color(0xFF1565C0),
+      'accent': const Color(0xFF1976D2),
+    },
+    {
+      'tag': 'LAYANAN BARU',
+      'title': 'Gratis Konsultasi\nHunian',
+      'desc': 'Tim kami siap bantu kamu menemukan hunian ideal.',
+      'btn': 'Hubungi Kami',
+      'color': const Color(0xFF0097A7),
+      'accent': const Color(0xFF00BCD4),
+    },
+    {
+      'tag': 'INFO',
+      'title': 'Temukan Hunian\nImpianmu!',
+      'desc': 'Ribuan pilihan kos dan kontrakan tersedia.',
+      'btn': 'Cari Sekarang',
+      'color': const Color(0xFF6A1B9A),
+      'accent': const Color(0xFF8E24AA),
+    },
+  ];
   final RxList<String> categories = <String>[
     "Semua",
     "Putra",
@@ -41,6 +72,15 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     loadProperties();
+    bannerController = PageController();
+    _bannerTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      final next = (bannerIndex.value + 1) % banners.length;
+      bannerController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
     final user = box.read('user');
     if (user != null) {
       final userId = user['id'];
@@ -149,8 +189,6 @@ class HomeController extends GetxController {
 
       bool matchesType =
           selectedType.value.isEmpty || property.type == selectedType.value;
-
-      // filter gender hanya berlaku untuk kosan
       bool matchesGender =
           selectedGender.value.isEmpty ||
           property.type != "Kosan" ||
@@ -189,6 +227,11 @@ class HomeController extends GetxController {
   bool isFavorite(Property item) {
     return wishlist.any((e) => e.id == item.id);
   }
+  String _fixUrl(String url) {
+    return url
+        .replaceAll('http://localhost', 'http://192.168.1.8:8000')
+        .replaceAll('https://localhost', 'http://192.168.1.8:8000');
+  }
 
   void toggleFavorite(Property item) {
     final user = box.read('user');
@@ -212,11 +255,12 @@ class HomeController extends GetxController {
               'alamat': e.location,
               'rating': e.rating,
               'tipe': e.type,
-              'foto': e.foto,
+              'foto': _fixUrl(e.foto), // ← fix URL localhost
               'period': e.period,
               'lat': e.lat,
               'lng': e.lng,
               'gender': e.gender,
+              'available_count': e.availableCount,
             },
           )
           .toList(),
