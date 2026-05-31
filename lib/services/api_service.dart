@@ -132,4 +132,11 @@ class ApiService extends GetxService {
   Future<dio_lib.Response<dynamic>> deleteBooking(String bookingId) async {
     return await _dio.delete('/bookings/$bookingId');
   }
+
+  Future<dio_lib.Response<dynamic>> refundBooking(
+    String bookingId,
+    String alasan,
+  ) async {
+    return await post('/bookings/$bookingId/refund', {'alasan_refund': alasan});
+  }
 }

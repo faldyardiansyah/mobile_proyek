@@ -5,7 +5,8 @@ import 'package:lottie/lottie.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'controllers/riwayat_controller.dart';
 import 'models/model_riwayat.dart';
-import 'screens/booking_detail_screen.dart';
+import '../Riwayat/screens/booking_detail_screen.dart';
+
 class RiwayatScreen extends StatefulWidget {
   const RiwayatScreen({super.key});
 
@@ -27,72 +28,75 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: AppColor.background,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          _buildTabBar(controller),
-          Expanded(
-            child: Obx(() {
-              final isLoading = controller.isLoading.value;
-              final list = controller.filteredList;
-
-              if (isLoading) {
-                return _buildSkeletonList();
-              }
-
-              return RefreshIndicator(
-                color: const Color(0xFF1565C0),
-                onRefresh: () => controller.fetchRiwayat(),
-                child: list.isEmpty
-                    ? ListView(
-                        // ← pakai ListView bukan SingleChildScrollView
-                        // supaya RefreshIndicator bisa ditarik walau kosong
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.only(bottom: 110),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Lottie.asset(
-                                    'assets/lottie/nothing.json',
-                                    width: 250,
-                                    height: 250,
-                                    repeat: true,
-                                  ),
-                                  const Text(
-                                    'Tidak ada riwayat booking',
-                                    style: TextStyle(color: AppColor.grey),
-                                  ),
-                                ],
+    return SafeArea(
+      bottom: false,
+      child: ColoredBox(
+        color: AppColor.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            _buildTabBar(controller),
+            Expanded(
+              child: Obx(() {
+                final isLoading = controller.isLoading.value;
+                final list = controller.filteredList;
+        
+                if (isLoading) {
+                  return _buildSkeletonList();
+                }
+        
+                return RefreshIndicator(
+                  color: const Color(0xFF1565C0),
+                  onRefresh: () => controller.fetchRiwayat(),
+                  child: list.isEmpty
+                      ? ListView(
+                          // ← pakai ListView bukan SingleChildScrollView
+                          // supaya RefreshIndicator bisa ditarik walau kosong
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(bottom: 110),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Lottie.asset(
+                                      'assets/lottie/nothing.json',
+                                      width: 250,
+                                      height: 250,
+                                      repeat: true,
+                                    ),
+                                    const Text(
+                                      'Tidak ada riwayat booking',
+                                      style: TextStyle(color: AppColor.grey),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
+                          ],
+                        )
+                      : ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            bottom: 110,
+                            top: 8,
                           ),
-                        ],
-                      )
-                    : ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          bottom: 110,
-                          top: 8,
+                          itemCount: list.length,
+                          itemBuilder: (context, index) => _BookingCard(
+                            item: list[index],
+                            controller: controller,
+                          ),
                         ),
-                        itemCount: list.length,
-                        itemBuilder: (context, index) => _BookingCard(
-                          item: list[index],
-                          controller: controller,
-                        ),
-                      ),
-              );
-            }),
-          ),
-        ],
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -319,7 +323,7 @@ class _BookingCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => Get.to(() => BookingDetailScreen(item: item)),
+          onTap: () => Get.to(() => BookingDetailScreen(item: item, controller: controller)),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(

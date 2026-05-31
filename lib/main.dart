@@ -9,6 +9,7 @@ import 'auth/controller/auth_controller.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,7 @@ void main() async {
   await GetStorage.init();
   Get.put(ApiService());
   Get.put(AuthController());
+   await NotificationService().init();
   runApp(const MyApp());
 }
 

@@ -16,6 +16,13 @@ class ModelRiwayat {
   final String? refundStatus;
   final String? alasanRefund;
   final int? nominalRefund;
+  final String noWaPemilik;
+  final String tipeProperty;
+  final String kamarNama;
+  final String tipeKamar;
+  final int durasi;
+  final String? buktiTransfer;
+  final String gender;
 
   ModelRiwayat({
     required this.id,
@@ -33,9 +40,15 @@ class ModelRiwayat {
     this.refundStatus,
     this.alasanRefund,
     this.nominalRefund,
+    this.noWaPemilik = '',
+    this.tipeProperty = '',
+    this.kamarNama = '',
+    this.tipeKamar = '', 
+    this.durasi = 0,
+    this.buktiTransfer, 
+     this.gender = '',
   });
 
-  // ← TAMBAH INI
   factory ModelRiwayat.fromJson(Map<String, dynamic> json) {
     final statusStr = json['status'] as String? ?? 'menunggu';
     final status = BookingStatus.values.firstWhere(
@@ -58,10 +71,19 @@ class ModelRiwayat {
       checkIn: json['check_in'] != null
           ? DateTime.tryParse(json['check_in'])
           : null,
-
       checkOut: json['check_out'] != null
           ? DateTime.tryParse(json['check_out'])
           : null,
+      refundStatus: json['refund_status'] as String?,
+      alasanRefund: json['alasan_refund'] as String?,
+      nominalRefund: json['nominal_refund'] as int?,
+      noWaPemilik: json['no_wa_pemilik'] as String? ?? '',
+      tipeProperty: json['tipe_property'] as String? ?? '',
+      kamarNama: json['kamar_nama'] as String? ?? '',
+      tipeKamar: json['tipe_kamar'] as String? ?? '',
+      durasi: json['durasi'] as int? ?? 0,
+      buktiTransfer: json['bukti_transfer'] as String?,
+         gender: json['gender'] as String? ?? '',
     );
   }
 
@@ -81,6 +103,13 @@ class ModelRiwayat {
     'refund_status': refundStatus,
     'alasan_refund': alasanRefund,
     'nominal_refund': nominalRefund,
+    'no_wa_pemilik': noWaPemilik,
+    'tipe_property': tipeProperty,
+    'kamar_nama': kamarNama,
+    'tipe_kamar': tipeKamar,
+    'durasi': durasi,
+    'bukti_transfer': buktiTransfer,
+    'gender': gender,
   };
 
   Duration get sisaWaktu {

@@ -127,7 +127,8 @@ class BookingBottomSheet extends StatelessWidget {
                     children: [
                       Row(
                         children: ctrl.opsiDurasi.map((durasi) {
-                          final isSelected = ctrl.selectedDurasi.value == durasi;
+                          final isSelected =
+                              ctrl.selectedDurasi.value == durasi;
 
                           return Expanded(
                             child: GestureDetector(
@@ -137,8 +138,12 @@ class BookingBottomSheet extends StatelessWidget {
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
-                                margin: const EdgeInsets.symmetric(horizontal: 5),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColor.blue
@@ -147,7 +152,9 @@ class BookingBottomSheet extends StatelessWidget {
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: AppColor.blue.withOpacity(0.25),
+                                            color: AppColor.blue.withOpacity(
+                                              0.25,
+                                            ),
                                             blurRadius: 10,
                                             offset: const Offset(0, 4),
                                           ),
@@ -336,7 +343,7 @@ class BookingBottomSheet extends StatelessWidget {
                       onPressed: ctrl.isLoading.value
                           ? null
                           : () {
-                              Get.back(); // tutup bottom sheet
+                              Get.back();
                               Get.to(
                                 () => BookingConfirmScreen(
                                   redirectUrl: '',

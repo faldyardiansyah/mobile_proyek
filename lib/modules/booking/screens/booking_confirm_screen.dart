@@ -39,7 +39,14 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
 
   bool _setuju = false;
   DateTime _tglMulai = DateTime.now();
-  final _catatanCtrl = TextEditingController();
+   DateTime _tambahBulan(DateTime date, int bulan) {
+    int totalBulan = date.month + bulan;
+    int tahun = date.year + ((totalBulan - 1) ~/ 12);
+    int bulanBaru = ((totalBulan - 1) % 12) + 1;
+    int hariMax = DateUtils.getDaysInMonth(tahun, bulanBaru);
+    int hari = date.day > hariMax ? hariMax : date.day;
+    return DateTime(tahun, bulanBaru, hari);
+  }
 
   String _formatHarga(int angka) {
     return angka.toString().replaceAllMapped(
@@ -90,12 +97,6 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
   }
 
   @override
-  void dispose() {
-    _catatanCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final authC = Get.find<AuthController>();
     final user = authC.user;
@@ -104,8 +105,8 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
     final total = widget.totalHarga + biayaLayanan;
 
     final tglSelesai = widget.tipeProperty == 'Kontrakan'
-        ? DateTime(_tglMulai.year + widget.durasi, _tglMulai.month, _tglMulai.day)
-        : DateTime(_tglMulai.year, _tglMulai.month + widget.durasi, _tglMulai.day);
+    ? DateTime(_tglMulai.year + widget.durasi, _tglMulai.month, _tglMulai.day)
+    : _tambahBulan(_tglMulai, widget.durasi);
 
     return SafeArea(
       child: Scaffold(
@@ -342,40 +343,6 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
 
               const SizedBox(height: 12),
 
-              // === CATATAN UNTUK PEMILIK ===
-              _sectionCard(
-                title: 'Catatan untuk Pemilik',
-                trailing: const Text(
-                  'Opsional',
-                  style: TextStyle(fontSize: 12, color: textGrey),
-                ),
-                child: TextField(
-                  controller: _catatanCtrl,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    hintText: 'Sampaikan pesan tambahan atau pertanyaan ke pemilik...',
-                    hintStyle: const TextStyle(fontSize: 13, color: textGrey),
-                    filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: blue, width: 1.5),
-                    ),
-                    contentPadding: const EdgeInsets.all(14),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
               // === RINCIAN HARGA ===
               _sectionCard(
                 title: 'Rincian Harga',
@@ -542,7 +509,6 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
                                 '${_tglMulai.year}-${_tglMulai.month.toString().padLeft(2, '0')}-${_tglMulai.day.toString().padLeft(2, '0')}';
                             await bookingC.submitBookingFinal(
                               tglMulai: tglStr,
-                              catatan: _catatanCtrl.text.trim(),
                             );
                           }
                         : null,

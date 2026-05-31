@@ -203,15 +203,10 @@ class LoginScreen extends StatelessWidget {
 
   Widget _buildSocialRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         SocialButton(
           Image(image: const AssetImage("assets/image/google.png"), height: 20),
           "Google",
-        ),
-        SocialButton(
-          Image(image: const AssetImage("assets/image/facebook.png"), height: 20),
-          "Facebook",
         ),
       ],
     );

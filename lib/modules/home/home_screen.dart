@@ -1,5 +1,7 @@
 import 'package:appkonkos_mobile/modules/home/screens/detail_screen.dart';
 import 'package:appkonkos_mobile/modules/Riwayat/models/model_riwayat.dart';
+import 'package:appkonkos_mobile/modules/notification/notification_screen.dart';
+import 'package:appkonkos_mobile/services/notification_service.dart';
 import '../Riwayat/riwayat_screen.dart';
 import 'package:appkonkos_mobile/modules/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -994,17 +996,57 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCircleIconButton(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Icon(icon, size: 22),
-    );
-  }
+ // Ubah _buildCircleIconButton menjadi:
+Widget _buildCircleIconButton(IconData icon) {
+  return GestureDetector(
+    onTap: () {
+      NotificationService.markAllAsRead();
+      Get.to(() => const NotificationScreen());
+    },
+    child: Obx(() {
+      final unread = NotificationService.unreadCount;
+      return Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Icon(icon, size: 22),
+          ),
+          if (unread > 0)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 18,
+                  minHeight: 18,
+                ),
+                child: Text(
+                  unread > 9 ? '9+' : '$unread',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      );
+    }),
+  );
+}
 
   void _showFilterBottomSheet() {
     Get.bottomSheet(

@@ -11,12 +11,12 @@ import 'package:appkonkos_mobile/modules/Riwayat/models/model_riwayat.dart';
 class BookingController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
   final _storage = GetStorage();
-  final durasiController = TextEditingController(text: '1');
 
   final RxInt selectedDurasi = 1.obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final tipeProperty = ''.obs;
+  final durasiController = TextEditingController(text: '1');
 
   String? kamarId;
   String? kamarNama;
@@ -27,7 +27,6 @@ class BookingController extends GetxController {
   String? namaProperti;
   String? fotoProperti;
 
-  // ← tambahan baru
   String lastBookingId = '';
   String noWaPemilik = '';
 
@@ -79,7 +78,6 @@ class BookingController extends GetxController {
 
   Future<bool> submitBookingFinal({
     required String tglMulai,
-    String catatan = '',
   }) async {
     if (kamarId == null && kontrakanId == null) {
       errorMessage.value = 'Kamar tidak valid.';
@@ -93,7 +91,6 @@ class BookingController extends GetxController {
       final body = <String, dynamic>{
         'tgl_mulai_sewa': tglMulai,
         'durasi_bulan': selectedDurasi.value,
-        if (catatan.isNotEmpty) 'catatan': catatan,
       };
       if (kamarId != null) body['kamar_id'] = kamarId;
       if (kontrakanId != null) body['kontrakan_id'] = kontrakanId;

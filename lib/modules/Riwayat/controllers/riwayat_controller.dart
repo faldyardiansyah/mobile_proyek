@@ -1,4 +1,5 @@
 import 'package:appkonkos_mobile/services/api_service.dart';
+import 'package:appkonkos_mobile/services/notification_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -24,7 +25,6 @@ class RiwayatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _box.remove(_cacheKey);
     _loadCache();
     fetchRiwayat();
     Stream.periodic(const Duration(seconds: 5)).listen((_) {
@@ -75,20 +75,39 @@ class RiwayatController extends GetxController {
 
     for (final item in expired) {
       final bookingId = item.rawId ?? item.id;
-
-      // cegah request berulang
       if (_processingCancel.contains(bookingId)) continue;
-
       _processingCancel.add(bookingId);
-
       _autoCancelBooking(item, bookingId);
+    }
+  }
+
+  Future<void> submitRefund(ModelRiwayat item, String alasan) async {
+    try {
+      final response = await _api.refundBooking(item.rawId ?? item.id, alasan);
+      if (response.data['success'] == true) {
+        updateStatus(item.id, BookingStatus.refund);
+        await fetchRiwayat();
+        Get.snackbar(
+          'Berhasil',
+          'Pengajuan refund berhasil dikirim',
+          backgroundColor: Colors.purple.shade50,
+          colorText: Colors.purple.shade800,
+          snackPosition: SnackPosition.TOP,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal mengajukan refund',
+        backgroundColor: Colors.red.shade50,
+        colorText: Colors.red.shade800,
+      );
     }
   }
 
   Future<void> _autoCancelBooking(ModelRiwayat item, String bookingId) async {
     try {
       updateStatus(item.id, BookingStatus.dibatalkan);
-
       await _api.cancelBooking(bookingId);
     } catch (e) {
       print('ERROR AUTO CANCEL: $e');
@@ -109,7 +128,7 @@ class RiwayatController extends GetxController {
           final String namaTitle = item['nama']?.toString() ?? 'Properti';
           final String alamat = item['alamat']?.toString() ?? '';
           final int totalBiaya = item['total_biaya'] ?? 0;
-          final String redirectUrl = item['redirect_url']?.toString() ?? '';
+
           BookingStatus status;
           switch (item['status_booking']?.toString()) {
             case 'settlement':
@@ -145,13 +164,23 @@ class RiwayatController extends GetxController {
             checkIn: item['check_in'] != null
                 ? DateTime.tryParse(item['check_in'])
                 : null,
-
             checkOut: item['check_out'] != null
                 ? DateTime.tryParse(item['check_out'])
                 : null,
-            refundStatus: item['refund_status'],
-            alasanRefund: item['alasan_refund'],
-            nominalRefund: item['nominal_refund'],
+            refundStatus: item['refund_status']?.toString(),
+            alasanRefund: item['alasan_refund']?.toString(),
+            nominalRefund: item['nominal_refund'] != null
+                ? int.tryParse(item['nominal_refund'].toString())
+                : null,
+            noWaPemilik: item['no_wa_pemilik']?.toString() ?? '',
+            tipeProperty: item['tipe_property']?.toString() ?? '',
+            durasi: item['durasi'] != null
+                ? int.tryParse(item['durasi'].toString()) ?? 0
+                : 0,
+            buktiTransfer: item['bukti_transfer']?.toString(),
+            kamarNama: item['kamar_nama']?.toString() ?? '', 
+            tipeKamar: item['tipe_kamar']?.toString() ?? '', 
+            gender: item['gender']?.toString() ?? '',
           );
         }).toList();
 
@@ -289,64 +318,131 @@ class RiwayatController extends GetxController {
   void selectTab(int index) => selectedTab.value = index;
 
   void tambahRiwayat({
-    required String id,
-    String? rawId,
-    required String title,
-    required String location,
-    required String price,
-    required BookingStatus status,
-    required String imageAsset,
-    DateTime? bookingTime,
-    String? redirectUrl,
-    int? totalHarga,
-  }) {
-    final index = listRiwayats.indexWhere((r) => r.id == id);
-    final item = ModelRiwayat(
-      id: id,
-      rawId: rawId,
-      title: title,
-      location: location,
-      price: price,
+  required String id,
+  String? rawId,
+  required String title,
+  required String location,
+  required String price,
+  required BookingStatus status,
+  required String imageAsset,
+  DateTime? bookingTime,
+  String? redirectUrl,
+  int? totalHarga,
+}) {
+  final index = listRiwayats.indexWhere((r) => r.id == id);
+
+  final item = ModelRiwayat(
+    id: id,
+    rawId: rawId,
+    title: title,
+    location: location,
+    price: price,
+    status: status,
+    imageAsset: imageAsset,
+    bookingTime: bookingTime,
+    redirectUrl: redirectUrl,
+    totalHarga: totalHarga,
+  );
+
+  if (index >= 0) {
+    listRiwayats[index] = item;
+  } else {
+    listRiwayats.insert(0, item);
+  }
+
+  _saveCache();
+
+  if (bookingTime != null) {
+    final deadline = bookingTime.add(const Duration(hours: 24));
+    final notif5Min = deadline.subtract(const Duration(minutes: 5));
+    final notif1Min = deadline.subtract(const Duration(minutes: 1));
+    final now = DateTime.now();
+
+    if (notif5Min.isAfter(now)) {
+      NotificationService().schedule(
+        id: id.hashCode,
+        title: '⏰ Segera Bayar!',
+        body: 'Booking $title akan kedaluwarsa dalam 5 menit!',
+        scheduledTime: notif5Min,
+        type: NotifType.segeraBayar,
+      );
+    }
+
+    if (notif1Min.isAfter(now)) {
+      NotificationService().schedule(
+        id: id.hashCode + 1,
+        title: '🚨 1 Menit Lagi!',
+        body: 'Booking $title akan kedaluwarsa dalam 1 menit!',
+        scheduledTime: notif1Min,
+        type: NotifType.segeraBayar,
+      );
+    }
+  }
+}
+
+  void updateStatus(String id, BookingStatus status) {
+  final index = listRiwayats.indexWhere((r) => r.id == id);
+  if (index >= 0) {
+    final old = listRiwayats[index];
+    listRiwayats[index] = ModelRiwayat(
+      id: old.id,
+      rawId: old.rawId,
+      title: old.title,
+      location: old.location,
+      price: old.price,
       status: status,
-      imageAsset: imageAsset,
-      bookingTime: bookingTime,
-      redirectUrl: redirectUrl,
-      totalHarga: totalHarga,
+      imageAsset: old.imageAsset,
+      bookingTime: old.bookingTime,
+      redirectUrl: old.redirectUrl,
+      totalHarga: old.totalHarga,
+      refundStatus: old.refundStatus,
+      alasanRefund: old.alasanRefund,
+      nominalRefund: old.nominalRefund,
+      noWaPemilik: old.noWaPemilik,
+      tipeProperty: old.tipeProperty,
+      durasi: old.durasi,
+      checkIn: old.checkIn,
+      checkOut: old.checkOut,
+      buktiTransfer: old.buktiTransfer,
+      kamarNama: old.kamarNama,   
+      tipeKamar: old.tipeKamar,  
+      gender: old.gender,        
     );
-    if (index >= 0) {
-      listRiwayats[index] = item;
-    } else {
-      listRiwayats.insert(0, item);
+    switch (status) {
+      case BookingStatus.dibayar:
+        NotificationService().show(
+          id: old.hashCode + 10,
+          title: '✅ Pembayaran Berhasil!',
+          body: 'Booking ${old.title} telah dikonfirmasi.',
+          type: NotifType.pembayaranBerhasil,
+        );
+        NotificationService().cancel(old.id.hashCode);
+        NotificationService().cancel(old.id.hashCode + 1);
+        break;
+      case BookingStatus.dibatalkan:
+        NotificationService().show(
+          id: old.hashCode + 20,
+          title: '❌ Booking Dibatalkan',
+          body: 'Booking ${old.title} telah dibatalkan.',
+          type: NotifType.pembayaranGagal,
+        );
+        NotificationService().cancel(old.id.hashCode);
+        NotificationService().cancel(old.id.hashCode + 1);
+        break;
+      case BookingStatus.refund:
+        NotificationService().show(
+          id: old.hashCode + 30,
+          title: '🔄 Refund Diajukan',
+          body: 'Permintaan refund ${old.title} sedang diproses.',
+          type: NotifType.refund,
+        );
+        break;
+      default:
+        break;
     }
     _saveCache();
   }
-
-  void updateStatus(String id, BookingStatus status) {
-    final index = listRiwayats.indexWhere((r) => r.id == id);
-    if (index >= 0) {
-      final old = listRiwayats[index];
-      listRiwayats[index] = ModelRiwayat(
-        id: old.id,
-        rawId: old.rawId,
-        title: old.title,
-        location: old.location,
-        price: old.price,
-        status: status,
-        imageAsset: old.imageAsset,
-        bookingTime: old.bookingTime,
-        redirectUrl: old.redirectUrl,
-        totalHarga: old.totalHarga,
-
-        refundStatus: old.refundStatus,
-        alasanRefund: old.alasanRefund,
-        nominalRefund: old.nominalRefund,
-
-        checkIn: old.checkIn,
-        checkOut: old.checkOut,
-      );
-      _saveCache();
-    }
-  }
+}
 
   void ajukanRefund(ModelRiwayat item) {
     Get.snackbar(
@@ -383,6 +479,9 @@ class RiwayatController extends GetxController {
         totalHarga: item.totalHarga ?? 0,
         bookingId: item.rawId ?? '',
         tipeKamarNama: item.title,
+        tglMulai: item.checkIn != null
+            ? '${item.checkIn!.year}-${item.checkIn!.month.toString().padLeft(2, '0')}-${item.checkIn!.day.toString().padLeft(2, '0')}'
+            : '',
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:appkonkos_mobile/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -48,7 +49,6 @@ class _MidtransWebViewState extends State<MidtransWebView> {
   static const Color textDark = Color(0xFF0B1020);
   static const Color textGrey = Color(0xFF7B8794);
 
-  // Data booking untuk struk — diisi dari BookingController
   String kamarNama = '';
   String tipeKamarNama = '';
   int totalHarga = 0;
@@ -478,6 +478,14 @@ Terima kasih! 🙏''';
       riwayatController.fetchRiwayat();
     } catch (_) {}
 
+    NotificationService().show(
+    id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    title: '✅ Pembayaran Berhasil!',
+    body: 'Booking $tipeKamarNama telah dikonfirmasi. Terima kasih!',
+    type: NotifType.pembayaranBerhasil,
+    route: '/riwayat',
+  );
+  
     Get.bottomSheet(
       Container(
         decoration: const BoxDecoration(
@@ -646,7 +654,7 @@ Terima kasih! 🙏''';
         price: 'Rp ${_formatHarga(totalHarga)}',
         status: BookingStatus.menunggu,
         imageAsset: '',
-        bookingTime: DateTime.now(), // ← mulai countdown 24 jam
+        bookingTime: DateTime.now(),
       );
     } catch (_) {}
     Get.bottomSheet(
