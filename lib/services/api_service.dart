@@ -139,4 +139,38 @@ class ApiService extends GetxService {
   ) async {
     return await post('/bookings/$bookingId/refund', {'alasan_refund': alasan});
   }
+
+  Future<dio_lib.Response<dynamic>> getUlasan(
+    String tipe,
+    int propertiId,
+  ) async {
+    return await get(
+      '/ulasan',
+      params: {'tipe': tipe, 'properti_id': propertiId},
+    );
+  }
+
+  Future<dio_lib.Response<dynamic>> cekBolehReview(
+    String tipe,
+    int propertiId,
+  ) async {
+    return await get(
+      '/ulasan/cek',
+      params: {'tipe': tipe, 'properti_id': propertiId},
+    );
+  }
+
+  Future<dio_lib.Response<dynamic>> kirimUlasan(
+    Map<String, dynamic> data,
+  ) async {
+    return await post('/ulasan', data);
+  }
+
+  Future<dio_lib.Response<dynamic>> getUlasanSaya() async {
+    return await get('/ulasan/saya');
+  }
+
+  Future<dio_lib.Response<dynamic>> getBookingBelumReview() async {
+    return await get('/ulasan/booking-belum-review');
+  }
 }

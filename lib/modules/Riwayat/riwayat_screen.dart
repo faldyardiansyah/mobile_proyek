@@ -235,7 +235,7 @@ Widget _buildHeader() {
           height: 40,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
@@ -270,12 +270,12 @@ Widget _buildTabBar(RiwayatController controller) {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF1565C0) : Colors.white,
+                color: isSelected ? AppColor.primary : Colors.white,
                 borderRadius: BorderRadius.circular(50),
                 boxShadow: [
                   BoxShadow(
                     color: isSelected
-                        ? const Color(0xFF1565C0).withOpacity(0.3)
+                        ? AppColor.primary.withOpacity(0.3)
                         : Colors.black.withOpacity(0.05),
                     blurRadius: isSelected ? 8 : 4,
                     offset: Offset(0, isSelected ? 4 : 1),

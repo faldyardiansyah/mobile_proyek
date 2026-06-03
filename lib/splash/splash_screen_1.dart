@@ -32,8 +32,8 @@ class SplashScreen1 extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: const Image(
-                          image: AssetImage("assets/image/transparent_logo.png"),
-                          height: 45,
+                          image: AssetImage("assets/image/transparant_logo.png"),
+                          height: 50,
                         ),
                       ),
                       const SizedBox(width: 12),

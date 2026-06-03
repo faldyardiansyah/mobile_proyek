@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
-import '../../home/models/property_model.dart'; 
+import '../../home/models/property_model.dart';
+import '../controllers/ulasan_controller.dart';
 
 class DetailController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
@@ -11,31 +12,44 @@ class DetailController extends GetxController {
   final selectedRoomId = Rxn<int>();
 
   @override
-  void onInit() {
-    super.onInit();
-    final Property args = Get.arguments as Property;
-    fetchDetail(int.parse(args.id.toString()), args.type);
-  }
+  @override
+void onInit() {
+  super.onInit();
+  final Property args = Get.arguments as Property;
+  final int id = int.parse(args.id.toString());
+  final String tipe = args.type.toLowerCase();
+
+  fetchDetail(id, args.type).then((_) {
+    final ulasanCtrl = Get.isRegistered<UlasanController>()
+        ? Get.find<UlasanController>()
+        : Get.put(UlasanController());
+    ulasanCtrl.loadUlasan(tipe, id);  
+    ulasanCtrl.cekBolehReview(tipe, id);   
+  });
+}
 
   @override
   void onClose() {
     detail.value = null;
     selectedRoomTypeId.value = null;
     selectedRoomId.value = null;
+    if (Get.isRegistered<UlasanController>()) {
+      Get.delete<UlasanController>();
+    }
     super.onClose();
   }
 
   Future<void> fetchDetail(int id, String tipe) async {
     try {
       isLoading(true);
-      print("=== FETCH: tipe=$tipe id=$id ==="); 
+      print("=== FETCH: tipe=$tipe id=$id ===");
       final res = tipe == 'Kosan'
           ? await _api.getDetailKosan(id)
           : await _api.getDetailKontrakan(id);
-      print("=== RESPONSE: ${res.data} ==="); 
+      print("=== RESPONSE: ${res.data} ===");
       detail.value = res.data['data'];
     } catch (e) {
-      print("=== ERROR: $e ==="); 
+      print("=== ERROR: $e ===");
       Get.snackbar('Error', 'Gagal memuat detail properti');
     } finally {
       isLoading(false);
@@ -59,15 +73,12 @@ class DetailController extends GetxController {
   }
 
   bool get canBook {
-  final tipe = detail.value?['tipe']
-      ?.toString()
-      .toLowerCase() ?? '';
+    final tipe = detail.value?['tipe']?.toString().toLowerCase() ?? '';
 
-  if (tipe == 'kosan') {
-    return selectedRoomTypeId.value != null &&
-        selectedRoomId.value != null;
+    if (tipe == 'kosan') {
+      return selectedRoomTypeId.value != null && selectedRoomId.value != null;
+    }
+
+    return true;
   }
-
-  return true;
-}
 }

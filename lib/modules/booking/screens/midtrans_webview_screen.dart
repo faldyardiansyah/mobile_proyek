@@ -479,6 +479,7 @@ Terima kasih! 🙏''';
     } catch (_) {}
 
     NotificationService().show(
+    userId: 'user_aktif',
     id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     title: '✅ Pembayaran Berhasil!',
     body: 'Booking $tipeKamarNama telah dikonfirmasi. Terima kasih!',

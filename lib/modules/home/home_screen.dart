@@ -996,57 +996,64 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
- // Ubah _buildCircleIconButton menjadi:
-Widget _buildCircleIconButton(IconData icon) {
-  return GestureDetector(
-    onTap: () {
-      NotificationService.markAllAsRead();
-      Get.to(() => const NotificationScreen());
-    },
-    child: Obx(() {
-      final unread = NotificationService.unreadCount;
-      return Stack(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Icon(icon, size: 22),
-          ),
-          if (unread > 0)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
-                ),
-                constraints: const BoxConstraints(
-                  minWidth: 18,
-                  minHeight: 18,
-                ),
-                child: Text(
-                  unread > 9 ? '9+' : '$unread',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
+  Widget _buildCircleIconButton(IconData icon) {
+    return GestureDetector(
+      onTap: () {
+        NotificationService.markAllAsRead();
+        Get.to(() => const NotificationScreen());
+      },
+      child: Obx(() {
+        final unread = NotificationService.getUnreadCount();
+
+        return Stack(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
                   ),
-                  textAlign: TextAlign.center,
+                ],
+              ),
+              child: Icon(icon, size: 22),
+            ),
+            if (unread > 0)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  child: Text(
+                    unread > 9 ? '9+' : '$unread',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-            ),
-        ],
-      );
-    }),
-  );
-}
+          ],
+        );
+      }),
+    );
+  }
 
   void _showFilterBottomSheet() {
     Get.bottomSheet(

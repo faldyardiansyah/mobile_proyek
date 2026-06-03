@@ -353,10 +353,11 @@ class RiwayatController extends GetxController {
   _saveCache();
 
   if (bookingTime != null) {
-    final deadline = bookingTime.add(const Duration(hours: 24));
+    final localBookingTime = bookingTime.toLocal(); 
+    final now = DateTime.now();
+    final deadline = localBookingTime.add(const Duration(hours: 24));
     final notif5Min = deadline.subtract(const Duration(minutes: 5));
     final notif1Min = deadline.subtract(const Duration(minutes: 1));
-    final now = DateTime.now();
 
     if (notif5Min.isAfter(now)) {
       NotificationService().schedule(

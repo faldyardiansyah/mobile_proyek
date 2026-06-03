@@ -1,11 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart' hide Marker;
 import 'package:share_plus/share_plus.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import '../controllers/detail_controller.dart';
+import '../controllers/ulasan_controller.dart';
 import '../widgets/review_card.dart';
 import '../widgets/full_screen_gallery.dart';
 import '../controllers/home_controller.dart';
@@ -58,6 +58,203 @@ class _DetailScreenState extends State<DetailScreen> {
     super.dispose();
   }
 
+  void _showTulisUlasanSheet(UlasanController ulasanCtrl, String tipe, int id) {
+    // Reset state sebelum buka
+    ulasanCtrl.selectedRating.value = 0;
+    ulasanCtrl.komentarCtrl.clear();
+    ulasanCtrl.isAnonymous.value = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Handle bar
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Tulis Ulasan",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: textDark,
+                  ),
+                ),
+                const SizedBox(height: 18),
+            
+                // Pilih bintang
+                const Text(
+                  "Rating",
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: textDark,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Obx(
+                  () => Row(
+                    children: List.generate(
+                      5,
+                      (i) => GestureDetector(
+                        onTap: () => ulasanCtrl.selectedRating.value = i + 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Icon(
+                            i < ulasanCtrl.selectedRating.value
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            color: Colors.orange,
+                            size: 36,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+            
+                // Komentar
+                const Text(
+                  "Komentar",
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: textDark,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: ulasanCtrl.komentarCtrl,
+                  maxLines: 4,
+                  maxLength: 500,
+                  decoration: InputDecoration(
+                    hintText: "Ceritakan pengalamanmu tinggal di sini...",
+                    hintStyle: const TextStyle(color: textGrey, fontSize: 13),
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: blue),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+            
+                // Toggle anonim
+                Obx(
+                  () => GestureDetector(
+                    onTap: () => ulasanCtrl.isAnonymous.value =
+                        !ulasanCtrl.isAnonymous.value,
+                    child: Row(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            color: ulasanCtrl.isAnonymous.value
+                                ? blue
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: ulasanCtrl.isAnonymous.value
+                                  ? blue
+                                  : const Color(0xFFCBD5E1),
+                            ),
+                          ),
+                          child: ulasanCtrl.isAnonymous.value
+                              ? const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 15,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          "Sembunyikan nama (Anonim)",
+                          style: TextStyle(fontSize: 13, color: textDark),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+            
+                // Tombol kirim
+                Obx(
+                  () => SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      onPressed: ulasanCtrl.isSubmitting.value
+                          ? null
+                          : () => ulasanCtrl.kirimUlasan(
+                              tipe: tipe,
+                              propertiId: id,
+                            ),
+                      child: ulasanCtrl.isSubmitting.value
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            )
+                          : const Text(
+                              "Kirim Ulasan",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,7 +298,6 @@ class _DetailScreenState extends State<DetailScreen> {
                     clipBehavior: Clip.none,
                     children: [
                       _buildHeaderImage(data['fotos'] ?? ''),
-                      // counter foto
                       Positioned(
                         right: 20,
                         bottom: 55,
@@ -199,7 +395,6 @@ class _DetailScreenState extends State<DetailScreen> {
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, progress) {
                         if (progress == null) return child;
-
                         return const Center(child: CircularProgressIndicator());
                       },
                       errorBuilder: (_, __, ___) {
@@ -218,8 +413,6 @@ class _DetailScreenState extends State<DetailScreen> {
               );
             },
           ),
-
-          // gradient bawah
           Positioned(
             bottom: 0,
             left: 0,
@@ -235,8 +428,6 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
           ),
-
-          // indicator
           Positioned(
             bottom: 40,
             left: 0,
@@ -376,6 +567,7 @@ Temukan hunian impianmu di AppKonkos!
     );
   }
 
+  // ─── Content card ─────────────────────────────────────────────────────────
   Widget _buildContentCard(DetailController ctrl, Map<String, dynamic> data) {
     final tipe = data['tipe'] ?? '';
     final lat = double.tryParse(data['lat']?.toString() ?? '0');
@@ -404,26 +596,31 @@ Temukan hunian impianmu di AppKonkos!
               ),
               const SizedBox(height: 25),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _typeBadge(tipe),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star_border,
-                        color: Colors.orange,
-                        size: 17,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        data['rating']?.toString() ?? '0',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: textDark,
-                        ),
-                      ),
-                    ],
+                  const Icon(Icons.star_border, color: Colors.orange, size: 17),
+                  const SizedBox(width: 4),
+                  // Ambil dari UlasanController kalau sudah ada, fallback ke data API
+                  Builder(
+                    builder: (_) {
+                      final ulasanCtrl = Get.isRegistered<UlasanController>()
+                          ? Get.find<UlasanController>()
+                          : null;
+                      return Obx(() {
+                        final rating =
+                            ulasanCtrl != null &&
+                                ulasanCtrl.totalUlasan.value > 0
+                            ? ulasanCtrl.rataRating.value.toStringAsFixed(1)
+                            : (data['rating']?.toString() ?? '0');
+                        return Text(
+                          rating,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: textDark,
+                          ),
+                        );
+                      });
+                    },
                   ),
                 ],
               ),
@@ -525,41 +722,119 @@ Temukan hunian impianmu di AppKonkos!
                 ],
               ),
               const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    "Ulasan & Komentar",
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: textDark,
-                    ),
-                  ),
-                  Text(
-                    "Lihat Semua",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: blue,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              const ReviewCard(
-                name: "Budi Santoso",
-                time: "2 hari yang lalu",
-                comment:
-                    '"Tempatnya bersih banget! Worth it banget buat harga segini."',
-                rating: 5,
-                avatar:
-                    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200",
-              ),
+              _buildUlasanSection(data),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildUlasanSection(Map<String, dynamic> data) {
+    // Ambil controller yang sudah didaftarkan oleh DetailController.onInit
+    // Kalau belum ada (edge-case), buat dulu
+    final UlasanController ulasanCtrl = Get.isRegistered<UlasanController>()
+        ? Get.find<UlasanController>()
+        : Get.put(UlasanController());
+
+    final String tipe = (data['tipe']?.toString() ?? '').toLowerCase();
+    final int id = data['id'] is int
+        ? data['id'] as int
+        : int.tryParse(data['id']?.toString() ?? '') ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header baris: judul + tombol tulis ulasan
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Ulasan & Komentar",
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: textDark,
+                  ),
+                ),
+                Obx(
+                  () => Text(
+                    '${ulasanCtrl.totalUlasan.value} ulasan  ·  '
+                    '⭐ ${ulasanCtrl.rataRating.value.toStringAsFixed(1)}',
+                    style: const TextStyle(fontSize: 12, color: textGrey),
+                  ),
+                ),
+              ],
+            ),
+            Obx(() {
+              if (!ulasanCtrl.bolehReview.value) {
+                return const SizedBox.shrink();
+              }
+              return GestureDetector(
+                onTap: () => _showTulisUlasanSheet(ulasanCtrl, tipe, id),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: blue,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    "+ Tulis Ulasan",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // List ulasan
+        Obx(() {
+          if (ulasanCtrl.isLoading.value) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (ulasanCtrl.ulasanList.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Text(
+                  "Belum ada ulasan untuk properti ini.",
+                  style: TextStyle(color: textGrey, fontSize: 13),
+                ),
+              ),
+            );
+          }
+          return Column(
+            children: ulasanCtrl.ulasanList
+                .map(
+                  (u) => ReviewCard(
+                    name: u['nama_user'] ?? 'Anonim',
+                    time: u['created_at'] ?? '',
+                    comment: u['komentar'] ?? '',
+                    rating: (u['rating'] as num?)?.toInt() ?? 0,
+                    avatar: u['foto_user'],
+                    balasanPemilik: u['balasan_pemilik'],
+                  ),
+                )
+                .toList(),
+          );
+        }),
+      ],
     );
   }
 
@@ -949,7 +1224,6 @@ Temukan hunian impianmu di AppKonkos!
                 child: GestureDetector(
                   onTap: () async {
                     String noWa = data['no_wa']?.toString() ?? '';
-
                     if (noWa.isEmpty) {
                       Get.snackbar(
                         "Oops",
@@ -958,27 +1232,20 @@ Temukan hunian impianmu di AppKonkos!
                       );
                       return;
                     }
-
-                    // ubah 08 jadi 628
                     if (noWa.startsWith('0')) {
                       noWa = '62${noWa.substring(1)}';
                     }
-
                     final pesan =
                         "Halo, saya tertarik dengan ${data['nama']} yang ada di AppKonkos.";
-
                     final uri = Uri.parse(
                       "https://api.whatsapp.com/send?phone=$noWa&text=${Uri.encodeComponent(pesan)}",
                     );
-
                     try {
                       await launchUrl(
                         uri,
                         mode: LaunchMode.externalApplication,
                       );
                     } catch (e) {
-                      print("ERROR WA: $e");
-
                       Get.snackbar(
                         "Error",
                         "WhatsApp tidak ditemukan",
@@ -1017,7 +1284,6 @@ Temukan hunian impianmu di AppKonkos!
                                       data['harga']?.toString() ?? '0',
                                     ) ??
                                     0;
-
                                 BookingBottomSheet.show(
                                   kamarId: null,
                                   kontrakanId: data['id']?.toString(),
@@ -1035,7 +1301,6 @@ Temukan hunian impianmu di AppKonkos!
                               final selectedType = roomTypes.firstWhereOrNull(
                                 (t) => t['id'] == selectedTypeId,
                               );
-
                               final kamarNama =
                                   ctrl
                                       .roomsForType(selectedTypeId!)
@@ -1044,16 +1309,13 @@ Temukan hunian impianmu di AppKonkos!
                                       )?['number']
                                       ?.toString() ??
                                   '';
-
                               final harga =
                                   int.tryParse(
                                     selectedType?['price']?.toString() ?? '0',
                                   ) ??
                                   0;
-
                               final tipeNama =
                                   selectedType?['name']?.toString() ?? '';
-
                               BookingBottomSheet.show(
                                 kamarId: selectedRoomId.toString(),
                                 kamarNama: kamarNama,

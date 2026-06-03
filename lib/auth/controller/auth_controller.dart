@@ -1,4 +1,5 @@
 import 'package:appkonkos_mobile/modules/Riwayat/controllers/riwayat_controller.dart';
+import 'package:appkonkos_mobile/services/notification_service.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +86,9 @@ class AuthController extends GetxController {
               }
             }
           } catch (_) {}
-
+          if (user.value['id'] != null) {
+            NotificationService.switchUser(user.value['id'].toString());
+          }
           Get.offAllNamed('/home');
           Future.delayed(const Duration(milliseconds: 500), () {
             if (Get.isRegistered<RiwayatController>()) {
@@ -263,6 +266,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
+    NotificationService.switchUser('global');
     final namaUser = user.value['name'] ?? 'Pengguna';
     try {
       await _api.post('/auth/logout', {}).timeout(const Duration(seconds: 2));

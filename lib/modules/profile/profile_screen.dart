@@ -8,6 +8,7 @@ import './help_screen.dart';
 import 'package:appkonkos_mobile/auth/controller/auth_controller.dart';
 import '../profile/controllers/profile_controller.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'ulasan_saya_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -192,7 +193,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
           
                         const SizedBox(height: 5),
-          
+                        const Text(
+                          "Aktivitas",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF94A3B8),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _menu(
+                          icon: Icons.star_outline_rounded,
+                          title: "Ulasan Saya",
+                          onTap: () {
+                            Get.to(() => const UlasanSayaScreen());
+                          },
+                        ),
+                        const SizedBox(height: 5),
                         const Text(
                           "Dukungan",
                           style: TextStyle(
@@ -201,7 +218,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-          
                         const SizedBox(height: 10),
           
                         _menu(
