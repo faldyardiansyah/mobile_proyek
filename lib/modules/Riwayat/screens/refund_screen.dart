@@ -125,271 +125,273 @@ class _RefundScreenState extends State<RefundScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Info booking
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: widget.item.imageAsset.isNotEmpty
-                        ? Image.network(
-                            widget.item.imageAsset,
-                            width: 64,
-                            height: 64,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _placeholder(),
-                          )
-                        : _placeholder(),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.item.title,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: textDark,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.item.price,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: blue,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.item.id,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: textGrey,
-                          ),
-                        ),
-                      ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Info booking
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Warning
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFFCD34D)),
-              ),
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    color: Color(0xFFD97706),
-                    size: 18,
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Refund akan diproses oleh admin dalam 3-5 hari kerja. Pastikan alasan refund yang kamu berikan valid.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF92400E),
-                        height: 1.5,
-                      ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: widget.item.imageAsset.isNotEmpty
+                          ? Image.network(
+                              widget.item.imageAsset,
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _placeholder(),
+                            )
+                          : _placeholder(),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Pilih alasan
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Pilih Alasan Refund',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ..._alasanOptions.map((alasan) {
-                    final isSelected = _selectedAlasan == alasan;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedAlasan = alasan),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFEFF6FF)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? blue
-                                : const Color(0xFFE2E8F0),
-                            width: isSelected ? 1.5 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: isSelected ? blue : Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? blue
-                                      : const Color(0xFFCBD5E1),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: isSelected
-                                  ? const Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 12,
-                                    )
-                                  : null,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.item.title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: textDark,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              alasan,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.normal,
-                                color: isSelected ? blue : textDark,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-
-                  if (_selectedAlasan == 'Lainnya') ...[
-                    const SizedBox(height: 4),
-                    TextField(
-                      controller: _alasanCtrl,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        hintText: 'Jelaskan alasan refund kamu...',
-                        hintStyle: const TextStyle(
-                          fontSize: 13,
-                          color: textGrey,
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: blue,
-                            width: 1.5,
                           ),
-                        ),
-                        contentPadding: const EdgeInsets.all(14),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.item.price,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: blue,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.item.id,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: textGrey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _selectedAlasan != null
-                      ? Colors.orange.shade700
-                      : Colors.grey.shade300,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
                 ),
-                onPressed: (_selectedAlasan != null && !_isLoading)
-                    ? _submitRefund
-                    : null,
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : const Text(
-                        'Kirim Permintaan Refund',
+              ),
+          
+              const SizedBox(height: 12),
+          
+              // Warning
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFBEB),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFCD34D)),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: Color(0xFFD97706),
+                      size: 18,
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Refund akan diproses oleh admin dalam 3-5 hari kerja. Pastikan alasan refund yang kamu berikan valid.',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                          color: Color(0xFF92400E),
+                          height: 1.5,
                         ),
                       ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-          ],
+          
+              const SizedBox(height: 12),
+          
+              // Pilih alasan
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Pilih Alasan Refund',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ..._alasanOptions.map((alasan) {
+                      final isSelected = _selectedAlasan == alasan;
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedAlasan = alasan),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFFEFF6FF)
+                                : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? blue
+                                  : const Color(0xFFE2E8F0),
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: isSelected ? blue : Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? blue
+                                        : const Color(0xFFCBD5E1),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 12,
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                alasan,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.normal,
+                                  color: isSelected ? blue : textDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+          
+                    if (_selectedAlasan == 'Lainnya') ...[
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: _alasanCtrl,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: 'Jelaskan alasan refund kamu...',
+                          hintStyle: const TextStyle(
+                            fontSize: 13,
+                            color: textGrey,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: blue,
+                              width: 1.5,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.all(14),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+          
+              const SizedBox(height: 24),
+          
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedAlasan != null
+                        ? Colors.orange.shade700
+                        : Colors.grey.shade300,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  onPressed: (_selectedAlasan != null && !_isLoading)
+                      ? _submitRefund
+                      : null,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          'Kirim Permintaan Refund',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

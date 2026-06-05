@@ -12,6 +12,7 @@ class Property {
   final double? lng;
   final String gender; 
   final int availableCount;
+  
 
   Property({
     required this.id,

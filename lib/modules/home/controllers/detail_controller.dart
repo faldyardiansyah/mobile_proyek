@@ -12,7 +12,6 @@ class DetailController extends GetxController {
   final selectedRoomId = Rxn<int>();
 
   @override
-  @override
 void onInit() {
   super.onInit();
   final Property args = Get.arguments as Property;
@@ -40,21 +39,27 @@ void onInit() {
   }
 
   Future<void> fetchDetail(int id, String tipe) async {
-    try {
-      isLoading(true);
-      print("=== FETCH: tipe=$tipe id=$id ===");
-      final res = tipe == 'Kosan'
-          ? await _api.getDetailKosan(id)
-          : await _api.getDetailKontrakan(id);
-      print("=== RESPONSE: ${res.data} ===");
-      detail.value = res.data['data'];
-    } catch (e) {
-      print("=== ERROR: $e ===");
-      Get.snackbar('Error', 'Gagal memuat detail properti');
-    } finally {
-      isLoading(false);
+  try {
+    isLoading(true);
+    final res = tipe == 'Kosan'
+        ? await _api.getDetailKosan(id)
+        : await _api.getDetailKontrakan(id);
+    
+    detail.value = res.data['data']; 
+    final rt = detail.value?['room_types'];
+    if (rt is List && rt.isNotEmpty) {
+      print("=== KEY FASILITAS KAMAR: ${rt[0].keys.toList()} ===");
+      print("=== FASILITAS KAMAR: ${rt[0]['fasilitas']} ===");
+      print("=== FASILITAS TIPE: ${rt[0]['fasilitas_tipe']} ===");
     }
+    print("=== FASILITAS UMUM: ${detail.value?['fasilitas_umum']} ===");
+
+  } catch (e) {
+    Get.snackbar('Error', 'Gagal memuat detail properti');
+  } finally {
+    isLoading(false);
   }
+}
 
   List<dynamic> get roomTypes => detail.value?['room_types'] ?? [];
 

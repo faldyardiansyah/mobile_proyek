@@ -1,3 +1,4 @@
+import 'screens/refund_screen.dart';
 import 'package:appkonkos_mobile/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'controllers/riwayat_controller.dart';
 import 'models/model_riwayat.dart';
 import '../Riwayat/screens/booking_detail_screen.dart';
+import '../notification/notification_screen.dart';
+import '../../services/notification_service.dart';
 
 class RiwayatScreen extends StatefulWidget {
   const RiwayatScreen({super.key});
@@ -32,70 +35,71 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
       bottom: false,
       child: ColoredBox(
         color: AppColor.white,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            _buildTabBar(controller),
-            Expanded(
-              child: Obx(() {
-                final isLoading = controller.isLoading.value;
-                final list = controller.filteredList;
-        
-                if (isLoading) {
-                  return _buildSkeletonList();
-                }
-        
-                return RefreshIndicator(
-                  color: const Color(0xFF1565C0),
-                  onRefresh: () => controller.fetchRiwayat(),
-                  child: list.isEmpty
-                      ? ListView(
-                          // ← pakai ListView bukan SingleChildScrollView
-                          // supaya RefreshIndicator bisa ditarik walau kosong
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(bottom: 110),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Lottie.asset(
-                                      'assets/lottie/nothing.json',
-                                      width: 250,
-                                      height: 250,
-                                      repeat: true,
-                                    ),
-                                    const Text(
-                                      'Tidak ada riwayat booking',
-                                      style: TextStyle(color: AppColor.grey),
-                                    ),
-                                  ],
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              _buildTabBar(controller),
+              Expanded(
+                child: Obx(() {
+                  final isLoading = controller.isLoading.value;
+                  final list = controller.filteredList;
+          
+                  if (isLoading) {
+                    return _buildSkeletonList();
+                  }
+          
+                  return RefreshIndicator(
+                    color: const Color(0xFF1565C0),
+                    onRefresh: () => controller.fetchRiwayat(),
+                    child: list.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.only(bottom: 110),
+                            children: [
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.5,
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Lottie.asset(
+                                        'assets/lottie/nothing.json',
+                                        width: 250,
+                                        height: 250,
+                                        repeat: true,
+                                          ),
+                                      const Text(
+                                        'Tidak ada riwayat booking',
+                                        style: TextStyle(color: AppColor.grey),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
+                            ],
+                          )
+                        : ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              bottom: 110,
+                              top: 8,
                             ),
-                          ],
-                        )
-                      : ListView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(
-                            left: 16,
-                            right: 16,
-                            bottom: 110,
-                            top: 8,
+                            itemCount: list.length,
+                            itemBuilder: (context, index) => _BookingCard(
+                              item: list[index],
+                              controller: controller,
+                            ),
                           ),
-                          itemCount: list.length,
-                          itemBuilder: (context, index) => _BookingCard(
-                            item: list[index],
-                            controller: controller,
-                          ),
-                        ),
-                );
-              }),
-            ),
-          ],
+                  );
+                }),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -140,7 +144,6 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Placeholder gambar
                 Container(
                   width: 72,
                   height: 72,
@@ -154,7 +157,6 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Placeholder badge status
                       Container(
                         width: 70,
                         height: 18,
@@ -164,14 +166,12 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      // Placeholder judul
                       Container(
                         width: double.infinity,
                         height: 14,
                         color: Colors.grey[300],
                       ),
                       const SizedBox(height: 6),
-                      // Placeholder lokasi
                       Container(
                         width: 150,
                         height: 11,
@@ -180,7 +180,6 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                     ],
                   ),
                 ),
-                // Placeholder ID/countdown
                 Container(width: 60, height: 14, color: Colors.grey[300]),
               ],
             ),
@@ -198,7 +197,6 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                     Container(width: 100, height: 16, color: Colors.grey[300]),
                   ],
                 ),
-                // Placeholder tombol
                 Container(
                   width: 100,
                   height: 38,
@@ -230,28 +228,72 @@ Widget _buildHeader() {
             color: Color(0xFF1A1A2E),
           ),
         ),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(50),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: Colors.black,
-            size: 21,
-          ),
-        ),
+        _notifButton(),
       ],
     ),
+  );
+}
+
+Widget _notifButton() {
+  return GestureDetector(
+    onTap: () {
+      NotificationService.markAllAsRead();
+      Get.to(() => const NotificationScreen());
+    },
+    child: Obx(() {
+      final unread = NotificationService.getUnreadCount();
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.notifications_none_rounded,
+              color: Colors.black,
+              size: 21,
+            ),
+          ),
+          if (unread > 0)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 16,
+                  minHeight: 16,
+                ),
+                child: Text(
+                  unread > 9 ? '9+' : '$unread',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ],
+      );
+    }),
   );
 }
 
@@ -319,7 +361,7 @@ class _BookingCard extends StatelessWidget {
         ],
       ),
       child: Material(
-        color: Colors.transparent,
+        color: AppColor.white,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -490,9 +532,10 @@ class _BookingCard extends StatelessWidget {
     switch (item.status) {
       case BookingStatus.dibayar:
         return OutlinedButton(
-          onPressed: () => controller.ajukanRefund(item),
+          onPressed: () => Get.to(() => RefundScreen(item: item)),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Color(0xFF1565C0)),
+            foregroundColor: const Color(0xFF1565C0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -502,8 +545,7 @@ class _BookingCard extends StatelessWidget {
             'Ajukan Refund',
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1565C0),
+              fontWeight: FontWeight.w700,
             ),
           ),
         );
@@ -638,8 +680,8 @@ class _StatusBadge extends StatelessWidget {
       case BookingStatus.dibatalkan:
         return {
           'label': 'DIBATALKAN',
-          'bg': const Color(0xFFFFEbee),
-          'text': const Color(0xFFf44336),
+          'bg': const Color(0xFFFFEBEE),
+          'text': const Color(0xFFF44336),
         };
     }
   }

@@ -23,6 +23,8 @@ class MidtransWebView extends StatefulWidget {
   final String tipeProperty;
   final String noWaPemilik;
   final String tglMulai;
+  final String gender;
+  final String tipeKamar;
 
   const MidtransWebView({
     super.key,
@@ -35,6 +37,8 @@ class MidtransWebView extends StatefulWidget {
     this.tipeProperty = '',
     this.noWaPemilik = '',
     this.tglMulai = '',
+    this.gender = '',
+    this.tipeKamar = '',
   });
 
   @override
@@ -57,6 +61,8 @@ class _MidtransWebViewState extends State<MidtransWebView> {
   String bookingId = '';
   String noWaPemilik = '';
   String tglMulai = '';
+  String gender = '';
+  String tipeKamar = '';
 
   @override
   void initState() {
@@ -69,6 +75,8 @@ class _MidtransWebViewState extends State<MidtransWebView> {
     bookingId = widget.bookingId;
     noWaPemilik = widget.noWaPemilik;
     tglMulai = widget.tglMulai;
+    gender = widget.gender;
+    tipeKamar = widget.tipeKamar;
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -109,6 +117,19 @@ class _MidtransWebViewState extends State<MidtransWebView> {
         ),
       )
       ..loadRequest(Uri.parse(widget.url));
+  }
+
+  String _genderLabel(String g) {
+    switch (g) {
+      case 'putra':
+        return 'Putra';
+      case 'putri':
+        return 'Putri';
+      case 'campur':
+        return 'Campur';
+      default:
+        return g;
+    }
   }
 
   String _formatHarga(int angka) {
@@ -218,7 +239,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
                   letterSpacing: 1,
                 ),
               ),
-              pw.SizedBox(height: 8),
+              // Use available fields as item data is not provided in this screen
               pw.Text(
                 tipeKamarNama.isNotEmpty ? tipeKamarNama : 'Properti',
                 style: pw.TextStyle(
@@ -226,11 +247,27 @@ class _MidtransWebViewState extends State<MidtransWebView> {
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
+              if (tipeKamar.isNotEmpty)
+                pw.Text(
+                  'Tipe Kamar: $tipeKamar',
+                  style: const pw.TextStyle(
+                    fontSize: 12,
+                    color: PdfColors.grey700,
+                  ),
+                ),
               if (kamarNama.isNotEmpty)
                 pw.Text(
-                  'Kamar $kamarNama',
+                  'Nomor Kamar: $kamarNama',
                   style: const pw.TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
+                    color: PdfColors.grey700,
+                  ),
+                ),
+              if (gender.isNotEmpty)
+                pw.Text(
+                  'Tipe Penghuni: ${_genderLabel(gender)}',
+                  style: const pw.TextStyle(
+                    fontSize: 12,
                     color: PdfColors.grey700,
                   ),
                 ),
@@ -268,7 +305,7 @@ class _MidtransWebViewState extends State<MidtransWebView> {
                       ],
                     ),
                     pw.Text(
-                      '→',
+                      '-',
                       style: const pw.TextStyle(
                         fontSize: 20,
                         color: PdfColors.grey,
@@ -479,14 +516,14 @@ Terima kasih! 🙏''';
     } catch (_) {}
 
     NotificationService().show(
-    userId: 'user_aktif',
-    id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-    title: '✅ Pembayaran Berhasil!',
-    body: 'Booking $tipeKamarNama telah dikonfirmasi. Terima kasih!',
-    type: NotifType.pembayaranBerhasil,
-    route: '/riwayat',
-  );
-  
+      userId: 'user_aktif',
+      id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      title: '✅ Pembayaran Berhasil!',
+      body: 'Booking $tipeKamarNama telah dikonfirmasi. Terima kasih!',
+      type: NotifType.pembayaranBerhasil,
+      route: '/riwayat',
+    );
+
     Get.bottomSheet(
       Container(
         decoration: const BoxDecoration(

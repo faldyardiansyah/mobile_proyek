@@ -123,7 +123,7 @@ class NotificationService {
       switchUser('global');
     }
 
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const android = AndroidInitializationSettings('@mipmap/launcher_icon');
     const ios = DarwinInitializationSettings(requestAlertPermission: true, requestBadgePermission: true, requestSoundPermission: true);
 
     await _plugin.initialize(
@@ -149,7 +149,7 @@ class NotificationService {
       id, title, body,
       NotificationDetails(
         android: AndroidNotificationDetails(
-          _channelId, _channelName, importance: Importance.max, priority: Priority.high, icon: '@mipmap/ic_launcher', color: cfg['color'] as Color, 
+          _channelId, _channelName, importance: Importance.max, priority: Priority.high, icon: '@mipmap/launcher_icon', color: cfg['color'] as Color, 
           styleInformation: BigTextStyleInformation(body, htmlFormatBigText: true, contentTitle: title, htmlFormatContentTitle: true, summaryText: 'APPKONKOS'),
           playSound: true,
         ),
@@ -167,7 +167,7 @@ class NotificationService {
       id, title, body, tz.TZDateTime.from(scheduledTime, tz.local),
       NotificationDetails(
         android: AndroidNotificationDetails(
-          _channelId, _channelName, importance: Importance.max, priority: Priority.high, icon: '@mipmap/ic_launcher', color: cfg['color'] as Color,
+          _channelId, _channelName, importance: Importance.max, priority: Priority.high, icon: '@mipmap/launcher_icon', color: cfg['color'] as Color,
           styleInformation: BigTextStyleInformation(body, htmlFormatBigText: true, contentTitle: title, htmlFormatContentTitle: true, summaryText: 'APPKONKOS'),
           playSound: true,
         ),

@@ -38,8 +38,8 @@ class ProfileController extends GetxController {
   String _fixUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     return url
-        .replaceAll('http://localhost', 'http://192.168.1.8:8000')
-        .replaceAll('https://localhost', 'http://192.168.1.8:8000');
+        .replaceAll('http://localhost', 'http://192.168.1.10:8000')
+        .replaceAll('https://localhost', 'http://192.168.1.10:8000');
   }
 
   @override

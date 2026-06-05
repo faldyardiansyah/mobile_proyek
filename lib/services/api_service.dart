@@ -9,7 +9,7 @@ class ApiService extends GetxService {
   final _storage = GetStorage();
 
   static String get baseUrl =>
-      dotenv.env['BASE_URL'] ?? 'http://192.168.1.8/api';
+      dotenv.env['BASE_URL'] ?? 'http://192.168.1.10/api';
   @override
   void onInit() {
     super.onInit();
@@ -54,6 +54,10 @@ class ApiService extends GetxService {
     Map<String, dynamic> data,
   ) async {
     return await _dio.post(endpoint, data: data);
+  }
+
+  Future<dio_lib.Response<dynamic>> googleLogin(String idToken) async {
+    return await post('/auth/google', {'id_token': idToken});
   }
 
   Future<dio_lib.Response<dynamic>> get(

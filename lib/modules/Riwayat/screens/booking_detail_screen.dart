@@ -101,7 +101,7 @@ class BookingDetailScreen extends StatelessWidget {
                       pw.SizedBox(height: 4),
                       pw.Text(_formatTanggal(item.checkIn), style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
                     ]),
-                    pw.Text('→', style: const pw.TextStyle(fontSize: 20, color: PdfColors.grey)),
+                    pw.Text('-', style: const pw.TextStyle(fontSize: 20, color: PdfColors.grey)),
                     pw.Column(children: [
                       pw.Text('CHECK-OUT', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.grey600)),
                       pw.SizedBox(height: 4),

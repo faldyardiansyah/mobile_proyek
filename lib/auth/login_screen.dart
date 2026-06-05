@@ -87,7 +87,7 @@ class LoginScreen extends StatelessWidget {
                               style: TextStyle(fontSize: 14, color: Colors.grey)),
                         ),
                         const SizedBox(height: 16),
-                        _buildSocialRow(),
+                        _buildSocialRow(controller),
                         const SizedBox(height: 24),
                         _buildRegisterRow(),
                       ],
@@ -201,16 +201,17 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialRow() {
-    return Row(
-      children: [
-        SocialButton(
-          Image(image: const AssetImage("assets/image/google.png"), height: 20),
-          "Google",
-        ),
-      ],
-    );
-  }
+ Widget _buildSocialRow(AuthController controller) {
+  return Row(
+    children: [
+      SocialButton(
+        Image(image: const AssetImage("assets/image/google.png"), height: 20),
+        "Google",
+        onTap: () => controller.loginWithGoogle(),
+      ),
+    ],
+  );
+}
 
   Widget _buildRegisterRow() {
     return Row(
@@ -231,25 +232,30 @@ class LoginScreen extends StatelessWidget {
 class SocialButton extends StatelessWidget {
   final Widget icon;
   final String label;
-  const SocialButton(this.icon, this.label, {super.key});
+  final VoidCallback? onTap; 
+
+  const SocialButton(this.icon, this.label, {super.key, this.onTap}); 
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-            const SizedBox(width: 6),
-            Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-          ],
+      child: GestureDetector(
+        onTap: onTap, // ← tambah
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              icon,
+              const SizedBox(width: 6),
+              Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+            ],
+          ),
         ),
       ),
     );

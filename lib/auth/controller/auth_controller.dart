@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthController extends GetxController {
   final ApiService _api = Get.find<ApiService>();
@@ -21,6 +23,10 @@ class AuthController extends GetxController {
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
   final registerphoneController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'],
+    scopes: ['email', 'profile'],
+  );
 
   var user = {}.obs;
 
@@ -48,6 +54,65 @@ class AuthController extends GetxController {
   void toggleRegisterPassword() =>
       isRegisterPasswordHidden.value = !isRegisterPasswordHidden.value;
   void toggleAgreeTerms(bool? v) => isAgreeTerms.value = v ?? false;
+
+  Future<void> loginWithGoogle() async {
+    try {
+      isLoading.value = true;
+
+      // Sign in via Google
+      final GoogleSignInAccount? account = await _googleSignIn.signIn();
+      if (account == null) return;
+
+      final GoogleSignInAuthentication auth = await account.authentication;
+      final String? idToken = auth.idToken;
+
+      if (idToken == null) {
+        _showSnackbar('Error', 'Gagal mendapatkan token Google', Colors.red);
+        return;
+      }
+
+      final response = await _api.post('/auth/google', {'id_token': idToken});
+
+      if (response != null && response.statusCode == 200) {
+        final data = response.data;
+
+        if (data['token'] != null && data['user'] != null) {
+          box.write('token', data['token']);
+          box.write('user', data['user']);
+          user.value = Map<String, dynamic>.from(data['user']);
+
+          if (user.value['id'] != null) {
+            NotificationService.switchUser(user.value['id'].toString());
+          }
+
+          Get.offAllNamed('/home');
+
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (Get.isRegistered<RiwayatController>()) {
+              Get.find<RiwayatController>().fetchRiwayat();
+            }
+          });
+
+          _showSnackbar(
+            'Berhasil',
+            'Selamat datang ${user.value['name']}',
+            Colors.green,
+          );
+        }
+      }
+    } on DioException catch (e) {
+      _showSnackbar(
+        'Gagal',
+        e.response?.data?['message'] ?? 'Login Google gagal',
+        Colors.red,
+      );
+    } catch (e) {
+      debugPrint('Google login error: $e');
+      _showSnackbar('Error', 'Terjadi kesalahan, coba lagi', Colors.red);
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   Future<void> login() async {
     if (emailLoginController.text.isEmpty ||
@@ -119,7 +184,7 @@ class AuthController extends GetxController {
       //     Colors.orange,
       //   );
       //   Get.toNamed('/verify-email', arguments: {'email': email});
-      // } else 
+      // } else
       {
         _showSnackbar(
           'Login Gagal',
