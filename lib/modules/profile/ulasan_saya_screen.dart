@@ -264,142 +264,144 @@ class UlasanSayaScreen extends StatelessWidget {
     ulasanCtrl.isAnonymous.value = false;
 
     Get.bottomSheet(
-      Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(10),
+      SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              Text(
-                "Ulasan untuk $propertiNama",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: textDark,
+                const SizedBox(height: 20),
+        
+                Text(
+                  "Ulasan untuk $propertiNama",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: textDark,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              const Text("Rating",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 14)),
-              const SizedBox(height: 10),
-              Obx(() => Row(
-                children: List.generate(5, (i) {
-                  return GestureDetector(
-                    onTap: () =>
-                        ulasanCtrl.selectedRating.value = i + 1,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Icon(
-                        i < ulasanCtrl.selectedRating.value
-                            ? Icons.star_rounded
-                            : Icons.star_outline_rounded,
-                        color: Colors.orange,
-                        size: 38,
+                const SizedBox(height: 20),
+        
+                const Text("Rating",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 14)),
+                const SizedBox(height: 10),
+                Obx(() => Row(
+                  children: List.generate(5, (i) {
+                    return GestureDetector(
+                      onTap: () =>
+                          ulasanCtrl.selectedRating.value = i + 1,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(
+                          i < ulasanCtrl.selectedRating.value
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          color: Colors.orange,
+                          size: 38,
+                        ),
+                      ),
+                    );
+                  }),
+                )),
+        
+                const SizedBox(height: 16),
+                const Text("Komentar",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 14)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: ulasanCtrl.komentarCtrl,
+                  maxLines: 4,
+                  maxLength: 500,
+                  decoration: InputDecoration(
+                    hintText:
+                        "Ceritakan pengalamanmu tinggal di sini...",
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(
+                          color: blue, width: 1.5),
+                    ),
+                  ),
+                ),
+        
+                Obx(() => Row(
+                  children: [
+                    Checkbox(
+                      value: ulasanCtrl.isAnonymous.value,
+                      activeColor: blue,
+                      onChanged: (val) =>
+                          ulasanCtrl.isAnonymous.value =
+                              val ?? false,
+                    ),
+                    const Text("Kirim sebagai anonim",
+                        style:
+                            TextStyle(fontSize: 13, color: textGrey)),
+                  ],
+                )),
+        
+                const SizedBox(height: 12),
+                Obx(() => SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                  );
-                }),
-              )),
-
-              const SizedBox(height: 16),
-              const Text("Komentar",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 14)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: ulasanCtrl.komentarCtrl,
-                maxLines: 4,
-                maxLength: 500,
-                decoration: InputDecoration(
-                  hintText:
-                      "Ceritakan pengalamanmu tinggal di sini...",
-                  filled: true,
-                  fillColor: const Color(0xFFF8FAFC),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFE2E8F0)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFE2E8F0)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
-                        color: blue, width: 1.5),
-                  ),
-                ),
-              ),
-
-              Obx(() => Row(
-                children: [
-                  Checkbox(
-                    value: ulasanCtrl.isAnonymous.value,
-                    activeColor: blue,
-                    onChanged: (val) =>
-                        ulasanCtrl.isAnonymous.value =
-                            val ?? false,
-                  ),
-                  const Text("Kirim sebagai anonim",
-                      style:
-                          TextStyle(fontSize: 13, color: textGrey)),
-                ],
-              )),
-
-              const SizedBox(height: 12),
-              Obx(() => SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  onPressed: ulasanCtrl.isSubmitting.value
-                      ? null
-                      : () async {
-                          await ulasanCtrl.kirimUlasan(
-                            tipe: tipe,
-                            propertiId: propertiId,
-                          );
-                          onSelesai();
-                        },
-                  child: ulasanCtrl.isSubmitting.value
-                      ? const CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2)
-                      : const Text(
-                          "Kirim Ulasan",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
+                    onPressed: ulasanCtrl.isSubmitting.value
+                        ? null
+                        : () async {
+                            await ulasanCtrl.kirimUlasan(
+                              tipe: tipe,
+                              propertiId: propertiId,
+                            );
+                            onSelesai();
+                          },
+                    child: ulasanCtrl.isSubmitting.value
+                        ? const CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2)
+                        : const Text(
+                            "Kirim Ulasan",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        ),
-                ),
-              )),
-            ],
+                  ),
+                )),
+              ],
+            ),
           ),
         ),
       ),

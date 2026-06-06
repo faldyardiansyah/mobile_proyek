@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import '../home/controllers/home_controller.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get_storage/get_storage.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -17,6 +18,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final HomeController homeController = Get.find();
+  final _box = GetStorage();
+  static const _storageKey = 'chat_messages';
 
   final ChatUser _currentUser = ChatUser(id: '1', firstName: 'User');
   final ChatUser _botUser = ChatUser(
@@ -34,14 +37,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _messages.add(
-      ChatMessage(
-        user: _botUser,
-        createdAt: DateTime.now(),
-        text:
-            "Halo! Saya Asisten Appkonkos. Saya bisa bantu kamu cari kos atau kontrakan di mana saja. Misalnya coba tanya: \"Kosan dekat RSUD Indramayu\" atau \"Kontrakan murah dekat alun-alun\" 😊",
-      ),
-    );
+    final existing = _box.read<String>(_storageKey);
+    if (existing == null) {
+      _messages.add(
+        ChatMessage(
+          user: _botUser,
+          createdAt: DateTime.now(),
+          text:
+              "Halo! Saya Asisten Appkonkos. Saya bisa bantu kamu cari kos atau kontrakan di mana saja. Misalnya coba tanya: \"Kosan dekat alun-alun Yogyakarta\" atau \"Kontrakan murah dekat alun-alun Indramayu\" 😊",
+        ),
+      );
+    } else {
+      _loadMessages();
+    }
   }
 
   // ─── Haversine Distance ───────────────────────────────────────────────────
@@ -109,35 +117,33 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // ─── Step 2: Geocoding nama lokasi → lat/lng (Nominatim, gratis) ──────────
   Future<Map<String, double>?> _geocode(String locationName) async {
-  final encoded = Uri.encodeComponent(
-    "$locationName, Indonesia",
-  );
+    final encoded = Uri.encodeComponent("$locationName, Indonesia");
 
-  final url =
-      "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=1";
+    final url =
+        "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=1";
 
-  try {
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'User-Agent': 'AppKonkos/1.0 (appkonkos@gmail.com)'},
-    );
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'User-Agent': 'AppKonkos/1.0 (appkonkos@gmail.com)'},
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
 
-      if (data.isNotEmpty) {
-        return {
-          'lat': double.tryParse(data[0]['lat'].toString()) ?? 0.0,
-          'lng': double.tryParse(data[0]['lon'].toString()) ?? 0.0,
-        };
+        if (data.isNotEmpty) {
+          return {
+            'lat': double.tryParse(data[0]['lat'].toString()) ?? 0.0,
+            'lng': double.tryParse(data[0]['lon'].toString()) ?? 0.0,
+          };
+        }
       }
+    } catch (e) {
+      debugPrint("Geocode error: $e");
     }
-  } catch (e) {
-    debugPrint("Geocode error: $e");
-  }
 
-  return null;
-}
+    return null;
+  }
 
   // ─── Build default list tanpa filter jarak (dengan rating) ───────────────
   String _defaultKosList() {
@@ -289,12 +295,51 @@ class _ChatScreenState extends State<ChatScreen> {
         'Maaf, saya belum bisa menjawab.';
   }
 
+  // Simpan pesan dan load ke storage
+  void _saveMessages() {
+    final encoded = _messages
+        .map(
+          (m) => {
+            'userId': m.user.id,
+            'text': m.text,
+            'createdAt': m.createdAt.toIso8601String(),
+          },
+        )
+        .toList();
+    _box.write(_storageKey, jsonEncode(encoded));
+  }
+
+  void _loadMessages() {
+    final raw = _box.read<String>(_storageKey);
+    if (raw == null) return;
+
+    try {
+      final List decoded = jsonDecode(raw);
+      final loaded = decoded.map((m) {
+        final user = m['userId'] == '1' ? _currentUser : _botUser;
+        return ChatMessage(
+          user: user,
+          text: m['text'],
+          createdAt: DateTime.parse(m['createdAt']),
+        );
+      }).toList();
+
+      setState(() {
+        _messages.clear();
+        _messages.addAll(loaded);
+      });
+    } catch (e) {
+      debugPrint("Load messages error: $e");
+    }
+  }
+
   // ─── Handle Send ──────────────────────────────────────────────────────────
   void _handleSendMessage(ChatMessage m) async {
     setState(() {
       _messages.insert(0, m);
       _isTyping = true;
     });
+    _saveMessages();
 
     try {
       final answer = await askGemini(m.text);
@@ -306,6 +351,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ChatMessage(user: _botUser, createdAt: DateTime.now(), text: answer),
         );
       });
+      _saveMessages();
     } catch (e) {
       setState(() => _isTyping = false);
       Get.snackbar(
@@ -322,7 +368,27 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Asisten Appkonkos AI")),
+      appBar: AppBar(
+        title: const Text("Asisten Appkonkos AI"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () {
+              _box.remove(_storageKey);
+              setState(() {
+                _messages.clear();
+                _messages.add(
+                  ChatMessage(
+                    user: _botUser,
+                    createdAt: DateTime.now(),
+                    text: "Halo! Saya Asisten Appkonkos ...",
+                  ),
+                );
+              });
+            },
+          ),
+        ],
+      ),
       body: DashChat(
         currentUser: _currentUser,
         onSend: _handleSendMessage,
@@ -433,6 +499,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return Text(message.text.replaceAll(RegExp(r'\[MATCH:.*?\]'), '').trim());
     }
   }
+
   Widget _buildPropertyCard(
     dynamic property,
     String description, {

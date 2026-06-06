@@ -214,7 +214,7 @@ class _RefundScreenState extends State<RefundScreen> {
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Refund akan diproses oleh admin dalam 3-5 hari kerja. Pastikan alasan refund yang kamu berikan valid.',
+                        'Refund akan diproses oleh admin dalam 24 jam. Pastikan alasan refund yang kamu berikan valid.',
                         style: TextStyle(
                           fontSize: 12,
                           color: Color(0xFF92400E),

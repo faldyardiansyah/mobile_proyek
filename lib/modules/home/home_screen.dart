@@ -29,8 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late final RiwayatController riwayatController;
 
   AuthController get authC => Get.find<AuthController>();
-
-  // ─── Design tokens ────────────────────────────────────────────────────────
   static const Color _bg = Color(0xFFF5F7FB);
   static const Color _card = Colors.white;
   static const Color _text1 = Color(0xFF0D1B2A);
@@ -80,8 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: _buildBottomNav(),
     );
   }
-
-  // ─── FAB ──────────────────────────────────────────────────────────────────
   Widget _buildFAB() {
     return Container(
       height: 62,
@@ -111,8 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
     );
   }
-
-  // ─── Bottom nav ───────────────────────────────────────────────────────────
   Widget _buildBottomNav() {
     return SafeArea(
       child: Container(
@@ -227,7 +221,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ).animate().fadeIn(delay: (idx * 80).ms);
   }
 
-  // ─── Home content ─────────────────────────────────────────────────────────
   Widget _buildHomeContent() {
     return SafeArea(
       child: Obx(() {
@@ -298,7 +291,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Header ───────────────────────────────────────────────────────────────
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
@@ -422,7 +414,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Search bar ───────────────────────────────────────────────────────────
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -487,7 +478,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Categories ───────────────────────────────────────────────────────────
   Widget _buildCategories() {
     return SizedBox(
       height: 68,
@@ -544,7 +534,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Banner ───────────────────────────────────────────────────────────────
   Widget _buildBanner() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
@@ -697,7 +686,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Section title ────────────────────────────────────────────────────────
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
@@ -738,7 +726,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Empty state ──────────────────────────────────────────────────────────
   Widget _buildEmpty(String msg) {
     return Center(
       child: Padding(
@@ -1152,7 +1139,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .scale(begin: const Offset(0.96, 0.96));
   }
 
-  // ─── Gender pill ──────────────────────────────────────────────────────────
   Widget _genderPill(String gender) {
     final g = gender.toLowerCase();
     final isCampur = g.contains('campur');
@@ -1191,7 +1177,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ─── Filter sheet ─────────────────────────────────────────────────────────
   void _showFilterSheet() {
     Get.bottomSheet(
       Container(

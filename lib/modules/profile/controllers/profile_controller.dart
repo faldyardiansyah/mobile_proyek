@@ -36,11 +36,12 @@ class ProfileController extends GetxController {
 
   // ← helper fix URL
   String _fixUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    return url
-        .replaceAll('http://localhost', 'http://192.168.1.10:8000')
-        .replaceAll('https://localhost', 'http://192.168.1.10:8000');
-  }
+  if (url == null || url.isEmpty) return '';
+  return url
+      .replaceAll('http://localhost', ApiService.baseUrl.replaceAll('/api', ''))
+      .replaceAll('https://localhost', ApiService.baseUrl.replaceAll('/api', ''))
+      .replaceAll('http://192.168.1.10:8000', ApiService.baseUrl.replaceAll('/api', ''));
+}
 
   @override
   void onInit() {

@@ -1285,7 +1285,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  // ─── Ulasan section ───────────────────────────────────────────────────────
   Widget _buildUlasanSection(Map<String, dynamic> data) {
     final UlasanController uc = Get.isRegistered<UlasanController>()
         ? Get.find<UlasanController>()
@@ -1398,7 +1397,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  // ─── Map card ─────────────────────────────────────────────────────────────
   Widget _buildMapCard(double? lat, double? lng, String nama, String alamat) {
     if (lat == null || lng == null || lat == 0.0 || lng == 0.0) {
       return Container(
