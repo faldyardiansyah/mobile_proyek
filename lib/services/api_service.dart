@@ -8,8 +8,8 @@ class ApiService extends GetxService {
   late dio_lib.Dio _dio;
   final _storage = GetStorage();
 
-  static String get baseUrl =>
-      dotenv.env['BASE_URL'] ?? 'http://192.168.1.10/api';
+static String get baseUrl =>
+    dotenv.env['BASE_URL'] ?? 'https://appkonkos.my.id/api';
   @override
   void onInit() {
     super.onInit();
