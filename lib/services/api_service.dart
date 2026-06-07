@@ -13,7 +13,7 @@ static String get baseUrl =>
   @override
   void onInit() {
     super.onInit();
-
+    debugPrint("BASE_URL: $baseUrl");
     _dio = dio_lib.Dio(
       dio_lib.BaseOptions(
         baseUrl: baseUrl,
