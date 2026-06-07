@@ -24,7 +24,7 @@ class AuthController extends GetxController {
   final registerPasswordController = TextEditingController();
   final registerphoneController = TextEditingController();
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'],
+  serverClientId: '556986985008-b33co49up55adp465b3t5li4vq32huir.apps.googleusercontent.com',
     scopes: ['email', 'profile'],
   );
 
@@ -176,15 +176,15 @@ class AuthController extends GetxController {
         _showSnackbar('Login Gagal', 'Email atau password salah', Colors.red);
       }
     } on DioException catch (e) {
-      // if (e.response?.statusCode == 403) {
-      //   final email = emailLoginController.text.trim();
-      //   _showSnackbar(
-      //     'Verifikasi Email',
-      //     'Email belum diverifikasi. Silakan cek inbox Anda.',
-      //     Colors.orange,
-      //   );
-      //   Get.toNamed('/verify-email', arguments: {'email': email});
-      // } else
+      if (e.response?.statusCode == 403) {
+        final email = emailLoginController.text.trim();
+        _showSnackbar(
+          'Verifikasi Email',
+          'Email belum diverifikasi. Silakan cek inbox Anda.',
+          Colors.orange,
+        );
+        Get.toNamed('/verify-email', arguments: {'email': email});
+      } else
       {
         _showSnackbar(
           'Login Gagal',
