@@ -35,19 +35,39 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _handleDeepLinks();
+    // Delay init deep link sampai app benar-benar siap
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _handleDeepLinks();
+    });
   }
 
   void _handleDeepLinks() {
-    _appLinks.uriLinkStream.listen((uri) {
-      if (uri.scheme == 'appkonkos' && uri.host == 'email-verified') {
-        Get.offAllNamed('/login');
+    // Fungsi untuk menangani navigasi
+    void processVerification() {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Get.until((route) => route.isFirst);
+        Get.offAllNamed('/login'); 
+        
         Get.snackbar(
           'Berhasil',
           'Email berhasil diverifikasi! Silakan login.',
           backgroundColor: Colors.green.shade50,
           colorText: Colors.green.shade800,
+          snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 3),
         );
+      });
+    }
+
+    _appLinks.uriLinkStream.listen((uri) {
+      if (uri.scheme == 'appkonkos' && uri.host == 'email-verified') {
+        processVerification();
+      }
+    });
+
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null && uri.scheme == 'appkonkos' && uri.host == 'email-verified') {
+        processVerification();
       }
     });
   }
@@ -68,6 +88,15 @@ class _MyAppState extends State<MyApp> {
         GetPage(name: '/register', page: () => const RegisterScreen()),
         GetPage(name: '/home', page: () => HomeScreen()),
         GetPage(name: '/verify-email', page: () => const VerifyEmailScreen()),
+      
+        GetPage(
+          name: '/email-verified', 
+          page: () => const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(), // Menampilkan loading indicator berputar sebentar
+            ),
+          ),
+        ),
       ],
     );
   }

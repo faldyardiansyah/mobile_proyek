@@ -25,6 +25,7 @@ class RiwayatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    listRiwayats.clear();
     _loadCache();
     fetchRiwayat();
     Stream.periodic(const Duration(seconds: 5)).listen((_) {

@@ -79,6 +79,7 @@ class AuthController extends GetxController {
         if (data['token'] != null && data['user'] != null) {
           box.write('token', data['token']);
           box.write('user', data['user']);
+          box.write('user_id', data['user']['id'].toString());
           user.value = Map<String, dynamic>.from(data['user']);
 
           if (user.value['id'] != null) {
@@ -139,6 +140,7 @@ class AuthController extends GetxController {
         if (data != null && data['token'] != null && data['user'] != null) {
           box.write('token', data['token']);
           box.write('user', data['user']);
+          box.write('user_id', data['user']['id'].toString());
           user.value = Map<String, dynamic>.from(data['user']);
 
           try {
@@ -339,6 +341,7 @@ class AuthController extends GetxController {
     } finally {
       box.remove('token');
       box.remove('user');
+      box.remove('user_id');
       user.value = {};
 
       if (Get.isRegistered<RiwayatController>()) {

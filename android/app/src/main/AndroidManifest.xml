@@ -13,19 +13,14 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <queries>
-        <!-- Gmail / Email -->
         <intent>
             <action android:name="android.intent.action.SENDTO"/>
             <data android:scheme="mailto"/>
         </intent>
-
-        <!-- Browser -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>
         </intent>
-
-        <!-- Text -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
@@ -38,7 +33,6 @@
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true">
 
-        <!-- PINDAHKAN RECEIVER KE SINI (DI DALAM APPLICATION) -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"/>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
@@ -65,6 +59,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="appkonkos" />
             </intent-filter>
         </activity>
 
