@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:appkonkos_mobile/services/api_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/notification_service.dart';
+import 'package:app_links/app_links.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,12 +18,39 @@ void main() async {
   await GetStorage.init();
   Get.put(ApiService());
   Get.put(AuthController());
-   await NotificationService().init();
+  await NotificationService().init();
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final _appLinks = AppLinks();
+
+  @override
+  void initState() {
+    super.initState();
+    _handleDeepLinks();
+  }
+
+  void _handleDeepLinks() {
+    _appLinks.uriLinkStream.listen((uri) {
+      if (uri.scheme == 'appkonkos' && uri.host == 'email-verified') {
+        Get.offAllNamed('/login');
+        Get.snackbar(
+          'Berhasil',
+          'Email berhasil diverifikasi! Silakan login.',
+          backgroundColor: Colors.green.shade50,
+          colorText: Colors.green.shade800,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

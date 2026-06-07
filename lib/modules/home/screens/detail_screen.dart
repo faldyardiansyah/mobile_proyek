@@ -98,10 +98,13 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildFasWrap(List<dynamic> items) {
     if (items.isEmpty) return const SizedBox.shrink();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: items.map((f) => _fasChip(f.toString())).toList(),
+    return SizedBox(
+      width: double.infinity,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: items.map((f) => _fasChip(f.toString())).toList(),
+      ),
     );
   }
 
@@ -1285,6 +1288,7 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
+  // ─── Ulasan section ───────────────────────────────────────────────────────
   Widget _buildUlasanSection(Map<String, dynamic> data) {
     final UlasanController uc = Get.isRegistered<UlasanController>()
         ? Get.find<UlasanController>()
@@ -1397,6 +1401,7 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
+  // ─── Map card ─────────────────────────────────────────────────────────────
   Widget _buildMapCard(double? lat, double? lng, String nama, String alamat) {
     if (lat == null || lng == null || lat == 0.0 || lng == 0.0) {
       return Container(
@@ -1722,7 +1727,7 @@ class _DetailScreenState extends State<DetailScreen> {
         : 'Rp ${_formatHarga(data['harga']?.toString() ?? '0')}/tahun';
     Share.share(
       '🏠 *${data['nama']}*\n📍 ${data['alamat']}\n💰 $harga\n🏷️ Tipe: $tipe\n\n'
-      'Temukan hunian impianmu di AppKonkos!\n👉 https://github.com/faldyardiansyah/mobile_proyek/releases/tag/v1.1.1',
+      'Temukan hunian impianmu di AppKonkos!\n👉 https://github.com/faldyardiansyah/mobile_proyek/releases/tag/v1.1.5',
       subject: 'Properti: ${data['nama']}',
     );
   }
