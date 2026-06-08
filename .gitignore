@@ -46,3 +46,5 @@ app.*.map.json
 
 # keamanan API Key
 .env
+# Keamanan Kunci Aplikasi (Release Keystore)
+android/app/appkonkos-release.jks
