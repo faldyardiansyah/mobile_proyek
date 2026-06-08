@@ -1727,7 +1727,7 @@ class _DetailScreenState extends State<DetailScreen> {
         : 'Rp ${_formatHarga(data['harga']?.toString() ?? '0')}/tahun';
     Share.share(
       '🏠 *${data['nama']}*\n📍 ${data['alamat']}\n💰 $harga\n🏷️ Tipe: $tipe\n\n'
-      'Temukan hunian impianmu di AppKonkos!\n👉 https://github.com/faldyardiansyah/mobile_proyek/releases/tag/v1.1.5',
+      'Temukan hunian impianmu di AppKonkos!\n👉 https://github.com/faldyardiansyah/mobile_proyek/releases/tag/v1.1.7',
       subject: 'Properti: ${data['nama']}',
     );
   }

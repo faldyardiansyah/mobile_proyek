@@ -31,8 +31,9 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
 
-  final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
-  final String modelName = 'gemini-2.5-flash';
+  // ✅ Ganti ke DeepSeek
+  final String apiKey = dotenv.env['DEEPSEEK_API_KEY'] ?? '';
+  final String modelName = 'deepseek-chat';
 
   @override
   void initState() {
@@ -53,7 +54,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // ─── Haversine Distance ───────────────────────────────────────────────────
-
   double _calculateDistance(
     double lat1,
     double lon1,
@@ -72,41 +72,41 @@ class _ChatScreenState extends State<ChatScreen> {
     return R * 2 * atan2(sqrt(a), sqrt(1 - a));
   }
 
-  // ─── Step 1: Ekstrak nama lokasi dari pesan user ──────────────────────────
+  // ─── Step 1: Ekstrak lokasi via DeepSeek ─────────────────────────────────
   Future<String?> _extractLocation(String userMessage) async {
     final body = {
-      "contents": [
+      "model": modelName,
+      "messages": [
         {
-          "parts": [
-            {
-              "text":
-                  """
-                Dari kalimat berikut, ekstrak nama lokasi/tempat spesifik yang disebutkan user.
-                Kalimat: "$userMessage"
+          "role": "user",
+          "content": """
+Dari kalimat berikut, ekstrak nama lokasi/tempat spesifik yang disebutkan user.
+Kalimat: "$userMessage"
 
-                Aturan:
-                - Jawab HANYA nama lokasinya saja. Contoh: "Universitas Indonesia", "Polindra", "Alun-alun Indramayu".
-                - Jika lokasinya tidak spesifik atau tidak ada, jawab persis: NONE
-                - Jangan tambahkan penjelasan apapun.
-                """,
-            },
-          ],
-        },
+Aturan:
+- Jawab HANYA nama lokasinya saja. Contoh: "Universitas Indonesia", "Polindra", "Alun-alun Indramayu".
+- Jika lokasinya tidak spesifik atau tidak ada, jawab persis: NONE
+- Jangan tambahkan penjelasan apapun.
+""",
+        }
       ],
+      "max_tokens": 100,
+      "temperature": 0,
     };
 
     try {
       final response = await http.post(
-        Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
-        ),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('https://api.deepseek.com/v1/chat/completions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
         body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final result =
-            data['candidates'][0]['content']['parts'][0]['text']?.trim() ?? '';
+            data['choices'][0]['message']['content']?.trim() ?? '';
         return result == 'NONE' || result.isEmpty ? null : result;
       }
     } catch (e) {
@@ -115,10 +115,9 @@ class _ChatScreenState extends State<ChatScreen> {
     return null;
   }
 
-  // ─── Step 2: Geocoding nama lokasi → lat/lng (Nominatim, gratis) ──────────
+  // ─── Step 2: Geocoding (tetap pakai Nominatim, gratis) ───────────────────
   Future<Map<String, double>?> _geocode(String locationName) async {
     final encoded = Uri.encodeComponent("$locationName, Indonesia");
-
     final url =
         "https://nominatim.openstreetmap.org/search?q=$encoded&format=json&limit=1";
 
@@ -127,10 +126,8 @@ class _ChatScreenState extends State<ChatScreen> {
         Uri.parse(url),
         headers: {'User-Agent': 'AppKonkos/1.0 (appkonkos@gmail.com)'},
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         if (data.isNotEmpty) {
           return {
             'lat': double.tryParse(data[0]['lat'].toString()) ?? 0.0,
@@ -141,11 +138,9 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       debugPrint("Geocode error: $e");
     }
-
     return null;
   }
 
-  // ─── Build default list tanpa filter jarak (dengan rating) ───────────────
   String _defaultKosList() {
     return homeController.allProperties
         .map(
@@ -155,46 +150,38 @@ class _ChatScreenState extends State<ChatScreen> {
         .join('\n');
   }
 
-  // ─── Step 3: Filter + hitung jarak, sort jarak lalu rating ───────────────
   List<Map<String, dynamic>> _getSortedByDistance(
     double targetLat,
     double targetLng,
   ) {
     return homeController.allProperties.map((p) {
-      print("PROPERTY: ${p.name}");
-      print("LAT: ${p.lat}");
-      print("LNG: ${p.lng}");
       double? lat = double.tryParse(p.lat.toString());
       double? lng = double.tryParse(p.lng.toString());
       double jarak = (lat != null && lng != null && lat != 0 && lng != 0)
           ? _calculateDistance(lat, lng, targetLat, targetLng)
           : 999.0;
       return {'property': p, 'jarak': jarak};
-    }).toList()..sort((a, b) {
-      final jarakA = (a['jarak'] ?? 999.0) as double;
-      final jarakB = (b['jarak'] ?? 999.0) as double;
-
-      int cmp = jarakA.compareTo(jarakB);
-      if (cmp != 0) return cmp;
-
-      final ratingA =
-          double.tryParse(
-            ((a['property'] as dynamic)?.rating ?? '').toString(),
-          ) ??
-          0;
-
-      final ratingB =
-          double.tryParse(
-            ((b['property'] as dynamic)?.rating ?? '').toString(),
-          ) ??
-          0;
-
-      return ratingB.compareTo(ratingA);
-    });
+    }).toList()
+      ..sort((a, b) {
+        final jarakA = (a['jarak'] ?? 999.0) as double;
+        final jarakB = (b['jarak'] ?? 999.0) as double;
+        int cmp = jarakA.compareTo(jarakB);
+        if (cmp != 0) return cmp;
+        final ratingA =
+            double.tryParse(
+              ((a['property'] as dynamic)?.rating ?? '').toString(),
+            ) ??
+            0;
+        final ratingB =
+            double.tryParse(
+              ((b['property'] as dynamic)?.rating ?? '').toString(),
+            ) ??
+            0;
+        return ratingB.compareTo(ratingA);
+      });
   }
 
-  // ─── Main: Kirim ke Gemini ────────────────────────────────────────────────
-  Future<String> askGemini(String userMessage) async {
+  Future<String> askDeepSeek(String userMessage) async {
     String kosList;
     String lokasiContext = "";
 
@@ -202,27 +189,22 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (locationName != null) {
       final coords = await _geocode(locationName);
-
       if (coords != null) {
         final sorted = _getSortedByDistance(coords['lat']!, coords['lng']!);
-
         kosList = sorted
             .take(10)
             .map((e) {
               final p = e['property'];
               final jarak = e['jarak'] as double;
-
               return '''
-              ${p.name}
-              - Tipe: ${p.type}
-              - Lokasi: ${p.location}
-              - Jarak dari $locationName: ${jarak.toStringAsFixed(1)} km
-              - Rating: ${p.rating ?? '-'}⭐
-              - Harga: Rp${p.price}
-              ''';
+${p.name}
+- Tipe: ${p.type}
+- Lokasi: ${p.location}
+- Jarak dari $locationName: ${jarak.toStringAsFixed(1)} km
+- Rating: ${p.rating ?? '-'}⭐
+- Harga: Rp${p.price}''';
             })
             .join('\n');
-
         lokasiContext =
             "User mencari properti dekat $locationName. Urutkan rekomendasi dari yang paling dekat. Jika jarak mirip (selisih kurang dari 0.5 km), prioritaskan rating yang lebih tinggi.";
       } else {
@@ -237,33 +219,35 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final body = {
-      "contents": [
+      "model": modelName,
+      "messages": [
         {
-          "parts": [
-            {
-              "text":
-                  """
-              Kamu adalah asisten ramah Appkonkos, aplikasi pencari kos dan kontrakan di seluruh indonesia.
-
-              Konteks: $lokasiContext
-
-              Data properti yang tersedia:
-              $kosList
-
-              Pertanyaan user: $userMessage
-
-              Tugasmu:
-              Tampilkan maksimal 5 properti paling relevan.
-              Jika ada jarak, urutkan dari yang terdekat, lalu rating tertinggi.
-              Setelah nama properti wajib tambahkan format [MATCH: Nama Properti].
-              Jawaban singkat, ramah, tanpa markdown, dan langsung ke inti.
-              Maksimal 1-2 kalimat per properti.
-              Jika tidak ada yang cocok, katakan dengan jujur.
-              """,
-            },
-          ],
+          "role": "system",
+          "content":
+              "Kamu adalah asisten ramah Appkonkos, aplikasi pencari kos dan kontrakan di seluruh Indonesia.",
         },
+        {
+          "role": "user",
+          "content": """
+Konteks: $lokasiContext
+
+Data properti yang tersedia:
+$kosList
+
+Pertanyaan user: $userMessage
+
+Tugasmu:
+Tampilkan maksimal 5 properti paling relevan.
+Jika ada jarak, urutkan dari yang terdekat, lalu rating tertinggi.
+Setelah nama properti wajib tambahkan format [MATCH: Nama Properti].
+Jawaban singkat, ramah, tanpa markdown, dan langsung ke inti.
+Maksimal 1-2 kalimat per properti.
+Jika tidak ada yang cocok, katakan dengan jujur.
+""",
+        }
       ],
+      "max_tokens": 1000,
+      "temperature": 0.7,
     };
 
     http.Response response;
@@ -271,13 +255,13 @@ class _ChatScreenState extends State<ChatScreen> {
     while (true) {
       await Future.delayed(const Duration(seconds: 1));
       response = await http.post(
-        Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
-        ),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('https://api.deepseek.com/v1/chat/completions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
         body: jsonEncode(body),
       );
-
       if (response.statusCode == 503 && retry < 1) {
         retry++;
         await Future.delayed(const Duration(seconds: 2));
@@ -291,11 +275,10 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final data = jsonDecode(response.body);
-    return data['candidates'][0]['content']['parts'][0]['text'] ??
+    return data['choices'][0]['message']['content'] ??
         'Maaf, saya belum bisa menjawab.';
   }
 
-  // Simpan pesan dan load ke storage
   void _saveMessages() {
     final encoded = _messages
         .map(
@@ -312,7 +295,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void _loadMessages() {
     final raw = _box.read<String>(_storageKey);
     if (raw == null) return;
-
     try {
       final List decoded = jsonDecode(raw);
       final loaded = decoded.map((m) {
@@ -323,7 +305,6 @@ class _ChatScreenState extends State<ChatScreen> {
           createdAt: DateTime.parse(m['createdAt']),
         );
       }).toList();
-
       setState(() {
         _messages.clear();
         _messages.addAll(loaded);
@@ -333,7 +314,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // ─── Handle Send ──────────────────────────────────────────────────────────
   void _handleSendMessage(ChatMessage m) async {
     setState(() {
       _messages.insert(0, m);
@@ -342,8 +322,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _saveMessages();
 
     try {
-      final answer = await askGemini(m.text);
-
+      final answer = await askDeepSeek(m.text); // ✅ Ganti ke DeepSeek
       setState(() {
         _isTyping = false;
         _messages.insert(
@@ -364,7 +343,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // ─── Build UI ─────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -381,7 +359,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   ChatMessage(
                     user: _botUser,
                     createdAt: DateTime.now(),
-                    text: "Halo! Saya Asisten Appkonkos ...",
+                    text:
+                        "Halo! Saya Asisten Appkonkos. Saya bisa bantu kamu cari kos atau kontrakan di mana saja. Misalnya coba tanya: \"Kosan dekat alun-alun Yogyakarta\" atau \"Kontrakan murah dekat alun-alun Indramayu\" 😊",
                   ),
                 );
               });
@@ -407,7 +386,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // ─── Parse semua [MATCH:] dalam satu pesan ────────────────────────────────
   Widget _buildMessageWidget(ChatMessage message) {
     if (message.user.id != _botUser.id) {
       return Text(message.text);
@@ -440,10 +418,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
       for (final match in matches) {
         final propertyName = match.group(1)?.trim() ?? '';
-
         final matchStart = match.start;
-        final lineStart = remainingText.lastIndexOf('\n', matchStart - 1) + 1;
-        String lineDesc = remainingText.substring(lineStart, matchStart).trim();
+        final lineStart =
+            remainingText.lastIndexOf('\n', matchStart - 1) + 1;
+        String lineDesc =
+            remainingText.substring(lineStart, matchStart).trim();
         lineDesc = lineDesc.replaceFirst(RegExp(r'^\d+\.\s*'), '');
         lineDesc = lineDesc
             .replaceFirst(
@@ -459,10 +438,9 @@ class _ChatScreenState extends State<ChatScreen> {
             afterMatch.length;
         final afterText = afterMatch.substring(0, nextMatchIdx).trim();
 
-        final fullDesc = [
-          lineDesc,
-          afterText,
-        ].where((s) => s.isNotEmpty).join(' ');
+        final fullDesc = [lineDesc, afterText]
+            .where((s) => s.isNotEmpty)
+            .join(' ');
 
         final property = homeController.allProperties.firstWhereOrNull(
           (p) => p.name.toLowerCase().contains(propertyName.toLowerCase()),
@@ -481,7 +459,8 @@ class _ChatScreenState extends State<ChatScreen> {
         final closingOnly = lines
             .where(
               (l) =>
-                  !RegExp(r'^\d+\.').hasMatch(l.trim()) && l.trim().isNotEmpty,
+                  !RegExp(r'^\d+\.').hasMatch(l.trim()) &&
+                  l.trim().isNotEmpty,
             )
             .join('\n')
             .trim();
@@ -496,7 +475,8 @@ class _ChatScreenState extends State<ChatScreen> {
         children: widgets,
       );
     } catch (e) {
-      return Text(message.text.replaceAll(RegExp(r'\[MATCH:.*?\]'), '').trim());
+      return Text(
+          message.text.replaceAll(RegExp(r'\[MATCH:.*?\]'), '').trim());
     }
   }
 
@@ -583,7 +563,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     children: [
                       const Icon(Icons.star, size: 14, color: Colors.orange),
                       const SizedBox(width: 3),
-
                       Text(
                         property.rating?.toString() ?? '-',
                         style: const TextStyle(
@@ -591,7 +570,6 @@ class _ChatScreenState extends State<ChatScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       if (distance != null) ...[
                         const SizedBox(width: 10),
                         const Icon(Icons.route, size: 13, color: Colors.blue),
@@ -607,9 +585,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ],
                     ],
                   ),
-
                   const SizedBox(height: 5),
-
                   Row(
                     children: [
                       const Icon(
@@ -630,7 +606,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ],
                   ),
-
                   if (description.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
@@ -643,9 +618,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
-
                   const Divider(height: 18),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
