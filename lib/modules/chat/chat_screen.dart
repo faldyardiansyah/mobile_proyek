@@ -31,9 +31,9 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
 
-  // ✅ Ganti ke DeepSeek
-  final String apiKey = dotenv.env['DEEPSEEK_API_KEY'] ?? '';
-  final String modelName = 'deepseek-chat';
+  // Ganti ke Groq
+  final String apiKey = dotenv.env['GROQ_API_KEY'] ?? '';
+  final String modelName = 'llama-3.3-70b-versatile';
 
   @override
   void initState() {
@@ -53,7 +53,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // ─── Haversine Distance ───────────────────────────────────────────────────
   double _calculateDistance(
     double lat1,
     double lon1,
@@ -72,14 +71,15 @@ class _ChatScreenState extends State<ChatScreen> {
     return R * 2 * atan2(sqrt(a), sqrt(1 - a));
   }
 
-  // ─── Step 1: Ekstrak lokasi via DeepSeek ─────────────────────────────────
+  // Ekstrak lokasi dari pesan user
   Future<String?> _extractLocation(String userMessage) async {
     final body = {
       "model": modelName,
       "messages": [
         {
           "role": "user",
-          "content": """
+          "content":
+              """
 Dari kalimat berikut, ekstrak nama lokasi/tempat spesifik yang disebutkan user.
 Kalimat: "$userMessage"
 
@@ -88,7 +88,7 @@ Aturan:
 - Jika lokasinya tidak spesifik atau tidak ada, jawab persis: NONE
 - Jangan tambahkan penjelasan apapun.
 """,
-        }
+        },
       ],
       "max_tokens": 100,
       "temperature": 0,
@@ -96,7 +96,9 @@ Aturan:
 
     try {
       final response = await http.post(
-        Uri.parse('https://api.deepseek.com/v1/chat/completions'),
+        Uri.parse(
+          'https://api.groq.com/openai/v1/chat/completions',
+        ), // Groq URL
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -105,8 +107,7 @@ Aturan:
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final result =
-            data['choices'][0]['message']['content']?.trim() ?? '';
+        final result = data['choices'][0]['message']['content']?.trim() ?? '';
         return result == 'NONE' || result.isEmpty ? null : result;
       }
     } catch (e) {
@@ -115,7 +116,7 @@ Aturan:
     return null;
   }
 
-  // ─── Step 2: Geocoding (tetap pakai Nominatim, gratis) ───────────────────
+  // Geocoding pakai Nominatim (tetap gratis)
   Future<Map<String, double>?> _geocode(String locationName) async {
     final encoded = Uri.encodeComponent("$locationName, Indonesia");
     final url =
@@ -161,27 +162,26 @@ Aturan:
           ? _calculateDistance(lat, lng, targetLat, targetLng)
           : 999.0;
       return {'property': p, 'jarak': jarak};
-    }).toList()
-      ..sort((a, b) {
-        final jarakA = (a['jarak'] ?? 999.0) as double;
-        final jarakB = (b['jarak'] ?? 999.0) as double;
-        int cmp = jarakA.compareTo(jarakB);
-        if (cmp != 0) return cmp;
-        final ratingA =
-            double.tryParse(
-              ((a['property'] as dynamic)?.rating ?? '').toString(),
-            ) ??
-            0;
-        final ratingB =
-            double.tryParse(
-              ((b['property'] as dynamic)?.rating ?? '').toString(),
-            ) ??
-            0;
-        return ratingB.compareTo(ratingA);
-      });
+    }).toList()..sort((a, b) {
+      final jarakA = (a['jarak'] ?? 999.0) as double;
+      final jarakB = (b['jarak'] ?? 999.0) as double;
+      int cmp = jarakA.compareTo(jarakB);
+      if (cmp != 0) return cmp;
+      final ratingA =
+          double.tryParse(
+            ((a['property'] as dynamic)?.rating ?? '').toString(),
+          ) ??
+          0;
+      final ratingB =
+          double.tryParse(
+            ((b['property'] as dynamic)?.rating ?? '').toString(),
+          ) ??
+          0;
+      return ratingB.compareTo(ratingA);
+    });
   }
 
-  Future<String> askDeepSeek(String userMessage) async {
+  Future<String> askGroq(String userMessage) async {
     String kosList;
     String lokasiContext = "";
 
@@ -228,7 +228,8 @@ ${p.name}
         },
         {
           "role": "user",
-          "content": """
+          "content":
+              """
 Konteks: $lokasiContext
 
 Data properti yang tersedia:
@@ -244,7 +245,7 @@ Jawaban singkat, ramah, tanpa markdown, dan langsung ke inti.
 Maksimal 1-2 kalimat per properti.
 Jika tidak ada yang cocok, katakan dengan jujur.
 """,
-        }
+        },
       ],
       "max_tokens": 1000,
       "temperature": 0.7,
@@ -255,7 +256,9 @@ Jika tidak ada yang cocok, katakan dengan jujur.
     while (true) {
       await Future.delayed(const Duration(seconds: 1));
       response = await http.post(
-        Uri.parse('https://api.deepseek.com/v1/chat/completions'),
+        Uri.parse(
+          'https://api.groq.com/openai/v1/chat/completions',
+        ), // Groq URL
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -271,6 +274,7 @@ Jika tidak ada yang cocok, katakan dengan jujur.
     }
 
     if (response.statusCode != 200) {
+      debugPrint("Groq error: ${response.statusCode} - ${response.body}");
       throw Exception('Server sibuk, coba lagi ya 😅');
     }
 
@@ -322,7 +326,7 @@ Jika tidak ada yang cocok, katakan dengan jujur.
     _saveMessages();
 
     try {
-      final answer = await askDeepSeek(m.text); // ✅ Ganti ke DeepSeek
+      final answer = await askGroq(m.text); // Pakai Groq
       setState(() {
         _isTyping = false;
         _messages.insert(
@@ -387,16 +391,12 @@ Jika tidak ada yang cocok, katakan dengan jujur.
   }
 
   Widget _buildMessageWidget(ChatMessage message) {
-    if (message.user.id != _botUser.id) {
-      return Text(message.text);
-    }
+    if (message.user.id != _botUser.id) return Text(message.text);
 
     final RegExp regExp = RegExp(r'\[MATCH:\s*(.*?)\]');
     final matches = regExp.allMatches(message.text);
 
-    if (matches.isEmpty) {
-      return Text(message.text);
-    }
+    if (matches.isEmpty) return Text(message.text);
 
     try {
       final List<Widget> widgets = [];
@@ -405,8 +405,8 @@ Jika tidak ada yang cocok, katakan dengan jujur.
       final firstMatchStart = matches.first.start;
       if (firstMatchStart > 0) {
         final introText = remainingText.substring(0, firstMatchStart).trim();
-        final introLines = introText.split('\n');
-        final introOnly = introLines
+        final introOnly = introText
+            .split('\n')
             .where((l) => !RegExp(r'^\d+\.').hasMatch(l.trim()))
             .join('\n')
             .trim();
@@ -419,10 +419,8 @@ Jika tidak ada yang cocok, katakan dengan jujur.
       for (final match in matches) {
         final propertyName = match.group(1)?.trim() ?? '';
         final matchStart = match.start;
-        final lineStart =
-            remainingText.lastIndexOf('\n', matchStart - 1) + 1;
-        String lineDesc =
-            remainingText.substring(lineStart, matchStart).trim();
+        final lineStart = remainingText.lastIndexOf('\n', matchStart - 1) + 1;
+        String lineDesc = remainingText.substring(lineStart, matchStart).trim();
         lineDesc = lineDesc.replaceFirst(RegExp(r'^\d+\.\s*'), '');
         lineDesc = lineDesc
             .replaceFirst(
@@ -437,10 +435,10 @@ Jika tidak ada yang cocok, katakan dengan jujur.
             RegExp(r'\[MATCH:').firstMatch(afterMatch)?.start ??
             afterMatch.length;
         final afterText = afterMatch.substring(0, nextMatchIdx).trim();
-
-        final fullDesc = [lineDesc, afterText]
-            .where((s) => s.isNotEmpty)
-            .join(' ');
+        final fullDesc = [
+          lineDesc,
+          afterText,
+        ].where((s) => s.isNotEmpty).join(' ');
 
         final property = homeController.allProperties.firstWhereOrNull(
           (p) => p.name.toLowerCase().contains(propertyName.toLowerCase()),
@@ -454,13 +452,13 @@ Jika tidak ada yang cocok, katakan dengan jujur.
 
       final lastMatchEnd = matches.last.end;
       if (lastMatchEnd < message.text.length) {
-        final closingText = message.text.substring(lastMatchEnd).trim();
-        final lines = closingText.split('\n');
-        final closingOnly = lines
+        final closingOnly = message.text
+            .substring(lastMatchEnd)
+            .trim()
+            .split('\n')
             .where(
               (l) =>
-                  !RegExp(r'^\d+\.').hasMatch(l.trim()) &&
-                  l.trim().isNotEmpty,
+                  !RegExp(r'^\d+\.').hasMatch(l.trim()) && l.trim().isNotEmpty,
             )
             .join('\n')
             .trim();
@@ -475,8 +473,7 @@ Jika tidak ada yang cocok, katakan dengan jujur.
         children: widgets,
       );
     } catch (e) {
-      return Text(
-          message.text.replaceAll(RegExp(r'\[MATCH:.*?\]'), '').trim());
+      return Text(message.text.replaceAll(RegExp(r'\[MATCH:.*?\]'), '').trim());
     }
   }
 
