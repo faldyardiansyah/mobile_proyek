@@ -191,22 +191,28 @@ Aturan:
       final coords = await _geocode(locationName);
       if (coords != null) {
         final sorted = _getSortedByDistance(coords['lat']!, coords['lng']!);
-        kosList = sorted
-            .take(10)
-            .map((e) {
-              final p = e['property'];
-              final jarak = e['jarak'] as double;
-              return '''
-${p.name}
-- Tipe: ${p.type}
-- Lokasi: ${p.location}
-- Jarak dari $locationName: ${jarak.toStringAsFixed(1)} km
-- Rating: ${p.rating ?? '-'}⭐
-- Harga: Rp${p.price}''';
-            })
-            .join('\n');
-        lokasiContext =
-            "User mencari properti dekat $locationName. Urutkan rekomendasi dari yang paling dekat. Jika jarak mirip (selisih kurang dari 0.5 km), prioritaskan rating yang lebih tinggi.";
+        final nearby = sorted
+          .where((e) => (e['jarak'] as double) <= 10.0)
+          .take(10)
+          .toList();
+
+        if (nearby.isEmpty) {
+          kosList = _defaultKosList();
+          lokasiContext = "User mencari properti dekat $locationName tapi tidak ada yang dalam radius 10 km. Sampaikan dengan ramah dan minta maaf bahwa belum ada properti tersedia di sekitar $locationName. Jangan tampilkan properti lain.";
+        } else {
+          kosList = nearby.map((e) {
+            final p = e['property'];
+            final jarak = e['jarak'] as double;
+            return '''
+      ${p.name}
+      - Tipe: ${p.type}
+      - Lokasi: ${p.location}
+      - Jarak dari $locationName: ${jarak.toStringAsFixed(1)} km
+      - Rating: ${p.rating ?? '-'}⭐
+      - Harga: Rp${p.price}''';
+          }).join('\n');
+          lokasiContext = "User mencari properti dekat $locationName. Urutkan rekomendasi dari yang paling dekat. Jika jarak mirip (selisih kurang dari 0.5 km), prioritaskan rating yang lebih tinggi.";
+        }
       } else {
         kosList = _defaultKosList();
         lokasiContext =

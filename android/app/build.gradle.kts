@@ -27,9 +27,29 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val isCI = System.getenv("GITHUB_ACTIONS") == "true"
+            if (isCI) {
+                // Konfigurasi otomatis untuk server GitHub Actions
+                storeFile = file("appkonkos-release.jks")
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEYSTORE_PASSWORD")
+            } else {
+                // Konfigurasi kalau kamu build/run lewat laptop sendiri
+                storeFile = file("appkonkos-release.jks")
+                storePassword = "password_terminal_kamu" // <-- GANTI dengan password keystore kamu
+                keyAlias = "appkonkos_alias"
+                keyPassword = "password_terminal_kamu"   // <-- GANTI dengan password keystore kamu
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            // Menggunakan stempel resmi release, bukan debug lagi
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

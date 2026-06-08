@@ -40,7 +40,13 @@ jobs:
       - name: 🧪 Run Tests
         run: flutter test
 
+      - name: 🔑 Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/appkonkos-release.jks
+
       - name: 🏗️ Build APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: flutter build apk --release
 
       - name: 📤 Upload APK Artifact
