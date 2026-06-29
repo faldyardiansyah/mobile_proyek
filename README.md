@@ -29,7 +29,7 @@ Sistem APPKONKOS menggunakan arsitektur terpisah (*decoupled architecture*). Rep
 - **Animation Engine**: Menggunakan library package `lottie` untuk merender komponen grafis vektor bergerak berkualitas tinggi tanpa membebani performa memori perangkat.
 - **Dedicated Mobile API (Back-End)**: RESTful API khusus yang dirancang menggunakan **Laravel** untuk menangani seluruh logika pemesanan (*booking*), kalkulasi algoritma jarak & rating untuk AI Chatbot, manajemen database (MySQL/Oracle), serta autentikasi user.
 
-> 💡 *Catatan Hubungan Sistem: Aplikasi mobile ini fokus 100% pada sisi User/Pencari Kos. Segala pengelolaan data master, properti, dan panel admin dikelola terpisah pada platform Web yang dikembangkan oleh rekan tim (Hannif).*
+> 💡 *Catatan Hubungan Sistem: Aplikasi mobile ini fokus 100% pada sisi User/Pencari Kos*
 
 ---
 
