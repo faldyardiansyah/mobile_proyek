@@ -6,27 +6,28 @@
 
 **appkonkos_mobile** (Aplikasi Pencarian Kosan & Kontrakan) adalah aplikasi mobile berbasis Flutter yang dirancang untuk mempermudah pencarian, pengelolaan, dan penyewaan properti seperti rumah kos dan kontrakan secara digital, efisien, dan transparan.
 
-Aplikasi ini mengintegrasikan manajemen status yang responsif menggunakan **GetX** serta fitur modern seperti verifikasi email via deep linking, yang terhubung langsung dengan sistem backend RESTful API.
+Proyek pada repositori ini berfokus penuh pada **Mobile Client App** serta **Dedicated Mobile RESTful API** yang dibangun secara terintegrasi untuk menyajikan performa aplikasi yang cepat, aman, dan interaktif.
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Fitur Utama (Mobile App)
 
-- **Pencarian Properti Cerdas**: Cari kos atau kontrakan berdasarkan lokasi, fasilitas, harga, dan tipe kamar.
-- **Manajemen Autentikasi**: Registrasi dan login pengguna yang aman dengan fitur **Deep Link Email Verification** untuk validasi akun.
-- **Detail Properti Komplit**: Informasi lengkap mengenai fasilitas, foto properti, harga sewa, sisa kamar, serta integrasi peta lokasi.
-- **Sistem Pengelolaan Properti (Owner)**: Pemilik kos dapat mengunggah properti, mengupdate ketersediaan kamar, dan memantau riwayat penyewa.
-- **Riwayat & Status Transaksi**: Halaman riwayat pemesanan yang informatif untuk memantau status sewa dan pembayaran secara real-time.
+- **🤖 Smart AI Chatbot Assistant**: Fitur asisten virtual pintar terintegrasi di dalam aplikasi untuk membantu memberikan rekomendasi kosan terbaik dan menjawab pertanyaan pengguna secara real-time.
+- **✨ Rich Animations & Smooth UI**: Antarmuka aplikasi yang interaktif memanfaatkan engine animasi modern (Lottie & Micro-animations) untuk transisi halaman dan interaksi elemen UI yang mulus.
+- **Pencarian Properti Cerdas**: Fitur filter pencarian kos atau kontrakan berdasarkan lokasi, fasilitas, harga, dan tipe kamar.
+- **Manajemen Autentikasi**: Registrasi dan login pengguna yang aman dengan dukungan fitur **Deep Link Email Verification** untuk validasi akun langsung ke aplikasi mobile.
+- **Sistem Pengelolaan Properti (Owner)**: Modul khusus bagi pemilik kos untuk mengunggah properti, memperbarui ketersediaan kamar, dan memantau penyewa melalui genggaman.
 
 ---
 
-## 🛠️ Arsitektur & Teknologi
+## 🛠️ Arsitektur & Teknologi (Mobile & Dedicated API)
 
-Sebagai pengembang tunggal, sistem ini dibangun secara *end-to-end* menggunakan teknologi terkini untuk memastikan performa tinggi dan skalabilitas yang baik:
+Dalam pengembangan sistem APPKONKOS, arsitektur dibagi menjadi beberapa *service* terpisah. Repositori ini mencakup seluruh ekosistem mobile yang dikembangkan secara mandiri oleh **Faldy Ardiansyah**:
 
-- **Mobile Client (Front-End)**: [Flutter](https://flutter.dev/) (Dart) dengan arsitektur **GetX** untuk manajemen status, rute, dan injeksi dependensi secara bersih dan responsif.
-- **Deep Linking**: Penanganan verifikasi email menggunakan deep link yang langsung diarahkan kembali ke dalam aplikasi mobile.
-- **RESTful API (Back-End)**: Dikembangkan secara mandiri menggunakan **Laravel** untuk menangani seluruh logika bisnis, database (MySQL/Oracle), autentikasi, serta komunikasi data yang aman dengan aplikasi mobile.
+- **Mobile Client App**: Dibangun menggunakan **Flutter (Dart)** dengan pola arsitektur **GetX** untuk manajemen status, rute navigasi, dan *dependency injection* yang efisien.
+- **Dedicated Mobile API (Back-End)**: RESTful API khusus yang dirancang dan dibangun menggunakan **Laravel** untuk melayani seluruh pertukaran data, manajemen database (MySQL/Oracle), autentikasi aman, dan integrasi pihak ketiga (AI Core & Deep Linking) khusus untuk aplikasi mobile.
+
+> 💡 *Catatan Sistem: Sistem ini beroperasi secara berdampingan dengan platform web APPKONKOS (Web Front-End & Back-End) yang dikembangkan secara terpisah oleh rekan tim (Hannif).*
 
 ---
 
